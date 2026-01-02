@@ -1,13 +1,23 @@
 /**
  * Database types for Supabase
- * Auto-generated types that match the database schema
+ * This file is manually maintained to reflect the database schema.
+ * It should be kept in sync with migrations and Zod schemas.
  */
 
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 export interface Database {
   public: {
     Tables: {
+      // ======================================================
+      // Existing Tables (checked and verified)
+      // ======================================================
       workspaces: {
         Row: {
           id: string;
@@ -45,8 +55,8 @@ export interface Database {
           id: string;
           workspace_id: string;
           user_id: string;
-          role: Database['public']['Enums']['user_role'];
-          status: Database['public']['Enums']['workspace_user_status'];
+          role: Database["public"]["Enums"]["user_role"];
+          status: Database["public"]["Enums"]["workspace_user_status"];
           invited_by: string | null;
           invited_at: string;
           created_at: string;
@@ -56,8 +66,8 @@ export interface Database {
           id?: string;
           workspace_id: string;
           user_id: string;
-          role?: Database['public']['Enums']['user_role'];
-          status?: Database['public']['Enums']['workspace_user_status'];
+          role?: Database["public"]["Enums"]["user_role"];
+          status?: Database["public"]["Enums"]["workspace_user_status"];
           invited_by?: string | null;
           invited_at?: string;
           created_at?: string;
@@ -67,8 +77,8 @@ export interface Database {
           id?: string;
           workspace_id?: string;
           user_id?: string;
-          role?: Database['public']['Enums']['user_role'];
-          status?: Database['public']['Enums']['workspace_user_status'];
+          role?: Database["public"]["Enums"]["user_role"];
+          status?: Database["public"]["Enums"]["workspace_user_status"];
           invited_by?: string | null;
           invited_at?: string;
           created_at?: string;
@@ -79,14 +89,14 @@ export interface Database {
         Row: {
           id: string;
           workspace_id: string;
-          tier: Database['public']['Enums']['subscription_tier'];
-          status: Database['public']['Enums']['subscription_status'];
-          billing_period: string;
+          tier: Database["public"]["Enums"]["subscription_tier"];
+          status: Database["public"]["Enums"]["subscription_status"];
+          billing_period: "monthly" | "annual";
           current_period_start: string;
           current_period_end: string;
           trial_ends_at: string | null;
           cancelled_at: string | null;
-          payment_provider: string | null;
+          payment_provider: "paddle" | "fondy" | "stripe" | null;
           external_subscription_id: string | null;
           enabled_modules: string[];
           created_at: string;
@@ -95,14 +105,14 @@ export interface Database {
         Insert: {
           id?: string;
           workspace_id: string;
-          tier?: Database['public']['Enums']['subscription_tier'];
-          status?: Database['public']['Enums']['subscription_status'];
-          billing_period?: string;
+          tier?: Database["public"]["Enums"]["subscription_tier"];
+          status?: Database["public"]["Enums"]["subscription_status"];
+          billing_period?: "monthly" | "annual";
           current_period_start?: string;
           current_period_end?: string;
           trial_ends_at?: string | null;
           cancelled_at?: string | null;
-          payment_provider?: string | null;
+          payment_provider?: "paddle" | "fondy" | "stripe" | null;
           external_subscription_id?: string | null;
           enabled_modules?: string[];
           created_at?: string;
@@ -111,14 +121,14 @@ export interface Database {
         Update: {
           id?: string;
           workspace_id?: string;
-          tier?: Database['public']['Enums']['subscription_tier'];
-          status?: Database['public']['Enums']['subscription_status'];
-          billing_period?: string;
+          tier?: Database["public"]["Enums"]["subscription_tier"];
+          status?: Database["public"]["Enums"]["subscription_status"];
+          billing_period?: "monthly" | "annual";
           current_period_start?: string;
           current_period_end?: string;
           trial_ends_at?: string | null;
           cancelled_at?: string | null;
-          payment_provider?: string | null;
+          payment_provider?: "paddle" | "fondy" | "stripe" | null;
           external_subscription_id?: string | null;
           enabled_modules?: string[];
           created_at?: string;
@@ -175,7 +185,7 @@ export interface Database {
           phones: Json;
           emails: Json;
           position: string | null;
-          status: Database['public']['Enums']['contact_status'];
+          status: Database["public"]["Enums"]["contact_status"];
           tags: string[];
           source: string | null;
           owner_id: string | null;
@@ -195,7 +205,7 @@ export interface Database {
           phones?: Json;
           emails?: Json;
           position?: string | null;
-          status?: Database['public']['Enums']['contact_status'];
+          status?: Database["public"]["Enums"]["contact_status"];
           tags?: string[];
           source?: string | null;
           owner_id?: string | null;
@@ -215,7 +225,7 @@ export interface Database {
           phones?: Json;
           emails?: Json;
           position?: string | null;
-          status?: Database['public']['Enums']['contact_status'];
+          status?: Database["public"]["Enums"]["contact_status"];
           tags?: string[];
           source?: string | null;
           owner_id?: string | null;
@@ -237,7 +247,7 @@ export interface Database {
           phone: string | null;
           email: string | null;
           address: Json;
-          status: Database['public']['Enums']['company_status'];
+          status: Database["public"]["Enums"]["company_status"];
           tags: string[];
           source: string | null;
           owner_id: string | null;
@@ -257,7 +267,7 @@ export interface Database {
           phone?: string | null;
           email?: string | null;
           address?: Json;
-          status?: Database['public']['Enums']['company_status'];
+          status?: Database["public"]["Enums"]["company_status"];
           tags?: string[];
           source?: string | null;
           owner_id?: string | null;
@@ -277,7 +287,7 @@ export interface Database {
           phone?: string | null;
           email?: string | null;
           address?: Json;
-          status?: Database['public']['Enums']['company_status'];
+          status?: Database["public"]["Enums"]["company_status"];
           tags?: string[];
           source?: string | null;
           owner_id?: string | null;
@@ -332,7 +342,7 @@ export interface Database {
           owner_id: string;
           expected_close_date: string | null;
           actual_close_date: string | null;
-          status: Database['public']['Enums']['deal_status'];
+          status: Database["public"]["Enums"]["deal_status"];
           lost_reason: string | null;
           tags: string[];
           custom_fields: Json;
@@ -355,7 +365,7 @@ export interface Database {
           owner_id: string;
           expected_close_date?: string | null;
           actual_close_date?: string | null;
-          status?: Database['public']['Enums']['deal_status'];
+          status?: Database["public"]["Enums"]["deal_status"];
           lost_reason?: string | null;
           tags?: string[];
           custom_fields?: Json;
@@ -378,7 +388,7 @@ export interface Database {
           owner_id?: string;
           expected_close_date?: string | null;
           actual_close_date?: string | null;
-          status?: Database['public']['Enums']['deal_status'];
+          status?: Database["public"]["Enums"]["deal_status"];
           lost_reason?: string | null;
           tags?: string[];
           custom_fields?: Json;
@@ -474,11 +484,11 @@ export interface Database {
           workspace_id: string;
           title: string;
           description: string | null;
-          task_type: Database['public']['Enums']['task_type'];
+          task_type: Database["public"]["Enums"]["task_type"];
           created_by: string;
           assigned_to: string;
-          status: Database['public']['Enums']['task_status'];
-          priority: Database['public']['Enums']['task_priority'];
+          status: Database["public"]["Enums"]["task_status"];
+          priority: Database["public"]["Enums"]["task_priority"];
           due_date: string;
           completed_at: string | null;
           reminders: Json;
@@ -494,11 +504,11 @@ export interface Database {
           workspace_id: string;
           title: string;
           description?: string | null;
-          task_type: Database['public']['Enums']['task_type'];
+          task_type: Database["public"]["Enums"]["task_type"];
           created_by: string;
           assigned_to: string;
-          status?: Database['public']['Enums']['task_status'];
-          priority?: Database['public']['Enums']['task_priority'];
+          status?: Database["public"]["Enums"]["task_status"];
+          priority?: Database["public"]["Enums"]["task_priority"];
           due_date: string;
           completed_at?: string | null;
           reminders?: Json;
@@ -514,11 +524,11 @@ export interface Database {
           workspace_id?: string;
           title?: string;
           description?: string | null;
-          task_type?: Database['public']['Enums']['task_type'];
+          task_type?: Database["public"]["Enums"]["task_type"];
           created_by?: string;
           assigned_to?: string;
-          status?: Database['public']['Enums']['task_status'];
-          priority?: Database['public']['Enums']['task_priority'];
+          status?: Database["public"]["Enums"]["task_status"];
+          priority?: Database["public"]["Enums"]["task_priority"];
           due_date?: string;
           completed_at?: string | null;
           reminders?: Json;
@@ -534,7 +544,7 @@ export interface Database {
         Row: {
           id: string;
           workspace_id: string;
-          activity_type: Database['public']['Enums']['activity_type'];
+          activity_type: Database["public"]["Enums"]["activity_type"];
           content: string | null;
           metadata: Json;
           contact_id: string | null;
@@ -547,7 +557,7 @@ export interface Database {
         Insert: {
           id?: string;
           workspace_id: string;
-          activity_type: Database['public']['Enums']['activity_type'];
+          activity_type: Database["public"]["Enums"]["activity_type"];
           content?: string | null;
           metadata?: Json;
           contact_id?: string | null;
@@ -560,7 +570,7 @@ export interface Database {
         Update: {
           id?: string;
           workspace_id?: string;
-          activity_type?: Database['public']['Enums']['activity_type'];
+          activity_type?: Database["public"]["Enums"]["activity_type"];
           content?: string | null;
           metadata?: Json;
           contact_id?: string | null;
@@ -656,27 +666,182 @@ export interface Database {
           deleted_at?: string | null;
         };
       };
+
+      // ======================================================
+      // Missing Tables (Added)
+      // ======================================================
+      payments: {
+        Row: {
+          id: string;
+          subscription_id: string;
+          workspace_id: string;
+          amount: number;
+          currency: string;
+          status: Database["public"]["Enums"]["payment_status"];
+          payment_provider: string;
+          external_payment_id: string | null;
+          invoice_url: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          subscription_id: string;
+          workspace_id: string;
+          amount: number;
+          currency?: string;
+          status?: Database["public"]["Enums"]["payment_status"];
+          payment_provider: string;
+          external_payment_id?: string | null;
+          invoice_url?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          subscription_id?: string;
+          workspace_id?: string;
+          amount?: number;
+          currency?: string;
+          status?: Database["public"]["Enums"]["payment_status"];
+          payment_provider?: string;
+          external_payment_id?: string | null;
+          invoice_url?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+      };
+      deal_stage_history: {
+        Row: {
+          id: string;
+          deal_id: string;
+          from_stage_id: string | null;
+          to_stage_id: string;
+          user_id: string;
+          duration_seconds: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          deal_id: string;
+          from_stage_id?: string | null;
+          to_stage_id: string;
+          user_id: string;
+          duration_seconds?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          deal_id?: string;
+          from_stage_id?: string | null;
+          to_stage_id?: string;
+          user_id?: string;
+          duration_seconds?: number | null;
+          created_at?: string;
+        };
+      };
+      product_categories: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          parent_id: string | null;
+          name: string;
+          order_index: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          workspace_id: string;
+          parent_id?: string | null;
+          name: string;
+          order_index?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          parent_id?: string | null;
+          name?: string;
+          order_index?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      product_price_history: {
+        Row: {
+          id: string;
+          product_id: string;
+          old_price: number | null;
+          new_price: number;
+          changed_by: string | null;
+          changed_at: string;
+        };
+        Insert: {
+          id?: string;
+          product_id: string;
+          old_price?: number | null;
+          new_price: number;
+          changed_by?: string | null;
+          changed_at?: string;
+        };
+        Update: {
+          id?: string;
+          product_id?: string;
+          old_price?: number | null;
+          new_price?: number;
+          changed_by?: string | null;
+          changed_at?: string;
+        };
+      };
+      integrations: {
+        Row: {
+          workspace_id: string;
+          nova_poshta_api_key: string | null;
+          nova_poshta_settings: Json;
+          smtp_settings: Json;
+          sms_settings: Json;
+          updated_at: string;
+        };
+        Insert: {
+          workspace_id: string;
+          nova_poshta_api_key?: string | null;
+          nova_poshta_settings?: Json;
+          smtp_settings?: Json;
+          sms_settings?: Json;
+          updated_at?: string;
+        };
+        Update: {
+          workspace_id?: string;
+          nova_poshta_api_key?: string | null;
+          nova_poshta_settings?: Json;
+          smtp_settings?: Json;
+          sms_settings?: Json;
+          updated_at?: string;
+        };
+      };
     };
     Enums: {
-      user_role: 'owner' | 'admin' | 'manager' | 'user' | 'guest';
-      workspace_user_status: 'pending' | 'active' | 'suspended';
-      subscription_tier: 'free' | 'starter' | 'pro' | 'enterprise';
-      subscription_status: 'trialing' | 'active' | 'past_due' | 'cancelled';
-      contact_status: 'new' | 'qualified' | 'customer' | 'lost';
-      company_status: 'lead' | 'active' | 'inactive';
-      deal_status: 'open' | 'won' | 'lost' | 'cancelled';
-      task_type: 'call' | 'meeting' | 'email' | 'todo';
-      task_status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-      task_priority: 'low' | 'medium' | 'high';
+      user_role: "owner" | "admin" | "manager" | "user" | "guest";
+      workspace_user_status: "pending" | "active" | "suspended";
+      subscription_tier: "free" | "starter" | "pro" | "enterprise";
+      subscription_status: "trialing" | "active" | "past_due" | "cancelled";
+      contact_status: "new" | "qualified" | "customer" | "lost";
+      company_status: "lead" | "active" | "inactive";
+      deal_status: "open" | "won" | "lost" | "cancelled";
+      task_type: "call" | "meeting" | "email" | "todo";
+      task_status: "pending" | "in_progress" | "completed" | "cancelled";
+      task_priority: "low" | "medium" | "high";
       activity_type:
-        | 'note'
-        | 'call'
-        | 'email'
-        | 'status_change'
-        | 'file_upload'
-        | 'created'
-        | 'updated';
-      payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
+        | "note"
+        | "call"
+        | "email"
+        | "status_change"
+        | "file_upload"
+        | "created"
+        | "updated";
+      payment_status: "pending" | "completed" | "failed" | "refunded";
     };
     Functions: {
       get_current_workspace_id: {
@@ -685,11 +850,7 @@ export interface Database {
       };
       get_current_user_role: {
         Args: { p_workspace_id?: string };
-        Returns: Database['public']['Enums']['user_role'];
-      };
-      can_user_perform_action: {
-        Args: { p_action: string; p_workspace_id?: string };
-        Returns: boolean;
+        Returns: Database["public"]["Enums"]["user_role"];
       };
     };
   };
