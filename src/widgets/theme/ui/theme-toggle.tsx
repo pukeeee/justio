@@ -92,9 +92,11 @@ export function ThemeToggle({
           }
         }
       `;
-    } else if (variant === 'circle-blur') {
-      const cx = start === 'center' ? '50' : start.includes('left') ? '0' : '100';
-      const cy = start === 'center' ? '50' : start.includes('top') ? '0' : '100';
+    } else if (variant === "circle-blur") {
+      const cx =
+        start === "center" ? "50" : start.includes("left") ? "0" : "100";
+      const cy =
+        start === "center" ? "50" : start.includes("top") ? "0" : "100";
       css = `
         @supports (view-transition-name: root) {
           ::view-transition-old(root) {
@@ -151,7 +153,7 @@ export function ThemeToggle({
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size={showLabel ? "default" : "icon"}
       onClick={handleClick}
       className={cn("gap-2", className)}
@@ -164,7 +166,7 @@ export function ThemeToggle({
 
       {showLabel && (
         <span className="text-sm">
-          {resolvedTheme === "light" ? "Світла" : "Темна"}
+          {resolvedTheme === "light" ? "Світла тема" : "Темна тема"}
         </span>
       )}
       <span className="sr-only">Перемкнути тему</span>

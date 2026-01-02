@@ -1,6 +1,6 @@
 /**
- * Permission-based UI components
- * Conditionally render UI based on user permissions
+ * Компоненти для умовного рендерингу інтерфейсу
+ * на основі дозволів та ролі користувача.
  */
 
 "use client";
@@ -10,22 +10,31 @@ import {
   usePermission,
   usePermissions,
   useAnyPermission,
+  useWorkspace,
+  useFeatureAccess,
+  useAuth,
 } from "@/shared/lib/hooks/use-auth";
 import { type Permission } from "@/shared/lib/auth/permissions";
 
 // ============================================================================
-// CAN COMPONENT (single permission)
+// КОМПОНЕНТ Can (перевірка одного дозволу)
 // ============================================================================
 
 interface CanProps {
+  /** Дозвіл, який необхідно перевірити */
   permission: Permission;
+  /** Дочірні елементи, що будуть відображені за наявності дозволу */
   children: React.ReactNode;
+  /** Запасний UI, що відображається за відсутності дозволу */
   fallback?: React.ReactNode;
 }
 
 /**
- * Render children only if user has the specified permission
+ * Відображає дочірні елементи, якщо користувач має вказаний дозвіл.
  *
+ * @param permission - Дозвіл для перевірки.
+ * @param children - Елементи для відображення.
+ * @param fallback - Елементи, що відображаються, якщо дозвіл відсутній.
  * @example
  * <Can permission="delete_contact">
  *   <DeleteButton />
@@ -42,18 +51,24 @@ export function Can({ permission, children, fallback = null }: CanProps) {
 }
 
 // ============================================================================
-// CAN ALL COMPONENT (multiple permissions - all required)
+// КОМПОНЕНТ CanAll (перевірка всіх дозволів)
 // ============================================================================
 
 interface CanAllProps {
+  /** Масив дозволів, які всі повинні бути у користувача */
   permissions: Permission[];
+  /** Дочірні елементи, що будуть відображені за наявності всіх дозволів */
   children: React.ReactNode;
+  /** Запасний UI, що відображається, якщо хоча б один дозвіл відсутній */
   fallback?: React.ReactNode;
 }
 
 /**
- * Render children only if user has ALL specified permissions
+ * Відображає дочірні елементи, тільки якщо користувач має ВСІ вказані дозволи.
  *
+ * @param permissions - Масив дозволів для перевірки.
+ * @param children - Елементи для відображення.
+ * @param fallback - Елементи, що відображаються, якщо умова не виконана.
  * @example
  * <CanAll permissions={['create_contact', 'update_contact']}>
  *   <ContactForm />
@@ -74,18 +89,24 @@ export function CanAll({
 }
 
 // ============================================================================
-// CAN ANY COMPONENT (multiple permissions - any required)
+// КОМПОНЕНТ CanAny (перевірка будь-якого з дозволів)
 // ============================================================================
 
 interface CanAnyProps {
+  /** Масив дозволів, з яких хоча б один має бути у користувача */
   permissions: Permission[];
+  /** Дочірні елементи, що будуть відображені за наявності будь-якого з дозволів */
   children: React.ReactNode;
+  /** Запасний UI, що відображається, якщо всі дозволи відсутні */
   fallback?: React.ReactNode;
 }
 
 /**
- * Render children if user has ANY of the specified permissions
+ * Відображає дочірні елементи, якщо користувач має БУДЬ-ЯКИЙ із вказаних дозволів.
  *
+ * @param permissions - Масив дозволів для перевірки.
+ * @param children - Елементи для відображення.
+ * @param fallback - Елементи, що відображаються, якщо умова не виконана.
  * @example
  * <CanAny permissions={['view_all_contacts', 'view_own_contacts']}>
  *   <ContactList />
@@ -106,18 +127,24 @@ export function CanAny({
 }
 
 // ============================================================================
-// ROLE-BASED COMPONENTS
+// КОМПОНЕНТИ НА ОСНОВІ РОЛЕЙ
 // ============================================================================
 
 interface RequireRoleProps {
+  /** Масив ролей, одна з яких має бути у користувача */
   roles: ("owner" | "admin" | "manager" | "user" | "guest")[];
+  /** Дочірні елементи, що будуть відображені за відповідності ролі */
   children: React.ReactNode;
+  /** Запасний UI, що відображається, якщо роль не відповідає */
   fallback?: React.ReactNode;
 }
 
 /**
- * Render children only if user has one of the specified roles
+ * Відображає дочірні елементи, тільки якщо користувач має одну із вказаних ролей.
  *
+ * @param roles - Масив ролей для перевірки.
+ * @param children - Елементи для відображення.
+ * @param fallback - Елементи, що відображаються, якщо умова не виконана.
  * @example
  * <RequireRole roles={['owner', 'admin']}>
  *   <AdminPanel />
@@ -128,7 +155,6 @@ export function RequireRole({
   children,
   fallback = null,
 }: RequireRoleProps) {
-  const { useWorkspace } = require("@/shared/lib/hooks/use-auth");
   const { role } = useWorkspace();
 
   if (!role || !roles.includes(role)) {
@@ -139,18 +165,24 @@ export function RequireRole({
 }
 
 // ============================================================================
-// FEATURE-BASED COMPONENTS
+// КОМПОНЕНТИ НА ОСНОВІ ФУНКЦІЙ (за підпискою)
 // ============================================================================
 
 interface RequireFeatureProps {
+  /** Назва функції, доступ до якої перевіряється */
   feature: string;
+  /** Дочірні елементи, що будуть відображені за наявності доступу до функції */
   children: React.ReactNode;
+  /** Запасний UI, що відображається, якщо доступ до функції відсутній */
   fallback?: React.ReactNode;
 }
 
 /**
- * Render children only if feature is enabled for current subscription
+ * Відображає дочірні елементи, тільки якщо функція доступна для поточної підписки.
  *
+ * @param feature - Назва функції для перевірки.
+ * @param children - Елементи для відображення.
+ * @param fallback - Елементи, що відображаються, якщо умова не виконана.
  * @example
  * <RequireFeature feature="automation">
  *   <AutomationPanel />
@@ -161,7 +193,6 @@ export function RequireFeature({
   children,
   fallback = null,
 }: RequireFeatureProps) {
-  const { useFeatureAccess } = require("@/lib/hooks/use-auth");
   const hasAccess = useFeatureAccess(feature);
 
   if (!hasAccess) {
@@ -172,22 +203,23 @@ export function RequireFeature({
 }
 
 // ============================================================================
-// UTILITY COMPONENTS
+// СЕРВІСНІ КОМПОНЕНТИ
 // ============================================================================
 
 interface ShowWhenAuthenticatedProps {
+  /** Дочірні елементи, що будуть відображені */
   children: React.ReactNode;
+  /** Запасний UI, що відображається, якщо умова не виконана */
   fallback?: React.ReactNode;
 }
 
 /**
- * Show children only when user is authenticated
+ * Відображає дочірні елементи, тільки якщо користувач автентифікований.
  */
 export function ShowWhenAuthenticated({
   children,
   fallback = null,
 }: ShowWhenAuthenticatedProps) {
-  const { useAuth } = require("@/lib/hooks/use-auth");
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
@@ -198,13 +230,12 @@ export function ShowWhenAuthenticated({
 }
 
 /**
- * Show children only when user is NOT authenticated
+ * Відображає дочірні елементи, тільки якщо користувач НЕ автентифікований (гість).
  */
 export function ShowWhenGuest({
   children,
   fallback = null,
 }: ShowWhenAuthenticatedProps) {
-  const { useAuth } = require("@/lib/hooks/use-auth");
   const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
