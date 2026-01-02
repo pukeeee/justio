@@ -566,40 +566,7 @@ RETURNS user_role AS $$
   LIMIT 1;
 $$ LANGUAGE SQL STABLE SECURITY DEFINER;
 
--- Function to check if user can perform action
-CREATE OR REPLACE FUNCTION can_user_perform_action(
-  p_action TEXT,
-  p_workspace_id UUID DEFAULT NULL
-)
-RETURNS BOOLEAN AS $$
-DECLARE
-  v_role user_role;
-BEGIN
-  v_role := get_current_user_role(p_workspace_id);
-  
-  -- Owner and Admin can do everything
-  IF v_role IN ('owner', 'admin') THEN
-    RETURN TRUE;
-  END IF;
-  
-  -- Manager has most permissions
-  IF v_role = 'manager' THEN
-    RETURN p_action NOT IN ('delete_workspace', 'manage_billing', 'delete_users');
-  END IF;
-  
-  -- User has limited permissions
-  IF v_role = 'user' THEN
-    RETURN p_action IN ('create_contact', 'create_deal', 'create_task', 'view_own');
-  END IF;
-  
-  -- Guest can only read
-  IF v_role = 'guest' THEN
-    RETURN p_action IN ('view_own', 'view_assigned');
-  END IF;
-  
-  RETURN FALSE;
-END;
-$$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
+
 
 -- ============================================================================
 -- TRIGGERS
