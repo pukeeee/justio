@@ -18,7 +18,7 @@ import { NavMain } from "./NavMain";
 import { NavProjects } from "./NavProjects";
 import { NavUser } from "./NavUser";
 import { TeamSwitcher } from "./TeamSwitcher";
-import { ThemeToggle } from "@/shared/components/ui/theme-toggle";
+import { ThemeToggle } from "@/widgets/theme/ui/theme-toggle";
 import {
   Sidebar,
   SidebarContent,
