@@ -1,4 +1,4 @@
-import { getDocSlugs, getDocHtml } from "@/lib/docs";
+import { getDocSlugs, getDocHtml } from "@/shared/lib/docs";
 
 // Generate static paths for all docs
 export async function generateStaticParams() {
