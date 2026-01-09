@@ -39,6 +39,15 @@ export default defineConfig({
     // Запускати тести послідовно в одному процесі, щоб уникнути конфліктів з БД.
     maxWorkers: 1,
   },
+  // Глобальна заміна змінних середовища для інтеграційних тестів.
+  // Це гарантує, що код програми, який використовує, наприклад,
+  // `process.env.NEXT_PUBLIC_SUPABASE_URL`, під час тестів отримає
+  // значення з `process.env.NEXT_PUBLIC_SUPABASE_TEST_URL`.
+  define: {
+    "process.env.NEXT_PUBLIC_SUPABASE_URL": JSON.stringify(process.env.NEXT_PUBLIC_SUPABASE_TEST_URL),
+    "process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY": JSON.stringify(process.env.NEXT_PUBLIC_SUPABASE_TEST_ANON_KEY),
+    "process.env.SUPABASE_SERVICE_ROLE_KEY": JSON.stringify(process.env.SUPABASE_TEST_SERVICE_KEY),
+  },
   resolve: {
     // Налаштування аліасів для зручних імпортів у тестах.
     alias: {

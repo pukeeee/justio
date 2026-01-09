@@ -77,12 +77,23 @@ export async function cleanupTestData() {
 
   for (const table of tables) {
     try {
-      await supabase
-        .from(table)
-        .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000"); // Безпека: не видаляти системні чи важливі записи
+      let query = supabase.from(table).delete();
+
+      // Для таблиць з PK 'workspace_id' використовуємо його для фільтрації,
+      // для інших - 'id'. Це робить очищення безпечнішим і виправляє помилку.
+      if (['workspace_quotas', 'subscriptions', 'integrations'].includes(table)) {
+        // @ts-ignore - TypeScript не знає, що 'workspace_id' існує, але ми знаємо.
+        query = query.neq('workspace_id', '00000000-0000-0000-0000-000000000000');
+      } else {
+        // @ts-ignore - TypeScript не знає, що 'id' існує, але ми знаємо.
+        query = query.neq('id', '00000000-0000-0000-0000-000000000000');
+      }
+
+      const { error } = await query;
+      if (error) throw error;
+
     } catch (error) {
-      console.warn(`Не вдалося очистити таблицю ${table}:`, error);
+      console.warn(`Не вдалося очистити таблицю ${table}:`, (error as Error).message);
     }
   }
 
@@ -120,10 +131,11 @@ export async function createTestWorkspace(data?: {
 }) {
   const supabase = createTestSupabaseClient();
   let userId = data?.owner_id;
+  let email: string | undefined;
 
   // Якщо owner_id не передано, створюємо нового користувача через Admin API.
   if (!userId) {
-    const email = `test-user-${Date.now()}-${Math.floor(
+    email = `test-user-${Date.now()}-${Math.floor(
       Math.random() * 1000,
     )}@example.com`;
     const { data: user, error: createError } =
@@ -197,6 +209,8 @@ export async function createTestWorkspace(data?: {
     subscription,
     quota,
     userId,
+    email,
+    password: "test-password-123",
   };
 }
 

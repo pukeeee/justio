@@ -1149,11 +1149,14 @@ export type Database = {
     }
     Functions: {
       generate_invitation_token: { Args: never; Returns: string }
-      get_current_user_role: {
-        Args: { p_workspace_id?: string }
+      get_workspace_role: {
+        Args: { p_user_id: string; p_workspace_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
-      get_current_workspace_id: { Args: never; Returns: string }
+      is_workspace_member: {
+        Args: { p_user_id: string; p_workspace_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       activity_type:
