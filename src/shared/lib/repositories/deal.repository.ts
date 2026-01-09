@@ -51,7 +51,7 @@ export async function getByWorkspaceId(
     pipelineId?: string;
     stageId?: string;
     ownerId?: string;
-    status?: string;
+    status?: Database["public"]["Enums"]["deal_status"];
     limit?: number;
     offset?: number;
   },
