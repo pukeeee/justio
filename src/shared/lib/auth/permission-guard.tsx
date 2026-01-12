@@ -13,7 +13,7 @@ import {
   useWorkspace,
   useFeatureAccess,
   useAuth,
-} from "@/shared/lib/hooks/use-auth";
+} from "@/shared/hooks/use-auth";
 import { type Permission } from "@/shared/lib/auth/permissions";
 
 // ============================================================================
