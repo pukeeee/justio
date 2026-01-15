@@ -124,4 +124,62 @@
     body {
         @apply bg-background text-foreground;
     }
+    /* Покращений scroll behavior */
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 5rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
+}
+
+@layer utilities {
+    /* Покращений контейнер з правильними відступами */
+    .container {
+        @apply mx-auto w-full;
+        max-width: 1280px;
+        padding-left: clamp(1rem, 5vw, 2rem);
+        padding-right: clamp(1rem, 5vw, 2rem);
+    }
+
+    /* Gradient текст */
+    .gradient-text {
+        @apply bg-clip-text text-transparent;
+        background-image: linear-gradient(
+            to right,
+            var(--primary),
+            var(--chart-2)
+        );
+    }
+}
+
+/* Покращена читабельність тексту */
+p,
+li,
+td {
+    text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    text-wrap: balance;
+}
+
+/* Плавні переходи для інтерактивних елементів */
+a,
+button {
+    @apply transition-colors duration-200;
+}
+
+/* Фокус для accessibility */
+:focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
 }

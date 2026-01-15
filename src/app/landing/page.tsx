@@ -8,19 +8,20 @@ import { PricingSection } from "@/widgets/landing/pricing/ui/PricingSection";
 import { FaqSection } from "@/widgets/landing/faq/ui/FaqSection";
 import { FinalCtaSection } from "@/widgets/landing/cta/ui/FinalCtaSection";
 import { LandingFooter } from "@/widgets/landing/footer/ui/LandingFooter";
+import { ScrollToTop } from "@/shared/components/ScrollToTop";
 
 /**
  * Головна сторінка (Landing Page)
- * Структурована за методологією FSD
+ * Структурована за методологією FSD з покращеною версткою та анімаціями
  */
 export default function LandingPage() {
   return (
-    <div className="container justify-center">
+    <div className="min-h-screen flex flex-col">
       {/* Header з навігацією */}
       <LandingHeader />
 
       {/* Основний контент */}
-      <main>
+      <main className="flex-1">
         {/* Hero секція з головним value-proposition */}
         <LandingHero />
 
@@ -48,6 +49,9 @@ export default function LandingPage() {
 
       {/* Footer */}
       <LandingFooter />
+
+      {/* Scroll to top button */}
+      <ScrollToTop />
     </div>
   );
 }
