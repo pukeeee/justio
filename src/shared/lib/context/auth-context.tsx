@@ -107,22 +107,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data, error } = await supabase
           .from("workspace_users")
-          .select("*, workspaces(*)") // Отримати всі поля з workspace_users та всі пов'язані поля з workspaces
+          .select("*, workspaces(*)") // Get all fields from workspace_users and all related fields from workspaces
           .eq("user_id", userId)
-          .eq("status", "active") // Тільки активні профілі
-          .single(); // Очікуємо один запис
+          .eq("status", "active") // Only active profiles
+          .maybeSingle(); // Expect 0 or 1 row, doesn't throw if 0
 
         if (error) throw error;
-        if (!data)
-          throw new Error(
-            "Профіль користувача для цього робочого простору не знайдено.",
-          );
 
-        const { workspaces, ...userProfile } = data as WorkspaceUserProfile;
-        setWorkspaceUser(userProfile);
-        setWorkspace(workspaces);
+        if (data) {
+          const { workspaces, ...userProfile } = data as WorkspaceUserProfile;
+          setWorkspaceUser(userProfile);
+          setWorkspace(workspaces);
+        } else {
+          // User has no active workspace, this is a valid state for a new user
+          setWorkspace(null);
+          setWorkspaceUser(null);
+        }
       } catch (error) {
-        console.error("Помилка при завантаженні робочого простору:", error);
+        console.error(
+          "Помилка при завантаженні робочого простору:",
+          JSON.stringify(error, null, 2),
+        );
         setWorkspace(null);
         setWorkspaceUser(null);
       }

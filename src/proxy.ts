@@ -9,7 +9,7 @@ import { createServerClient } from "@supabase/ssr";
 
 // Список маршрутів, які потребують автентифікації для доступу.
 // В майбутньому сюди можна додати нові, наприклад, '/settings', '/analytics' тощо.
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard", "/docs"];
 
 export async function proxy(request: NextRequest) {
   // Створюємо об'єкт відповіді (response), який можна буде змінювати.
@@ -25,7 +25,7 @@ export async function proxy(request: NextRequest) {
   const supabase = createServerClient(
     // Ці змінні середовища мають бути налаштовані у вашому проекті (.env.local).
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_SERVICE_KEY!,
     {
       // Цей об'єкт визначає, як Supabase буде читати та записувати cookies для автентифікації.
       cookies: {
@@ -63,8 +63,8 @@ export async function proxy(request: NextRequest) {
   // Якщо користувач не автентифікований (`!user`) і намагається отримати доступ
   // до захищеного маршруту, його буде перенаправлено на сторінку входу.
   if (!user && isProtectedRoute) {
-    // Створюємо URL для перенаправлення на сторінку /login.
-    const redirectUrl = new URL("/login", request.url);
+    // Створюємо URL для перенаправлення на сторінку /.
+    const redirectUrl = new URL("/", request.url);
     // Додаємо параметр `redirect`, щоб після успішного входу повернути користувача
     // на сторінку, яку він спочатку запитував.
     redirectUrl.searchParams.set("redirect", request.nextUrl.pathname);
@@ -72,11 +72,11 @@ export async function proxy(request: NextRequest) {
   }
 
   // 2. Обробка для вже автентифікованих користувачів.
-  // Якщо користувач вже увійшов в систему (`user`) і намагається зайти на `/login`,
+  // Якщо користувач вже увійшов в систему (`user`) і намагається зайти на `/`,
   // його буде перенаправлено на головну сторінку кабінету.
-  if (user && request.nextUrl.pathname === "/login") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
+  // if (user && request.nextUrl.pathname === "/") {
+  //   return NextResponse.redirect(new URL("/dashboard", request.url));
+  // }
 
   // Якщо жодна з умов перенаправлення не спрацювала, продовжуємо до запитаної сторінки.
   // Повертаємо об'єкт `response`, який може містити оновлені cookies.

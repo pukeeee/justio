@@ -6,10 +6,15 @@ import { LANDING_CONTENT } from "@/shared/lib/config/landing";
 import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/shared/lib/utils/utils";
+import { useAuthModal } from "@/shared/stores/use-auth-modal.store";
+import { useAuth } from "@/shared/hooks/use-auth";
+import { AuthenticatedUser } from "./AuthenticatedUser";
 
 export function LandingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { open: openAuthModal } = useAuthModal();
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,7 +25,7 @@ export function LandingHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Закриття мобільного меню при зміні розміру вікна
+  // Close mobile menu on window resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -32,7 +37,7 @@ export function LandingHeader() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Блокування scroll при відкритому меню
+  // Block scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -44,6 +49,69 @@ export function LandingHeader() {
       document.body.style.overflow = "unset";
     };
   }, [mobileMenuOpen]);
+
+  const renderAuthBlock = () => {
+    if (loading) {
+      return (
+        <div className="hidden md:flex items-center space-x-4">
+          <div className="h-8 w-20 rounded-md bg-muted animate-pulse" />
+          <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+        </div>
+      );
+    }
+    if (isAuthenticated) {
+      return <AuthenticatedUser />;
+    }
+    return (
+      <div className="hidden md:flex items-center">
+        <Button variant="ghost" size="sm" onClick={openAuthModal}>
+          Увійти
+        </Button>
+      </div>
+    );
+  };
+
+  const renderMobileAuthBlock = () => {
+    if (loading) {
+      return (
+        <div className="pt-4 space-y-2">
+          <div className="h-10 w-full rounded-md bg-muted animate-pulse" />
+          <div className="h-10 w-full rounded-md bg-muted animate-pulse" />
+        </div>
+      );
+    }
+    if (isAuthenticated) {
+      return (
+        <div
+          className="pt-4 space-y-2 animate-fade-in-up"
+          style={{ animationDelay: "200ms" }}
+        >
+          <Button asChild className="w-full">
+            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+              Дашборд
+            </Link>
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <div
+        className="pt-4 space-y-2 animate-fade-in-up"
+        style={{ animationDelay: "200ms" }}
+      >
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => {
+            openAuthModal();
+            setMobileMenuOpen(false);
+          }}
+        >
+          Увійти
+        </Button>
+      </div>
+    );
+  };
 
   return (
     <header
@@ -79,32 +147,25 @@ export function LandingHeader() {
             ))}
           </nav>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/auth/signin">Увійти</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href={LANDING_CONTENT.header.cta.href}>
-                {LANDING_CONTENT.header.cta.label}
-              </Link>
+          <div className="flex items-center gap-2">
+            {/* Desktop CTA */}
+            {renderAuthBlock()}
+
+            {/* Mobile Menu Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Закрити меню" : "Відкрити меню"}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
-
-          {/* Mobile Menu Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Закрити меню" : "Відкрити меню"}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </Button>
         </div>
       </div>
 
@@ -131,27 +192,7 @@ export function LandingHeader() {
                 </Link>
               ))}
 
-              <div
-                className="pt-4 space-y-2 animate-fade-in-up"
-                style={{ animationDelay: "200ms" }}
-              >
-                <Button asChild variant="outline" className="w-full">
-                  <Link
-                    href="/auth/signin"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Увійти
-                  </Link>
-                </Button>
-                <Button asChild className="w-full">
-                  <Link
-                    href={LANDING_CONTENT.header.cta.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {LANDING_CONTENT.header.cta.label}
-                  </Link>
-                </Button>
-              </div>
+              {renderMobileAuthBlock()}
             </nav>
           </div>
         </div>
