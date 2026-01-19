@@ -137,9 +137,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Головний ефект для ініціалізації та відстеження сесії
   useEffect(() => {
-    // Підписка на зміни стану автентифікації (логін, логаут).
-    // `onAuthStateChange` спрацьовує негайно з поточною сесією,
-    // що робить окремий виклик `getUser()` непотрібним.
+    // По-перше, одразу отримуємо поточного користувача. Це може повернути сесію з localStorage.
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      setUser(user);
+      if (user) {
+        await fetchWorkspace(user.id);
+      }
+      // Встановлюємо loading в false після першої спроби, щоб уникнути "застрягання".
+      setLoading(false);
+    });
+
+    // По-друге, підписуємось на майбутні зміни (логін, логаут, оновлення токену).
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -147,16 +155,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(currentUser);
 
       if (currentUser) {
-        // Якщо користувач увійшов, завантажуємо його дані
         await fetchWorkspace(currentUser.id);
       } else {
         // Якщо користувач вийшов, очищуємо дані
         setWorkspace(null);
         setWorkspaceUser(null);
       }
-
-      // Позначаємо завантаження як завершене ПІСЛЯ першого спрацьовування onAuthStateChange.
-      // Це гарантує, що ми маємо остаточний стан сесії перед рендерингом.
+      // На випадок, якщо початковий getUser() повернув null, а onAuthStateChange спрацював пізніше
       setLoading(false);
     });
 
