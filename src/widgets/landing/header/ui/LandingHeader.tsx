@@ -3,18 +3,52 @@
 import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
 import { LANDING_CONTENT } from "@/shared/lib/config/landing";
-import { Menu, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Menu, X, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/shared/lib/utils/utils";
 import { useAuthModal } from "@/shared/stores/use-auth-modal.store";
 import { useAuth } from "@/shared/hooks/use-auth";
 import { AuthenticatedUser } from "./AuthenticatedUser";
 
+/**
+ * Компонент хедера для landing page
+ */
 export function LandingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showSkeleton, setShowSkeleton] = useState(false);
   const { open: openAuthModal } = useAuthModal();
   const { isAuthenticated, loading } = useAuth();
+
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Effect для управління показом skeleton з таймаутом
+  useEffect(() => {
+    // Очищуємо попередній таймер при кожній зміні loading
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
+    if (loading) {
+      // Показуємо skeleton одразу
+      setShowSkeleton(true);
+
+      // Ховаємо skeleton через 3 секунди
+      timeoutRef.current = setTimeout(() => {
+        setShowSkeleton(false);
+      }, 3000);
+    } else {
+      // Якщо loading=false, ховаємо skeleton одразу
+      setShowSkeleton(false);
+    }
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [loading]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,7 +59,6 @@ export function LandingHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on window resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -37,7 +70,6 @@ export function LandingHeader() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Block scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -50,18 +82,30 @@ export function LandingHeader() {
     };
   }, [mobileMenuOpen]);
 
+  /**
+   * Рендерить блок автентифікації для desktop
+   */
   const renderAuthBlock = () => {
-    if (loading) {
+    // Показуємо скелетон тільки якщо loading=true і не минув таймаут
+    if (showSkeleton) {
       return (
         <div className="hidden md:flex items-center space-x-4">
-          <div className="h-8 w-20 rounded-md bg-muted animate-pulse" />
-          <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              Завантаження...
+            </span>
+          </div>
         </div>
       );
     }
+
+    // Якщо авторизований - показуємо AuthenticatedUser
     if (isAuthenticated) {
       return <AuthenticatedUser />;
     }
+
+    // Fallback: кнопка Увійти
     return (
       <div className="hidden md:flex items-center">
         <Button variant="ghost" size="sm" onClick={openAuthModal}>
@@ -71,15 +115,24 @@ export function LandingHeader() {
     );
   };
 
+  /**
+   * Рендерить блок автентифікації для mobile
+   */
   const renderMobileAuthBlock = () => {
-    if (loading) {
+    if (showSkeleton) {
       return (
-        <div className="pt-4 space-y-2">
-          <div className="h-10 w-full rounded-md bg-muted animate-pulse" />
-          <div className="h-10 w-full rounded-md bg-muted animate-pulse" />
+        <div
+          className="pt-4 space-y-2 animate-fade-in-up"
+          style={{ animationDelay: "200ms" }}
+        >
+          <div className="flex items-center justify-center gap-2 py-3">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm">Завантаження...</span>
+          </div>
         </div>
       );
     }
+
     if (isAuthenticated) {
       return (
         <div
@@ -94,6 +147,7 @@ export function LandingHeader() {
         </div>
       );
     }
+
     return (
       <div
         className="pt-4 space-y-2 animate-fade-in-up"
@@ -148,7 +202,7 @@ export function LandingHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
-            {/* Desktop CTA */}
+            {/* Desktop Auth Block */}
             {renderAuthBlock()}
 
             {/* Mobile Menu Toggle */}

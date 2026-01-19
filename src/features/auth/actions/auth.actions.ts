@@ -1,55 +1,181 @@
 "use server";
 
+/**
+ * @file auth.actions.ts
+ * @description Server Actions для автентифікації
+ *
+ * Покращення:
+ * - Валідація вхідних даних
+ * - Детальне логування
+ * - Безпечні редіректи
+ * - Правильна обробка помилок
+ */
+
 import { createServerClient } from "@/shared/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 /**
- * Ініціює процес автентифікації через Google OAuth.
- * Створює URL для редиректу в Google і перенаправляє користувача на нього.
- * @param formData - Дані форми. Не використовуються, але потрібні для сумісності з `formAction`.
+ * Максимальна довжина redirect URL для безпеки
+ */
+const MAX_REDIRECT_LENGTH = 200;
+
+/**
+ * Валідує redirect URL
+ */
+function validateRedirectUrl(url: string | null): string | null {
+  if (!url) return null;
+
+  // Перевіряємо довжину
+  if (url.length > MAX_REDIRECT_LENGTH) return null;
+
+  // Перевіряємо, що це відносний шлях
+  if (!url.startsWith("/")) return null;
+
+  // Перевіряємо, що немає протоколу (захист від open redirect)
+  if (url.includes("://")) return null;
+
+  return url;
+}
+
+/**
+ * Ініціює автентифікацію через Google OAuth
  */
 export async function signInWithGoogle(formData: FormData) {
-  // Створюємо клієнт Supabase для серверних операцій.
-  const supabase = await createServerClient();
-  // Визначаємо URL, на який Google має повернути користувача.
-  const origin = (await headers()).get("origin");
-  const redirectUrl = formData.get("redirectUrl") as string | null;
+  try {
+    const supabase = await createServerClient();
+    const headersList = await headers();
+    const origin = headersList.get("origin");
 
-  const callbackUrl = new URL(`${origin}/auth/callback`);
-  if (redirectUrl) {
-    callbackUrl.searchParams.set("next", redirectUrl);
-  }
+    if (!origin) {
+      throw new Error("Не вдалося визначити origin");
+    }
 
-  // Викликаємо метод Supabase для входу через OAuth.
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      // Вказуємо URL для callback. Після успішної автентифікації
-      // користувач буде перенаправлений на /auth/callback.
-      redirectTo: callbackUrl.toString(),
-    },
-  });
+    // Отримуємо та валідуємо redirect URL
+    const rawRedirectUrl = formData.get("redirectUrl") as string | null;
+    const redirectUrl = validateRedirectUrl(rawRedirectUrl);
 
-  if (error) {
-    console.error("Помилка signInWithGoogle:", error);
-    // В реальному додатку тут може бути редирект на сторінку з помилкою.
-    return redirect("/login?error=Не вдалося ініціювати вхід через Google");
-  }
+    // Формуємо callback URL
+    const callbackUrl = new URL(`${origin}/auth/callback`);
+    if (redirectUrl) {
+      callbackUrl.searchParams.set("next", redirectUrl);
+    }
 
-  // Якщо URL для редиректу успішно створено, перенаправляємо користувача.
-  if (data.url) {
+    // Логування для debugging (тільки dev)
+    if (process.env.NODE_ENV === "development") {
+      console.log("[Auth Action] Google OAuth initiation:", {
+        redirectUrl,
+        callbackUrl: callbackUrl.toString(),
+      });
+    }
+
+    // Викликаємо Supabase OAuth
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callbackUrl.toString(),
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
+
+    if (error) {
+      console.error("[Auth Action] OAuth помилка:", error);
+      redirect(
+        `/?error=${encodeURIComponent("Не вдалося ініціювати вхід через Google")}`,
+      );
+    }
+
+    if (!data.url) {
+      console.error("[Auth Action] Відсутній OAuth URL");
+      redirect(
+        `/?error=${encodeURIComponent("Не вдалося отримати URL для автентифікації")}`,
+      );
+    }
+
+    // Редірект на Google OAuth
     redirect(data.url);
-  } else {
-    // На випадок, якщо URL не було отримано, але й помилки не було.
-    return redirect("/login?error=Не вдалося отримати URL для автентифікації");
+  } catch (error) {
+    console.error("[Auth Action] Критична помилка:", error);
+
+    // Якщо це не redirect error від Next.js
+    if (error instanceof Error && !error.message.includes("NEXT_REDIRECT")) {
+      redirect(`/?error=${encodeURIComponent("Внутрішня помилка сервера")}`);
+    }
+
+    throw error;
   }
 }
 
 /**
- * Виконує вихід користувача з системи.
+ * Виконує вихід користувача з системи
  */
 export async function signOut() {
-  const supabase = await createServerClient();
-  await supabase.auth.signOut();
+  try {
+    const supabase = await createServerClient();
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error("[Auth Action] Помилка виходу:", error);
+      // Не кидаємо помилку, все одно очистимо сесію
+    }
+
+    // Очищаємо кеш для всього layout
+    revalidatePath("/", "layout");
+  } catch (error) {
+    console.error("[Auth Action] Критична помилка при виході:", error);
+  } finally {
+    // Завжди редіректимо на головну, навіть якщо була помилка
+    redirect("/");
+  }
+}
+
+/**
+ * Перевіряє наявність активної сесії (для серверних компонентів)
+ */
+export async function getSession() {
+  try {
+    const supabase = await createServerClient();
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error("[Auth Action] Помилка отримання сесії:", error);
+      return null;
+    }
+
+    return session;
+  } catch (error) {
+    console.error("[Auth Action] Критична помилка отримання сесії:", error);
+    return null;
+  }
+}
+
+/**
+ * Перевіряє та оновлює сесію (для періодичної перевірки)
+ */
+export async function refreshSession() {
+  try {
+    const supabase = await createServerClient();
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.refreshSession();
+
+    if (error) {
+      console.error("[Auth Action] Помилка оновлення сесії:", error);
+      return null;
+    }
+
+    return session;
+  } catch (error) {
+    console.error("[Auth Action] Критична помилка оновлення сесії:", error);
+    return null;
+  }
 }

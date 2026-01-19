@@ -25,7 +25,7 @@ export async function proxy(request: NextRequest) {
   const supabase = createServerClient(
     // Ці змінні середовища мають бути налаштовані у вашому проекті (.env.local).
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       // Цей об'єкт визначає, як Supabase буде читати та записувати cookies для автентифікації.
       cookies: {
