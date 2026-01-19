@@ -137,30 +137,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Головний ефект для ініціалізації та відстеження сесії
   useEffect(() => {
-    /**
-     * @function initAuth
-     * @description Ініціалізує стан автентифікації: отримує поточного користувача
-     * і, якщо він є, завантажує дані його робочого простору.
-     */
-    const initAuth = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        setUser(user);
-        if (user) {
-          await fetchWorkspace(user.id);
-        }
-      } catch (error) {
-        console.error("Помилка при ініціалізації автентифікації:", error);
-      } finally {
-        setLoading(false); // Завершуємо завантаження в будь-якому випадку
-      }
-    };
-
-    initAuth();
-
-    // Підписка на зміни стану автентифікації (логін, логаут)
+    // Підписка на зміни стану автентифікації (логін, логаут).
+    // `onAuthStateChange` спрацьовує негайно з поточною сесією,
+    // що робить окремий виклик `getUser()` непотрібним.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -175,6 +154,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setWorkspace(null);
         setWorkspaceUser(null);
       }
+
+      // Позначаємо завантаження як завершене ПІСЛЯ першого спрацьовування onAuthStateChange.
+      // Це гарантує, що ми маємо остаточний стан сесії перед рендерингом.
+      setLoading(false);
     });
 
     // Функція очищення, яка відписується від слухача при демонтуванні компонента
