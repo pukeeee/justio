@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
    * в команді `npm run dev`, але проблему витоку варто дослідити окремо.
    */
   reactStrictMode: true,
+  turbopack: {},
   webpack: (config, { dev }) => {
     // Налаштування для уникнення проблем з hot-reload у деяких середовищах (напр. Docker)
     if (dev) {
