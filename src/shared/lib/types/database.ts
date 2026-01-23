@@ -1148,7 +1148,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_workspace_with_owner: {
+        Args: { p_name: string }
+        Returns: {
+          workspace_id: string
+          workspace_name: string
+          workspace_slug: string
+        }[]
+      }
       generate_invitation_token: { Args: never; Returns: string }
+      generate_random_slug: { Args: never; Returns: string }
       get_workspace_role: {
         Args: { p_user_id: string; p_workspace_id: string }
         Returns: string

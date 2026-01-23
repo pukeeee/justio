@@ -16,7 +16,7 @@ import {
   AvatarImage,
 } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
-import { DROPDOWN_MENU_ITEMS } from "../config/dropdown-menu.config";
+import { USER_PAGES } from "@/shared/lib/config/user-pages";
 import { signOut } from "@/features/auth/actions/auth.actions";
 import { LogOut } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
@@ -117,7 +117,7 @@ export function AuthenticatedUser({ user }: AuthenticatedUserProps) {
           <DropdownMenuSeparator />
 
           {/* Навігаційні пункти */}
-          {DROPDOWN_MENU_ITEMS.map((item) => (
+          {USER_PAGES.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
               <Link href={item.href}>{item.label}</Link>
             </DropdownMenuItem>

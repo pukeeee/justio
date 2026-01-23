@@ -13,6 +13,7 @@
  */
 
 // Core CRM Entities
+export * as WorkspaceRepository from './workspace.repository';
 export * as ContactRepository from "./contact.repository";
 export * as CompanyRepository from "./company.repository";
 export * as DealRepository from "./deal.repository";

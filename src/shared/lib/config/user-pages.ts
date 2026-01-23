@@ -1,10 +1,14 @@
 /**
  * Конфігурація для елементів випадаючого меню користувача в хедері.
  */
-export const DROPDOWN_MENU_ITEMS = [
+export const USER_PAGES = [
   {
     label: "Профіль",
     href: "/user/profile",
+  },
+  {
+    label: "Ворспейси",
+    href: "/user/workspace",
   },
   {
     label: "Налаштування",

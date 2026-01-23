@@ -152,7 +152,6 @@ export const WorkspaceSchema = z.object({
 
 export const CreateWorkspaceSchema = WorkspaceSchema.pick({
   name: true,
-  slug: true,
 }).extend({
   settings: WorkspaceSettingsSchema.partial().optional(),
 });
