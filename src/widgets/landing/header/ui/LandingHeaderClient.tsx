@@ -152,7 +152,7 @@ export function LandingHeaderClient({ user }: LandingHeaderClientProps) {
                 >
                   <Button asChild className="w-full">
                     <Link
-                      href="/dashboard"
+                      href="/user/workspace"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Дашборд

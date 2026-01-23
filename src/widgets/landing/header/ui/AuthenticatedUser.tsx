@@ -23,13 +23,17 @@ import type { User } from "@supabase/supabase-js";
 
 interface AuthenticatedUserProps {
   user: User;
+  showDashboardButton?: boolean;
 }
 
 /**
  * Компонент для відображення авторизованого користувача
  * Получает данные через пропсы (SSR) - нет проблем с гидратацией
  */
-export function AuthenticatedUser({ user }: AuthenticatedUserProps) {
+export function AuthenticatedUser({
+  user,
+  showDashboardButton = true,
+}: AuthenticatedUserProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -74,9 +78,11 @@ export function AuthenticatedUser({ user }: AuthenticatedUserProps) {
   return (
     <div className="flex items-center md:gap-4">
       {/* Кнопка Dashboard (тільки на desktop) */}
-      <Button asChild size="sm" className="hidden md:inline-flex">
-        <Link href="/dashboard">Дашборд</Link>
-      </Button>
+      {showDashboardButton && (
+        <Button asChild size="sm" className="hidden md:inline-flex">
+          <Link href="/user/workspace">Дашборд</Link>
+        </Button>
+      )}
 
       {/* Dropdown меню користувача */}
       <DropdownMenu>

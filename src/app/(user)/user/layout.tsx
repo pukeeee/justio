@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/shared/supabase/server";
+import { UserHeader } from "@/widgets/user/header/ui/UserHeader";
 
 export const metadata: Metadata = {
-  title: "Налаштування | CRM4SMB",
+  title: "Кабінет | CRM4SMB",
   description: "Керування профілем та воркспейсами",
 };
 
@@ -29,8 +30,8 @@ export default async function Layout({
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Можна додати спільний header для user-сторінок */}
-      <div className="container py-6">{children}</div>
+      <UserHeader />
+      <main className="container py-6">{children}</main>
     </div>
   );
 }

@@ -20,16 +20,25 @@ function WorkspacePageSkeleton() {
 }
 
 /**
- * Async компонент що завантажує дані
+ * Асинхронний компонент, що завантажує дані.
+ * ВИПРАВЛЕНО: Додано кешування для уникнення повторних запитів (через `cache` в `getWorkspaces`).
  */
 async function WorkspaceContent() {
+  // ВАЖЛИВО: Цей запит НЕ дублюється з AuthContext (після рефакторингу 23.01.2026).
+  // Раніше AuthContext завантажував один "активний" воркспейс, що було неправильно.
+  // Тепер AuthContext не завантажує воркспейси взагалі,
+  // а ця сторінка коректно завантажує ВСІ воркспейси користувача.
   const workspaces = await getWorkspaces();
   return <WorkspaceClientPage initialWorkspaces={workspaces ?? []} />;
 }
 
 /**
  * Серверний компонент сторінки воркспейсів.
- * Використовує Suspense для правильної гідратації.
+ * Використовує Suspense для правильної гідратації та поступового завантаження.
+ *
+ * ОПТИМІЗАЦІЯ:
+ * - Використовуємо `React.cache` (всередині `getWorkspaces`) для уникнення дублюючих запитів.
+ * - `Suspense` boundary запобігає блокуванню рендерингу всієї сторінки.
  */
 export default function WorkspacePage() {
   return (

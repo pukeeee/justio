@@ -1,11 +1,12 @@
 /**
  * @file auth-context.tsx
- * @description Улучшенный провайдер контексту автентифікації
+ * @description Провайдер контексту для керування сесією та даними користувача.
  *
- * Изменения:
- * - Убраны race conditions
- * - Добавлена синхронизация состояния
- * - Оптимизирована загрузка данных
+ * @history
+ * - 2026-01-23: Видалено логіку завантаження воркспейсу, підписок та квот.
+ *   Контекст тепер відповідає лише за сесію користувача (User).
+ *   Це виправляє баг, коли система неправильно обробляла наявність кількох воркспейсів
+ *   і завантажувала в глобальний контекст лише один із них.
  */
 
 "use client";
@@ -19,171 +20,59 @@ import React, {
 } from "react";
 import { createBrowserClient } from "@/shared/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import type {
-  UserRole,
-  Workspace,
-  WorkspaceUser,
-  Subscription,
-  WorkspaceQuota,
-} from "@/shared/lib/validations/schemas";
 
 // ============================================================================
-// ТИПЫ
+// Типи
 // ============================================================================
 
 interface AuthContextType {
   user: User | null;
-  workspace: Workspace | null;
-  workspaceUser: WorkspaceUser | null;
-  role: UserRole | null;
-  subscription: Subscription | null;
-  quotas: WorkspaceQuota | null;
   loading: boolean;
-  refresh: () => Promise<void>;
 }
 
-type WorkspaceUserProfile = WorkspaceUser & {
-  workspaces: Workspace | null;
-};
-
 // ============================================================================
-// КОНТЕКСТ
+// Контекст
 // ============================================================================
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // ============================================================================
-// ПРОВАЙДЕР
+// Провайдер
 // ============================================================================
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [workspace, setWorkspace] = useState<Workspace | null>(null);
-  const [workspaceUser, setWorkspaceUser] = useState<WorkspaceUser | null>(
-    null,
-  );
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [quotas, setQuotas] = useState<WorkspaceQuota | null>(null);
   const [loading, setLoading] = useState(true);
 
   const supabase = createBrowserClient();
 
   /**
-   * Очищает все данные пользователя
+   * Скидає стан користувача
    */
-  const clearUserData = useCallback(() => {
+  const clearUser = useCallback(() => {
     setUser(null);
-    setWorkspace(null);
-    setWorkspaceUser(null);
-    setSubscription(null);
-    setQuotas(null);
   }, []);
 
   /**
-   * Завантажує дані робочого простору користувача
-   */
-  const fetchWorkspaceData = useCallback(
-    async (workspaceId: string) => {
-      try {
-        const [subResult, quotasResult] = await Promise.all([
-          supabase
-            .from("subscriptions")
-            .select("*")
-            .eq("workspace_id", workspaceId)
-            .maybeSingle(),
-          supabase
-            .from("workspace_quotas")
-            .select("*")
-            .eq("workspace_id", workspaceId)
-            .maybeSingle(),
-        ]);
-
-        if (!subResult.error) {
-          setSubscription((subResult.data as Subscription) || null);
-        }
-
-        if (!quotasResult.error) {
-          setQuotas((quotasResult.data as WorkspaceQuota) || null);
-        }
-      } catch (error) {
-        console.error(
-          "[AuthContext] Помилка завантаження даних воркспейсу:",
-          error,
-        );
-      }
-    },
-    [supabase],
-  );
-
-  /**
-   * Завантажує дані робочого простору користувача
-   */
-  const fetchWorkspace = useCallback(
-    async (userId: string) => {
-      try {
-        const { data, error } = await supabase
-          .from("workspace_users")
-          .select("*, workspaces(*)")
-          .eq("user_id", userId)
-          .eq("status", "active")
-          .maybeSingle();
-
-        if (error) throw error;
-
-        if (data) {
-          const { workspaces, ...userProfile } = data as WorkspaceUserProfile;
-          setWorkspaceUser(userProfile);
-          setWorkspace(workspaces);
-
-          // Загружаем зависимые данные только если есть workspace
-          if (workspaces?.id) {
-            await fetchWorkspaceData(workspaces.id);
-          }
-        } else {
-          setWorkspace(null);
-          setWorkspaceUser(null);
-          setSubscription(null);
-          setQuotas(null);
-        }
-      } catch (error) {
-        console.error(
-          "[AuthContext] Помилка при завантаженні робочого простору:",
-          error,
-        );
-        setWorkspace(null);
-        setWorkspaceUser(null);
-        setSubscription(null);
-        setQuotas(null);
-      }
-    },
-    [supabase, fetchWorkspaceData],
-  );
-
-  /**
-   * Ініціалізація та відстеження змін автентифікації
+   * Ініціалізація сесії та відстеження змін стану автентифікації.
    */
   useEffect(() => {
     let mounted = true;
 
-    // Початкове завантаження користувача
+    // 1. Початкове завантаження даних користувача
     const initializeAuth = async () => {
       try {
         const {
           data: { user: currentUser },
         } = await supabase.auth.getUser();
 
-        if (!mounted) return;
-
-        if (currentUser) {
-          setUser(currentUser);
-          await fetchWorkspace(currentUser.id);
-        } else {
-          clearUserData();
+        if (mounted) {
+          setUser(currentUser ?? null);
         }
       } catch (error) {
         console.error("[AuthContext] Помилка ініціалізації:", error);
         if (mounted) {
-          clearUserData();
+          setUser(null);
         }
       } finally {
         if (mounted) {
@@ -194,85 +83,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initializeAuth();
 
-    // Підписка на зміни автентифікації
+    // 2. Підписка на зміни стану автентифікації (вхід, вихід, оновлення токена)
     const {
       data: { subscription: authSubscription },
-    } = supabase.auth.onAuthStateChange(async (event) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
-      // INITIAL_SESSION обробляється в initializeAuth, тому ігноруємо його тут,
-      // щоб уникнути подвійного завантаження
-      if (event === "INITIAL_SESSION") {
-        return;
+      // Події SIGNED_IN та TOKEN_REFRESHED обробляються однаково:
+      // ми просто встановлюємо нового користувача з сесії.
+      // Подія INITIAL_SESSION вже оброблена в `initializeAuth`.
+      if (
+        event === "SIGNED_IN" ||
+        event === "TOKEN_REFRESHED" ||
+        event === "USER_UPDATED"
+      ) {
+        setUser(session?.user ?? null);
       }
 
       if (event === "SIGNED_OUT") {
-        clearUserData();
-        return;
-      }
-
-      // Для SIGNED_IN та TOKEN_REFRESHED, ми перевіряємо сесію на сервері
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        try {
-          // Важливо: отримуємо свіжого користувача, а не з колбеку
-          const {
-            data: { user: freshUser },
-          } = await supabase.auth.getUser();
-          if (mounted) {
-            if (freshUser) {
-              setUser(freshUser);
-              // Перезавантажуємо дані воркспейсу, оскільки могли змінитись підписки/ролі
-              await fetchWorkspace(freshUser.id);
-            } else {
-              // Якщо getUser не повернув користувача, сесія не валідна
-              clearUserData();
-            }
-          }
-        } catch (error) {
-          console.error(
-            "[AuthContext] Помилка під час оновлення сесії:",
-            error,
-          );
-          if (mounted) clearUserData();
-        }
+        clearUser();
       }
     });
 
+    // Відписка при розмонтуванні компонента
     return () => {
       mounted = false;
       authSubscription.unsubscribe();
     };
-  }, [supabase.auth, fetchWorkspace, clearUserData]);
-
-  /**
-   * Функція для ручного оновлення даних
-   */
-  const refresh = useCallback(async () => {
-    if (user?.id) {
-      setLoading(true);
-      await fetchWorkspace(user.id);
-      setLoading(false);
-    }
-  }, [user?.id, fetchWorkspace]);
+  }, [supabase, clearUser]);
 
   const value: AuthContextType = {
     user,
-    workspace,
-    workspaceUser,
-    role: workspaceUser?.role ?? null,
-    subscription,
-    quotas,
     loading,
-    refresh,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 // ============================================================================
-// ХУК
+// Хук
 // ============================================================================
 
+/**
+ * Хук для доступу до контексту автентифікації.
+ * @returns {AuthContextType} Об'єкт з даними користувача та станом завантаження.
+ */
 export function useAuthContext() {
   const context = useContext(AuthContext);
   if (context === undefined) {
