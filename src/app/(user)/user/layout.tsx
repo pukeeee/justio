@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/shared/supabase/server";
 import { UserHeader } from "@/widgets/user/header/ui/UserHeader";
+import { UserSidebar } from "@/widgets/user/sidebar/ui/UserSidebar";
 
 export const metadata: Metadata = {
   title: "Кабінет | CRM4SMB",
@@ -29,9 +30,14 @@ export default async function Layout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <UserHeader />
-      <main className="container py-6">{children}</main>
+      <div className="container flex flex-1 py-6">
+        <div className="hidden md:flex">
+          <UserSidebar />
+        </div>
+        <main className="flex-1 md:pl-6">{children}</main>
+      </div>
     </div>
   );
 }

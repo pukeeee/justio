@@ -12,7 +12,8 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { WorkspaceList } from "./WorkspaceList";
+import { WorkspaceCard } from "@/entities/workspace/ui/WorkspaceCard";
+import { CreateWorkspaceCard } from "@/features/workspace/ui/CreateWorkspaceCard";
 
 type Workspace = Pick<
   Database["public"]["Tables"]["workspaces"]["Row"],
@@ -31,12 +32,11 @@ type WorkspaceClientPageProps = {
  * Клієнтський компонент-обгортка для сторінки вибору воркспейсів.
  *
  * Відповідає за:
- * 1. Відображення списку воркспейсів (`WorkspaceList`) або стану-заглушки, якщо воркспейсів немає.
+ * 1. Відображення списку воркспейсів або стану-заглушки, якщо воркспейсів немає.
  * 2. Управління станом модального вікна для створення нового воркспейсу.
  * 3. Передачу даних та колбеків дочірнім компонентам.
  *
  * @param {WorkspaceClientPageProps} props - Пропси компонента.
- * @returns {JSX.Element}
  */
 export function WorkspaceClientPage({
   initialWorkspaces,
@@ -79,25 +79,29 @@ export function WorkspaceClientPage({
       <div className="container max-w-6xl py-8">
         {hasWorkspaces ? (
           // --- Стан, коли воркспейси існують ---
-          <div className="space-y-6">
-            {/* Заголовок сторінки та кнопка "Створити" */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                  Ваші воркспейси
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                  Оберіть воркспейс для роботи або створіть новий
-                </p>
-              </div>
-              <Button onClick={() => setIsDialogOpen(true)} size="lg">
-                <PlusCircle className="mr-2 h-5 w-5" />
-                Створити воркспейс
-              </Button>
+          <div className="space-y-8">
+            {/* Заголовок сторінки */}
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                Ваші воркспейси
+              </h1>
+              <p className="text-sm text-muted-foreground sm:text-base">
+                Оберіть воркспейс для роботи або створіть новий
+              </p>
             </div>
 
-            {/* Рендеримо список воркспейсів */}
-            <WorkspaceList workspaces={displayWorkspaces} />
+            {/* Обгортка для обмеження максимальної ширини сітки */}
+            <div className="mx-auto max-w-4xl">
+              {/* Адаптивний контейнер для карток */}
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {displayWorkspaces.map((workspace) => (
+                  <WorkspaceCard key={workspace.id} workspace={workspace} />
+                ))}
+                <CreateWorkspaceCard
+                  onClickAction={() => setIsDialogOpen(true)}
+                />
+              </div>
+            </div>
           </div>
         ) : (
           // --- Стан-заглушка, коли воркспейсів немає ---

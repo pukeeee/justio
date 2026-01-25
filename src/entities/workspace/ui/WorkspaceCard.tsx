@@ -4,13 +4,11 @@ import Link from "next/link";
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
 import type { Database } from "@/shared/lib/types/database";
-import { ArrowRight, Building2 } from "lucide-react";
+import { Building2 } from "lucide-react";
 
 // Локально визначаємо тип Workspace як підмножину полів з авто-згенерованого типу бази даних.
 // Це гарантує консистентність з БД і не вимагає створення окремих файлів типів.
@@ -32,11 +30,17 @@ type WorkspaceCardProps = {
  * Є "тупим" (dumb) компонентом, що відповідає виключно за візуалізацію переданих даних.
  *
  * @param {WorkspaceCardProps} props - Пропси з даними воркспейсу.
- * @returns {JSX.Element}
  */
 export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
   return (
-    <Card className="group flex flex-col transition-all hover:shadow-lg hover:border-primary/50">
+    <Card className="group relative flex h-full flex-col transition-all border-2 border-transparent hover:shadow-lg hover:border-primary/80">
+      {/* Посилання, що покриває всю картку для клікабельності */}
+      <Link
+        href={`/dashboard/${workspace.slug}`}
+        className="absolute inset-0 z-10"
+        aria-label={`Перейти до воркспейсу ${workspace.name}`}
+      />
+
       {/* Заголовок картки з іконкою та назвою */}
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
@@ -61,22 +65,6 @@ export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
           </p>
         </div>
       </CardContent>
-
-      {/* Футер картки з кнопкою-посиланням */}
-      <CardFooter className="border-t bg-muted/30 p-4">
-        <Button
-          asChild // Дозволяє кнопці рендеритись як дочірній Link, зберігаючи стилі
-          className="w-full group-hover:bg-primary/90"
-          size="default"
-        >
-          {/* Посилання на дашборд відповідного воркспейсу */}
-          <Link href={`/dashboard/${workspace.slug}`}>
-            Відкрити дашборд
-            {/* Іконка стрілки з анімацією при наведенні на картку */}
-            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
