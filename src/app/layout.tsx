@@ -1,8 +1,20 @@
+/**
+ * @file layout.tsx (root)
+ * @description Root Layout з ініціалізацією воркспейсів для всього додатку
+ */
+
 import type { Metadata } from "next";
 import { Geist_Mono, Geist } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/widgets/theme/model/theme-provider";
 import { ClientProviders } from "@/shared/components/providers/client-providers";
+import { createServerClient } from "@/shared/supabase/server";
+import type { Database } from "@/shared/lib/types/database";
+
+type Workspace = Pick<
+  Database["public"]["Tables"]["workspaces"]["Row"],
+  "id" | "name" | "slug"
+>;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,14 +34,31 @@ export const metadata: Metadata = {
 /**
  * Root Layout - Server Component
  *
- * Важно: этот компонент должен быть Server Component
- * Все клиентские провайдеры вынесены в ClientProviders
+ * Завантажує воркспейси на сервері для моментального відображення
  */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createServerClient();
+
+  // Отримуємо користувача
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Якщо користувач автентифікований - завантажуємо його воркспейси
+  let initialWorkspaces: Workspace[] = [];
+  if (user) {
+    const { data: workspaces } = await supabase
+      .from("workspaces")
+      .select("id, name, slug")
+      .order("created_at", { ascending: false });
+
+    initialWorkspaces = workspaces || [];
+  }
+
   return (
     <html
       lang="uk"
@@ -43,7 +72,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ClientProviders>{children}</ClientProviders>
+          <ClientProviders initialWorkspaces={initialWorkspaces}>
+            {children}
+          </ClientProviders>
         </ThemeProvider>
       </body>
     </html>

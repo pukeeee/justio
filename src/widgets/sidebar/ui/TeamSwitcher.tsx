@@ -1,7 +1,18 @@
+/**
+ * @file TeamSwitcher.tsx
+ * @description Компонент перемикача воркспейсів у сайдбарі
+ *
+ * Особливості:
+ * - Моментальне відображення (дані з Zustand)
+ * - Автоматичне визначення активного воркспейсу з URL
+ * - Перевірка ліміту створення воркспейсів
+ */
+
 "use client";
 
 import * as React from "react";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown, Plus, Building2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 
 import {
   DropdownMenu,
@@ -9,7 +20,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import {
@@ -18,21 +28,78 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/shared/components/ui/sidebar";
+import {
+  useWorkspaceStore,
+  useCanCreateWorkspace,
+} from "@/shared/stores/workspace-store";
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string;
-    logo: React.ElementType;
-    plan: string;
-  }[];
-}) {
+/**
+ * Компонент перемикача воркспейсів
+ * Відображає список всіх воркспейсів користувача та дозволяє перемикатися між ними
+ */
+export function TeamSwitcher() {
   const { isMobile } = useSidebar();
-  const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+  const router = useRouter();
+  const params = useParams();
 
-  if (!activeTeam) {
-    return null;
+  // Отримуємо slug з URL
+  const currentSlug = params?.slug as string | undefined;
+
+  // Отримуємо дані з Zustand store (моментально, без loading)
+  const workspaces = useWorkspaceStore((state) => state.workspaces);
+  const canCreate = useCanCreateWorkspace();
+
+  // Знаходимо активний воркспейс
+  const activeWorkspace = React.useMemo(() => {
+    if (!currentSlug) return workspaces[0]; // Fallback на перший
+    return workspaces.find((w) => w.slug === currentSlug) || workspaces[0];
+  }, [workspaces, currentSlug]);
+
+  // Синхронізуємо активний воркспейс зі store
+  React.useEffect(() => {
+    if (activeWorkspace) {
+      useWorkspaceStore.getState().setCurrentWorkspace(activeWorkspace.slug);
+    }
+  }, [activeWorkspace]);
+
+  /**
+   * Обробник перемикання воркспейсу
+   */
+  const handleWorkspaceSwitch = React.useCallback(
+    (slug: string) => {
+      router.push(`/dashboard/${slug}`);
+    },
+    [router],
+  );
+
+  /**
+   * Обробник створення нового воркспейсу
+   */
+  const handleCreateWorkspace = React.useCallback(() => {
+    router.push("/user/workspace");
+  }, [router]);
+
+  // Якщо немає жодного воркспейсу - показуємо placeholder
+  if (workspaces.length === 0) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            size="lg"
+            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            onClick={handleCreateWorkspace}
+          >
+            <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+              <Plus className="size-4" />
+            </div>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">Створити воркспейс</span>
+              <span className="truncate text-xs">Почніть роботу</span>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
   }
 
   return (
@@ -45,11 +112,16 @@ export function TeamSwitcher({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <activeTeam.logo className="size-4" />
+                <Building2 className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeTeam.name}</span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+                <span className="truncate font-medium">
+                  {activeWorkspace?.name || "Воркспейс"}
+                </span>
+                <span className="truncate text-xs">
+                  {workspaces.length}{" "}
+                  {workspaces.length === 1 ? "воркспейс" : "воркспейси"}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -61,28 +133,52 @@ export function TeamSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Teams
+              Воркспейси
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
+            {workspaces.map((workspace) => (
               <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
+                key={workspace.id}
+                onClick={() => handleWorkspaceSwitch(workspace.slug)}
                 className="gap-2 p-2"
+                disabled={workspace.slug === currentSlug}
               >
-                <div className="flex size-6 items-center justify-center rounded-md border">
-                  <team.logo className="size-3.5 shrink-0" />
+                <div className="flex size-6 items-center justify-center rounded-md border bg-sidebar">
+                  <Building2 className="size-3.5 shrink-0" />
                 </div>
-                {team.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                <span className="truncate">{workspace.name}</span>
+                {workspace.slug === currentSlug && (
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    Активний
+                  </span>
+                )}
               </DropdownMenuItem>
             ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
-              <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                <Plus className="size-4" />
-              </div>
-              <div className="text-muted-foreground font-medium">Add team</div>
-            </DropdownMenuItem>
+
+            {canCreate && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="gap-2 p-2"
+                  onClick={handleCreateWorkspace}
+                >
+                  <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+                    <Plus className="size-4" />
+                  </div>
+                  <div className="text-muted-foreground font-medium">
+                    Додати воркспейс
+                  </div>
+                </DropdownMenuItem>
+              </>
+            )}
+
+            {!canCreate && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                  Досягнуто ліміт воркспейсів
+                </div>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

@@ -1,3 +1,8 @@
+/**
+ * @file CreateWorkspaceForm.tsx
+ * @description Форма створення воркспейсу з перевіркою квот
+ */
+
 "use client";
 
 import { useActionState, useEffect } from "react";
@@ -6,24 +11,18 @@ import { createWorkspaceAction } from "@/features/workspace/actions/create-works
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  useWorkspaceStore,
+  useCanCreateWorkspace,
+} from "@/shared/stores/workspace-store";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 
-/**
- * @typedef {object} CreateWorkspaceFormProps
- * @description Пропси для компонента `CreateWorkspaceForm`.
- * @property {() => void} onSuccessAction - Колбек-функція, яка викликається після успішного створення воркспейсу.
- */
 type CreateWorkspaceFormProps = {
   onSuccessAction: () => void;
 };
 
-/**
- * Внутрішній компонент кнопки відправки форми.
- * Використовує хук `useFormStatus` для отримання стану відправки форми-батька.
- * Це дозволяє показувати стан завантаження (`pending`) без необхідності передавати пропси.
- * @returns {JSX.Element}
- */
 function SubmitButton() {
   const { pending } = useFormStatus();
 
@@ -42,47 +41,49 @@ function SubmitButton() {
 }
 
 /**
- * Форма для створення нового воркспейсу.
- * Використовує React `useActionState` для управління станом форми та взаємодії з Server Action.
- * Після успішного створення викликає наданий колбек `onSuccessAction`.
- *
- * @param {CreateWorkspaceFormProps} props - Пропси компонента.
- * @returns {JSX.Element}
+ * Форма створення воркспейсу з перевіркою ліміту
  */
 export function CreateWorkspaceForm({
   onSuccessAction,
 }: CreateWorkspaceFormProps) {
-  /**
-   * Ініціалізація стану форми за допомогою `useActionState`.
-   * @param {Action} createWorkspaceAction - Server Action, який буде викликаний при відправці форми.
-   * @param {object} initialState - Початковий стан форми.
-   * @returns {[state, formAction]} - Поточний стан та функція для відправки форми.
-   */
+  // Перевіряємо чи можна створити воркспейс
+  const canCreate = useCanCreateWorkspace();
+  const addWorkspace = useWorkspaceStore((state) => state.addWorkspace);
+
   const [state, formAction] = useActionState(createWorkspaceAction, {
     workspace: null,
     error: null,
   });
 
-  // `useEffect` для обробки "сайд-ефектів", що виникають після зміни стану `state`.
-  // Це правильний спосіб викликати такі дії, як показ сповіщень або колбеків,
-  // у відповідь на результат роботи Server Action.
   useEffect(() => {
-    // Якщо `state` містить помилку, показуємо її користувачеві.
     if (state.error) {
       toast.error(state.error);
     }
 
-    // Якщо `state` містить успішно створений воркспейс, показуємо сповіщення
-    // і викликаємо батьківський колбек для закриття модального вікна.
     if (state.workspace) {
+      // Додаємо в store
+      addWorkspace(state.workspace);
+
       toast.success(`Воркспейс "${state.workspace.name}" створено!`);
       onSuccessAction();
     }
-    // Залежності хука: `state` (результат екшену) та `onSuccessAction` (колбек).
-  }, [state, onSuccessAction]);
+  }, [state, onSuccessAction, addWorkspace]);
+
+  // Якщо досягнуто ліміт - показуємо попередження
+  if (!canCreate) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Ви досягли максимальної кількості воркспейсів для вашого тарифу.
+          <br />
+          Оновіть підписку щоб створити більше воркспейсів.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
-    // HTML-тег <form> з атрибутом `action`, що вказує на Server Action.
     <form action={formAction} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name">Назва воркспейсу</Label>
@@ -99,14 +100,12 @@ export function CreateWorkspaceForm({
         <p className="text-xs text-muted-foreground">Від 2 до 100 символів</p>
       </div>
 
-      {/* Блок для відображення помилки, якщо вона є в стані `state` */}
       {state.error && (
         <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
           {state.error}
         </div>
       )}
 
-      {/* Компонент кнопки, який знає про стан відправки форми */}
       <SubmitButton />
     </form>
   );

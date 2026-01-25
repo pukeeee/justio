@@ -13,7 +13,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { WorkspaceCard } from "@/entities/workspace/ui/WorkspaceCard";
-import { CreateWorkspaceCard } from "@/features/workspace/ui/CreateWorkspaceCard";
+import { CreateWorkspaceCard } from "@/features/workspace/ui/CreateWorkspaceButton";
 
 type Workspace = Pick<
   Database["public"]["Tables"]["workspaces"]["Row"],

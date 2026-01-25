@@ -2,24 +2,40 @@
 
 /**
  * @file client-providers.tsx
- * @description Обертка для всех клиентских провайдеров
- * 
- * Это позволяет использовать Server Components в layout
- * при этом сохраняя клиентские провайдеры для интерактивности
+ * @description Всі клієнтські провайдери додатку
  */
 
 import { AuthProvider } from "@/shared/lib/context/auth-context";
 import { AuthModal } from "@/widgets/auth/ui/AuthModal";
+import { Toaster } from "@/shared/components/ui/sonner";
+import { WorkspaceProvider } from "./workspace-provider";
+import type { Database } from "@/shared/lib/types/database";
+
+type Workspace = Pick<
+  Database["public"]["Tables"]["workspaces"]["Row"],
+  "id" | "name" | "slug"
+>;
 
 interface ClientProvidersProps {
   children: React.ReactNode;
+  initialWorkspaces?: Workspace[];
 }
 
-export function ClientProviders({ children }: ClientProvidersProps) {
+/**
+ * Компонент що об'єднує всі клієнтські провайдери
+ * Використовується в Root Layout
+ */
+export function ClientProviders({
+  children,
+  initialWorkspaces = [],
+}: ClientProvidersProps) {
   return (
     <AuthProvider>
-      {children}
-      <AuthModal />
+      <WorkspaceProvider initialWorkspaces={initialWorkspaces}>
+        {children}
+        <AuthModal />
+        <Toaster />
+      </WorkspaceProvider>
     </AuthProvider>
   );
 }
