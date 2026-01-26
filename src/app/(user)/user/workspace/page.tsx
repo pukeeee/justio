@@ -1,10 +1,23 @@
-import { getWorkspaces } from "@/features/workspace/actions/get-workspaces.action";
+/**
+ * @file page.tsx (/user/workspace)
+ * @description Серверна сторінка управління воркспейсами
+ *
+ * АРХІТЕКТУРА:
+ * - Server Component (за замовчуванням)
+ * - Мінімальна логіка (тільки Suspense boundary)
+ * - Дані завантажуються в RootLayout та зберігаються в store
+ */
+
 import { WorkspaceClientPage } from "@/widgets/workspace/ui/WorkspaceClientPage";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
 /**
  * Loading fallback для Suspense
+ *
+ * ВИКОРИСТАННЯ:
+ * - Показується поки WorkspaceClientPage завантажується
+ * - Покращує UX під час initial render
  */
 function WorkspacePageSkeleton() {
   return (
@@ -20,30 +33,28 @@ function WorkspacePageSkeleton() {
 }
 
 /**
- * Асинхронний компонент, що завантажує дані.
- * ВИПРАВЛЕНО: Додано кешування для уникнення повторних запитів (через `cache` в `getWorkspaces`).
- */
-async function WorkspaceContent() {
-  // ВАЖЛИВО: Цей запит НЕ дублюється з AuthContext (після рефакторингу 23.01.2026).
-  // Раніше AuthContext завантажував один "активний" воркспейс, що було неправильно.
-  // Тепер AuthContext не завантажує воркспейси взагалі,
-  // а ця сторінка коректно завантажує ВСІ воркспейси користувача.
-  const workspaces = await getWorkspaces();
-  return <WorkspaceClientPage initialWorkspaces={workspaces ?? []} />;
-}
-
-/**
- * Серверний компонент сторінки воркспейсів.
- * Використовує Suspense для правильної гідратації та поступового завантаження.
+ * Сторінка управління воркспейсами
  *
- * ОПТИМІЗАЦІЯ:
- * - Використовуємо `React.cache` (всередині `getWorkspaces`) для уникнення дублюючих запитів.
- * - `Suspense` boundary запобігає блокуванню рендерингу всієї сторінки.
+ * СПРОЩЕННЯ:
+ * - Видалено getWorkspaces() - дані вже є в store
+ * - Видалено передачу initialWorkspaces
+ * - Store ініціалізується в RootLayout
+ *
+ * ПЕРЕВАГИ:
+ * 1. Немає дублювання запитів
+ * 2. Менше коду
+ * 3. Single Source of Truth (store)
+ * 4. Автоматичне оновлення при змінах
+ *
+ * ВАЖЛИВО:
+ * - Suspense все ще потрібний для правильної hydration
+ * - Fallback показується тільки при initial load
+ * - Після hydration компонент працює миттєво
  */
 export default function WorkspacePage() {
   return (
     <Suspense fallback={<WorkspacePageSkeleton />}>
-      <WorkspaceContent />
+      <WorkspaceClientPage />
     </Suspense>
   );
 }

@@ -1,28 +1,44 @@
+/**
+ * @file CreateWorkspaceForm.tsx
+ * @description Форма створення воркспейсу з перевіркою квот
+ */
+
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { createWorkspaceAction } from "@/features/workspace/actions/create-workspace.action";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  useWorkspaceStore,
+  useCanCreateWorkspace,
+} from "@/shared/stores/workspace-store";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 
-/**
- * @typedef {object} CreateWorkspaceFormProps
- * @description Пропси для компонента `CreateWorkspaceForm`.
- * @property {() => void} onSuccessAction - Колбек-функція, яка викликається після успішного створення воркспейсу.
- */
+// ============================================================================
+// ТИПИ
+// ============================================================================
+
 type CreateWorkspaceFormProps = {
+  /** Callback після успішного створення */
   onSuccessAction: () => void;
 };
 
+// ============================================================================
+// SUBMIT BUTTON COMPONENT
+// ============================================================================
+
 /**
- * Внутрішній компонент кнопки відправки форми.
- * Використовує хук `useFormStatus` для отримання стану відправки форми-батька.
- * Це дозволяє показувати стан завантаження (`pending`) без необхідності передавати пропси.
- * @returns {JSX.Element}
+ * Кнопка submit з індикатором завантаження
+ *
+ * ВАЖЛИВО:
+ * - Використовує useFormStatus() з react-dom
+ * - Автоматично disabled під час pending
+ * - Показує spinner
  */
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -41,49 +57,113 @@ function SubmitButton() {
   );
 }
 
+// ============================================================================
+// ОСНОВНИЙ КОМПОНЕНТ
+// ============================================================================
+
 /**
- * Форма для створення нового воркспейсу.
- * Використовує React `useActionState` для управління станом форми та взаємодії з Server Action.
- * Після успішного створення викликає наданий колбек `onSuccessAction`.
+ * Форма створення воркспейсу з валідацією та обробкою помилок
  *
- * @param {CreateWorkspaceFormProps} props - Пропси компонента.
- * @returns {JSX.Element}
+ * ФУНКЦІОНАЛ:
+ * 1. Client-side валідація (2-100 символів)
+ * 2. Перевірка квоти перед відображенням форми
+ * 3. Server Action для створення
+ * 4. Автоматичне додавання в store
+ * 5. Toast нотифікації
  */
 export function CreateWorkspaceForm({
   onSuccessAction,
 }: CreateWorkspaceFormProps) {
+  // ===== ПЕРЕВІРКА КВОТИ =====
+
   /**
-   * Ініціалізація стану форми за допомогою `useActionState`.
-   * @param {Action} createWorkspaceAction - Server Action, який буде викликаний при відправці форми.
-   * @param {object} initialState - Початковий стан форми.
-   * @returns {[state, formAction]} - Поточний стан та функція для відправки форми.
+   * Перевіряємо чи може користувач створити ще один воркспейс
+   * Враховує тарифний план
    */
+  const canCreate = useCanCreateWorkspace();
+
+  /**
+   * Функція для додавання воркспейсу в store
+   */
+  const addWorkspace = useWorkspaceStore((state) => state.addWorkspace);
+
+  // ===== FORM STATE =====
+
   const [state, formAction] = useActionState(createWorkspaceAction, {
     workspace: null,
     error: null,
   });
 
-  // `useEffect` для обробки "сайд-ефектів", що виникають після зміни стану `state`.
-  // Це правильний спосіб викликати такі дії, як показ сповіщень або колбеків,
-  // у відповідь на результат роботи Server Action.
+  // ===== REFS ДЛЯ ЗАПОБІГАННЯ ДУБЛЮВАННЮ =====
+
+  /**
+   * Ref для відстеження чи вже показали toast для поточного стану
+   * Запобігає подвійним нотифікаціям при ре-рендерах
+   */
+  const previousStateRef = useRef(state);
+
+  // ===== ОБРОБКА РЕЗУЛЬТАТУ =====
+
+  /**
+   * Effect для обробки результату Server Action
+   *
+   * ОПТИМІЗАЦІЯ:
+   * - Виконується тільки при зміні state
+   * - Перевіряємо чи це новий стан (не дублюємо toast)
+   * - Cleanup на unmount
+   */
   useEffect(() => {
-    // Якщо `state` містить помилку, показуємо її користувачеві.
+    // Перевіряємо чи стан змінився
+    const stateChanged = previousStateRef.current !== state;
+
+    if (!stateChanged) return;
+
+    // Оновлюємо ref
+    previousStateRef.current = state;
+
+    // ОБРОБКА ПОМИЛКИ
     if (state.error) {
       toast.error(state.error);
     }
 
-    // Якщо `state` містить успішно створений воркспейс, показуємо сповіщення
-    // і викликаємо батьківський колбек для закриття модального вікна.
+    // ОБРОБКА УСПІХУ
     if (state.workspace) {
+      // Додаємо в store
+      addWorkspace(state.workspace);
+
+      // Показуємо успішне повідомлення
       toast.success(`Воркспейс "${state.workspace.name}" створено!`);
+
+      // Викликаємо callback (закриє модалку)
       onSuccessAction();
     }
-    // Залежності хука: `state` (результат екшену) та `onSuccessAction` (колбек).
-  }, [state, onSuccessAction]);
+  }, [state, onSuccessAction, addWorkspace]);
 
+  // ===== РЕНДЕР =====
+
+  /**
+   * СТАН 1: Досягнуто ліміт
+   * Показуємо попередження замість форми
+   */
+  if (!canCreate) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Ви досягли максимальної кількості воркспейсів для вашого тарифу.
+          <br />
+          Оновіть підписку щоб створити більше воркспейсів.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  /**
+   * СТАН 2: Форма створення
+   */
   return (
-    // HTML-тег <form> з атрибутом `action`, що вказує на Server Action.
     <form action={formAction} className="space-y-4">
+      {/* Поле вводу назви */}
       <div className="space-y-2">
         <Label htmlFor="name">Назва воркспейсу</Label>
         <Input
@@ -95,18 +175,19 @@ export function CreateWorkspaceForm({
           maxLength={100}
           autoComplete="off"
           autoFocus
+          className="w-full"
         />
         <p className="text-xs text-muted-foreground">Від 2 до 100 символів</p>
       </div>
 
-      {/* Блок для відображення помилки, якщо вона є в стані `state` */}
+      {/* Відображення помилки від server */}
       {state.error && (
         <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
           {state.error}
         </div>
       )}
 
-      {/* Компонент кнопки, який знає про стан відправки форми */}
+      {/* Кнопка submit */}
       <SubmitButton />
     </form>
   );

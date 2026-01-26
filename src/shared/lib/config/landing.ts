@@ -19,7 +19,7 @@ import {
 
 export const LANDING_CONTENT = {
   header: {
-    logo: "CRM4SMB",
+    logo: "Justio CRM",
     nav: [
       { label: "Можливості", href: "#features" },
       { label: "Тарифи", href: "#pricing" },

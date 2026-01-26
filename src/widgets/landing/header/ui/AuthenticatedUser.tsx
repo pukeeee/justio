@@ -19,10 +19,10 @@ import { Button } from "@/shared/components/ui/button";
 import { USER_PAGES } from "@/shared/lib/config/user-pages";
 import { signOut } from "@/features/auth/actions/auth.actions";
 import { LogOut } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
+import type { FormattedUserData } from "@/shared/lib/auth/get-user-data";
 
 interface AuthenticatedUserProps {
-  user: User;
+  user: FormattedUserData;
   showDashboardButton?: boolean;
 }
 
@@ -36,21 +36,6 @@ export function AuthenticatedUser({
 }: AuthenticatedUserProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-
-  /**
-   * Генерує ініціали з імені користувача
-   */
-  const getInitials = (name: string | undefined): string => {
-    if (!name) return "U";
-
-    return name
-      .split(" ")
-      .filter(Boolean)
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   /**
    * Обробник виходу з системи
@@ -71,10 +56,6 @@ export function AuthenticatedUser({
     });
   };
 
-  const userName = user.user_metadata?.full_name || user.email || "Користувач";
-  const userEmail = user.email || "";
-  const avatarUrl = user.user_metadata?.avatar_url;
-
   return (
     <div className="flex items-center md:gap-4">
       {/* Кнопка Dashboard (тільки на desktop) */}
@@ -93,15 +74,15 @@ export function AuthenticatedUser({
             disabled={isPending}
           >
             <Avatar className="h-8 w-8">
-              {avatarUrl && (
+              {user.avatar && (
                 <AvatarImage
-                  src={avatarUrl}
-                  alt={userName}
+                  src={user.avatar}
+                  alt={user.name}
                   referrerPolicy="no-referrer"
                 />
               )}
               <AvatarFallback className="bg-primary/10 text-primary">
-                {getInitials(userName)}
+                {user.initials}
               </AvatarFallback>
             </Avatar>
           </Button>
@@ -112,10 +93,10 @@ export function AuthenticatedUser({
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none truncate">
-                {userName}
+                {user.name}
               </p>
               <p className="text-xs leading-none text-muted-foreground truncate">
-                {userEmail}
+                {user.email}
               </p>
             </div>
           </DropdownMenuLabel>
@@ -125,7 +106,13 @@ export function AuthenticatedUser({
           {/* Навігаційні пункти */}
           {USER_PAGES.map((item) => (
             <DropdownMenuItem key={item.href} asChild>
-              <Link href={item.href}>{item.label}</Link>
+              <Link
+                href={item.href}
+                className="flex items-center cursor-pointer"
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                <span>{item.label}</span>
+              </Link>
             </DropdownMenuItem>
           ))}
 

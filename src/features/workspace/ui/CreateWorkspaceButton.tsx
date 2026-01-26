@@ -1,7 +1,8 @@
 "use client";
 
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { PlusCircle } from "lucide-react";
+import { Ban, PlusCircle } from "lucide-react";
+import { useCanCreateWorkspace } from "@/shared/stores/workspace-store";
 
 /**
  * @description Пропси для компонента `CreateWorkspaceCard`.
@@ -21,6 +22,25 @@ type CreateWorkspaceCardProps = {
 export function CreateWorkspaceCard({
   onClickAction,
 }: CreateWorkspaceCardProps) {
+  /**
+   * Перевіряємо чи може користувач створити ще один воркспейс
+   * Враховує тарифний план
+   */
+  const canCreate = useCanCreateWorkspace();
+
+  if (!canCreate) {
+    return (
+      <Card className="group flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/50 text-muted-foreground transition-all hover:border-destructive/80 hover:text-destructive">
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center gap-4">
+            <Ban className="h-10 w-10" />
+            <span className="text-lg font-semibold">Ліміт воркспейcів</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card
       onClick={onClickAction}

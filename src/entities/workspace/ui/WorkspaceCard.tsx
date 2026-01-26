@@ -60,9 +60,9 @@ export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
       {/* Основний контент картки з коротким описом */}
       <CardContent className="flex-1">
         <div className="rounded-lg bg-muted/50 p-3.5">
-          <p className="text-sm text-muted-foreground">
+          {/*<p className="text-sm text-muted-foreground">
             Перейдіть до дашборда для роботи з клієнтами, угодами та аналітикою
-          </p>
+          </p>*/}
         </div>
       </CardContent>
     </Card>

@@ -20,7 +20,6 @@ import { useAuthContext } from "@/shared/lib/context/auth-context";
 /**
  * @function useUser
  * @description Хук для отримання поточного об'єкта користувача та статусу завантаження.
- * @returns {{ user: User | null, loading: boolean }}
  */
 export function useUser() {
   const { user, loading } = useAuthContext();

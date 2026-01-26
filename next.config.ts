@@ -26,6 +26,20 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  /**
+   * Images конфігурація
+   */
+  images: {
+    // Дозволені домени для зображень
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.supabase.co",
+      },
+    ],
+    // Формати (за замовчуванням: ['image/webp'])
+    formats: ["image/webp", "image/avif"],
+  },
 };
 
 export default nextConfig;

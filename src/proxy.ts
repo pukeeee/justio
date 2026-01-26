@@ -6,12 +6,13 @@
 // Імпортуємо необхідні типи з Next.js та клієнт Supabase для серверного середовища.
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { ALL_DASHBOARD_ROUTES } from "@/shared/lib/config/dashboard-nav";
 
 // Список маршрутів, які потребують автентифікації для доступу.
-// В майбутньому сюди можна додати нові, наприклад, '/settings', '/analytics' тощо.
-const protectedRoutes = ["/dashboard", "/docs"];
+const protectedRoutes = ["/dashboard", "/docs", "/user"];
 
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
   // Створюємо об'єкт відповіді (response), який можна буде змінювати.
   // Це потрібно, щоб ми могли додавати або оновлювати cookies.
   const response = NextResponse.next({
@@ -69,6 +70,74 @@ export async function proxy(request: NextRequest) {
     // на сторінку, яку він спочатку запитував.
     redirectUrl.searchParams.set("redirect", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // --- 2. Спеціальна логіка для дашборду ---
+  if (user && pathname.startsWith("/dashboard")) {
+    // Якщо точно /dashboard без slug
+    if (pathname === "/dashboard" || pathname === "/dashboard/") {
+      // Отримуємо перший доступний воркспейс
+      const { data: firstWorkspace } = await supabase
+        .from("workspaces")
+        .select("slug")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (firstWorkspace) {
+        // Редіректимо на перший воркспейс
+        const redirectUrl = new URL(
+          `/dashboard/${firstWorkspace.slug}`,
+          request.url,
+        );
+        return NextResponse.redirect(redirectUrl);
+      } else {
+        // Немає воркспейсів - на сторінку створення
+        const redirectUrl = new URL("/user/workspace", request.url);
+        return NextResponse.redirect(redirectUrl);
+      }
+    }
+
+    // Якщо є slug - перевіряємо доступ
+    const dashboardMatch = pathname.match(/^\/dashboard\/([^\/]+)(\/.*)?$/);
+    if (dashboardMatch) {
+      const workspaceSlug = dashboardMatch[1];
+      const subPath = dashboardMatch[2] || "";
+
+      // Перевіряємо доступ через RLS
+      const { data: workspace } = await supabase
+        .from("workspaces")
+        .select("id")
+        .eq("slug", workspaceSlug)
+        .single();
+
+      if (!workspace) {
+        // Немає доступу - редіректимо на перший доступний
+        const { data: firstWorkspace } = await supabase
+          .from("workspaces")
+          .select("slug")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .single();
+
+        if (firstWorkspace) {
+          // Зберігаємо subPath якщо він валідний (є в конфігурації)
+          const isValidSubPath = ALL_DASHBOARD_ROUTES.some(
+            (route) => subPath && subPath.startsWith(route),
+          );
+
+          const redirectUrl = new URL(
+            `/dashboard/${firstWorkspace.slug}${isValidSubPath ? subPath : ""}`,
+            request.url,
+          );
+          return NextResponse.redirect(redirectUrl);
+        } else {
+          // Немає воркспейсів взагалі
+          const redirectUrl = new URL("/user/workspace", request.url);
+          return NextResponse.redirect(redirectUrl);
+        }
+      }
+    }
   }
 
   // 2. Обробка для вже автентифікованих користувачів.
