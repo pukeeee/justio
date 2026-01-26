@@ -1,37 +1,28 @@
-"use client";
+/**
+ * @file Sidebar.tsx
+ * @description Головний серверний компонент сайдбару.
+ * Завантажує дані на сервері та передає їх у клієнтську частину.
+ */
 
 import * as React from "react";
+import { Sidebar } from "@/shared/components/ui/sidebar";
+import { getFormattedUserData } from "@/shared/lib/auth/get-user-data";
+import { AppSidebarClient } from "./SidebarClient";
 
-// import { NavMain } from "./NavMain";
-import { NavProjects } from "./NavProjects";
-import { NavUser } from "./NavUser";
-import { TeamSwitcher } from "./WorkspaceSwitcher";
-import { ThemeToggle } from "@/widgets/theme/ui/theme-toggle";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarRail,
-} from "@/shared/components/ui/sidebar";
-import { data } from "../config";
+/**
+ * Server Component обгортка
+ * Завантажує дані користувача та передає Client Component
+ */
+export async function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  // Завантажуємо дані користувача на сервері
+  const userData = await getFormattedUserData();
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <TeamSwitcher />
-      </SidebarHeader>
-      <SidebarContent>
-        <NavProjects projects={data.main} />
-        {/*<NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />*/}
-      </SidebarContent>
-      <SidebarFooter>
-        <ThemeToggle />
-        <NavUser user={data.user} />
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
-  );
+  // Якщо немає користувача - не рендеримо sidebar
+  if (!userData) {
+    return null;
+  }
+
+  return <AppSidebarClient user={userData} {...props} />;
 }

@@ -1,4 +1,4 @@
-import { getCachedUser } from "@/shared/lib/auth/get-user";
+import { getFormattedUserData } from "@/shared/lib/auth/get-user-data";
 import { UserHeaderClient } from "./UserHeaderClient";
 
 /**
@@ -6,7 +6,7 @@ import { UserHeaderClient } from "./UserHeaderClient";
  * Отримує дані про користувача на сервері для уникнення проблем з гідратацією.
  */
 export async function UserHeader() {
-  const user = await getCachedUser();
+  const user = await getFormattedUserData();
 
   // Теоретично, layout вже робить редірект, але це додаткова перевірка.
   // Якщо користувача немає, можна повернути null або альтернативний layout.

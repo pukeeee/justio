@@ -25,7 +25,10 @@ export function UserSidebarClient() {
               pathname === page.href && "bg-accent text-accent-foreground",
             )}
           >
-            <Link href={page.href}>{page.label}</Link>
+            <Link href={page.href} className="flex items-center w-full">
+              <page.icon className="mr-2 h-4 w-4" />
+              <span>{page.label}</span>
+            </Link>
           </Button>
         ))}
       </nav>

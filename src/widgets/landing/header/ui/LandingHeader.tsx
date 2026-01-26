@@ -1,4 +1,4 @@
-import { getCachedUser } from "@/shared/lib/auth/get-user";
+import { getFormattedUserData } from "@/shared/lib/auth/get-user-data";
 import { LandingHeaderClient } from "./LandingHeaderClient";
 
 /**
@@ -6,7 +6,7 @@ import { LandingHeaderClient } from "./LandingHeaderClient";
  * Это решает проблемы с гидратацией и мигающим UI
  */
 export async function LandingHeader() {
-  const user = await getCachedUser();
+  const user = await getFormattedUserData();
 
   return <LandingHeaderClient user={user} />;
 }

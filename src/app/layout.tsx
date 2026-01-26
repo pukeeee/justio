@@ -13,21 +13,7 @@ import { Geist_Mono, Geist } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/widgets/theme/model/theme-provider";
 import { ClientProviders } from "@/shared/components/providers/client-providers";
-import { createServerClient } from "@/shared/supabase/server";
-import type { Database } from "@/shared/lib/types/database";
-
-// ============================================================================
-// ТИПИ
-// ============================================================================
-
-/**
- * Мінімальний тип воркспейсу для передачі клієнту
- * Використовуємо Pick для type-safety з базою даних
- */
-type Workspace = Pick<
-  Database["public"]["Tables"]["workspaces"]["Row"],
-  "id" | "name" | "slug"
->;
+import { getUserWorkspaces, getCachedUser } from "@/shared/lib/auth/get-user-data";
 
 // ============================================================================
 // ШРИФТИ
@@ -83,60 +69,22 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // ===== ІНІЦІАЛІЗАЦІЯ SUPABASE =====
+  // ===== ЗАВАНТАЖЕННЯ ДАНИХ (SSR) =====
 
   /**
-   * Створюємо серверний клієнт Supabase
-   * Використовує cookies для автентифікації
+   * Отримуємо користувача та його воркспейси паралельно
+   * getUserWorkspaces вже загорнута в cache() та використовує репозиторій
    */
-  const supabase = await createServerClient();
+  const [user, initialWorkspaces] = await Promise.all([
+    getCachedUser(),
+    getUserWorkspaces()
+  ]);
 
-  // ===== ПЕРЕВІРКА АВТЕНТИФІКАЦІЇ =====
-
-  /**
-   * Отримуємо поточного користувача
-   */
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // ===== ЗАВАНТАЖЕННЯ ВОРКСПЕЙСІВ =====
-
-  /**
-   * Завантажуємо воркспейси для автентифікованих користувачів
-   *
-   * ОПТИМІЗАЦІЯ:
-   * - Запит виконується тільки якщо є user
-   * - Вибираємо тільки потрібні поля (id, name, slug)
-   * - Сортуємо за датою створення (новіші першими)
-   *
-   * RLS БЕЗПЕКА:
-   * - Row Level Security автоматично фільтрує тільки доступні воркспейси
-   * - Користувач бачить тільки ті воркспейси, де він є учасником
-   */
-  let initialWorkspaces: Workspace[] = [];
-
-  if (user) {
-    const { data: workspaces, error } = await supabase
-      .from("workspaces")
-      .select("id, name, slug")
-      .order("created_at", { ascending: false });
-
-    // Обробка помилок
-    if (error) {
-      console.error("[RootLayout] Помилка завантаження воркспейсів:", error);
-      // Не кидаємо помилку - додаток має працювати навіть без воркспейсів
-      initialWorkspaces = [];
-    } else {
-      initialWorkspaces = workspaces || [];
-    }
-
-    // Debug логування (тільки dev)
-    if (process.env.NODE_ENV === "development") {
-      console.log(
-        `[RootLayout] Завантажено ${initialWorkspaces.length} воркспейсів для користувача ${user.id}`,
-      );
-    }
+  // Debug логування (тільки dev)
+  if (process.env.NODE_ENV === "development" && user) {
+    console.log(
+      `[RootLayout] Завантажено ${initialWorkspaces.length} воркспейсів для користувача ${user.id}`,
+    );
   }
 
   // ===== РЕНДЕРИНГ HTML =====

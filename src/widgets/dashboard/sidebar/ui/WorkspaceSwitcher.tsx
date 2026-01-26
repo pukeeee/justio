@@ -49,7 +49,7 @@ import {
  * - initialized: з Zustand store (чи завантажено дані)
  * - currentSlug: з URL params (активний воркспейс)
  */
-export function TeamSwitcher() {
+export function WorkspaceSwitcher() {
   const { isMobile } = useSidebar();
   const router = useRouter();
   const params = useParams();

@@ -43,6 +43,10 @@ export const useThemeTransition = () => {
   return { startTransition };
 };
 
+/**
+ * Компонент для перемикання теми з анімацією View Transitions.
+ * Рендериться виключно на клієнті через динамічний імпорт у Sidebar.
+ */
 export function ThemeToggle({
   variant = "circle-blur",
   start = "bottom-left",

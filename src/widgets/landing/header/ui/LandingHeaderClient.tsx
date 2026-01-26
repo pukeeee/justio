@@ -8,10 +8,10 @@ import { useState, useEffect } from "react";
 import { cn } from "@/shared/lib/utils/utils";
 import { useAuthModal } from "@/shared/stores/use-auth-modal.store";
 import { AuthenticatedUser } from "./AuthenticatedUser";
-import type { User } from "@supabase/supabase-js";
+import type { FormattedUserData } from "@/shared/lib/auth/get-user-data";
 
 interface LandingHeaderClientProps {
-  user: User | null;
+  user: FormattedUserData | null;
 }
 
 /**

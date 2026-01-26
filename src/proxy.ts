@@ -6,6 +6,7 @@
 // Імпортуємо необхідні типи з Next.js та клієнт Supabase для серверного середовища.
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { ALL_DASHBOARD_ROUTES } from "@/shared/lib/config/dashboard-nav";
 
 // Список маршрутів, які потребують автентифікації для доступу.
 const protectedRoutes = ["/dashboard", "/docs", "/user"];
@@ -98,9 +99,10 @@ export async function proxy(request: NextRequest) {
     }
 
     // Якщо є slug - перевіряємо доступ
-    const dashboardMatch = pathname.match(/^\/dashboard\/([^\/]+)/);
+    const dashboardMatch = pathname.match(/^\/dashboard\/([^\/]+)(\/.*)?$/);
     if (dashboardMatch) {
       const workspaceSlug = dashboardMatch[1];
+      const subPath = dashboardMatch[2] || "";
 
       // Перевіряємо доступ через RLS
       const { data: workspace } = await supabase
@@ -119,8 +121,13 @@ export async function proxy(request: NextRequest) {
           .single();
 
         if (firstWorkspace) {
+          // Зберігаємо subPath якщо він валідний (є в конфігурації)
+          const isValidSubPath = ALL_DASHBOARD_ROUTES.some(
+            (route) => subPath && subPath.startsWith(route),
+          );
+
           const redirectUrl = new URL(
-            `/dashboard/${firstWorkspace.slug}`,
+            `/dashboard/${firstWorkspace.slug}${isValidSubPath ? subPath : ""}`,
             request.url,
           );
           return NextResponse.redirect(redirectUrl);
