@@ -1,5 +1,5 @@
 import type { WorkspaceInvitation } from "../validations/schemas";
-import { DEFAULT_INVITATION_EXPIRY_DAYS } from "../config/billing";
+import { DEFAULT_INVITATION_EXPIRY_DAYS } from "../../config/billing";
 
 /**
  * Перевіряє, чи може сутність бути додана згідно з лімітами.

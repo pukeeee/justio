@@ -16,12 +16,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/shared/components/ui/navigation-menu";
-import {
-  productLinks,
-  solutionLinks,
-  resourceLinks,
-  companyLinks,
-} from "./links";
+import { headerContent } from "@/content/root/header";
 import type { FormattedUserData } from "@/shared/lib/auth/get-user-data";
 
 interface MainHeaderClientProps {
@@ -86,7 +81,7 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
           <div className="flex items-center flex-1">
             {/* Logo */}
             <Link
-              href="/"
+              href={headerContent.homeRoute}
               className="flex items-center  space-x-2 hover:opacity-80 transition-opacity"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
@@ -95,7 +90,7 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
                 </span>
               </div>
               <span className=" text-xl font-bold gradient-text">
-                Justio CRM
+                {headerContent.logoText}
               </span>
             </Link>
           </div>
@@ -108,11 +103,11 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
                 {/* Remove default gap between items */}
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="bg-transparent text-sm font-medium data-active:bg-transparent data-[state=open]:bg-transparent">
-                    Product
+                    {headerContent.nav.product.title}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="left-0">
                     <ul className="grid w-125 gap-1 p-4 md:grid-cols-2">
-                      {productLinks.map((link) => (
+                      {headerContent.nav.product.links.map((link) => (
                         <ListItem
                           key={link.href}
                           href={link.href}
@@ -123,10 +118,10 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
                       ))}
                       <li className="col-span-2 mt-2 border-t pt-2">
                         <Link
-                          href="/product"
-                          className="flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+                          href={headerContent.nav.product.viewAllFeaturesRoute}
+                          className="flex items-center gap-1 text-sm font-medium text-accent hover:underline hover:text-primary"
                         >
-                          View all features →
+                          {headerContent.nav.product.viewAllFeatures}
                         </Link>
                       </li>
                     </ul>
@@ -134,11 +129,11 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="bg-transparent text-sm font-medium data-active:bg-transparent data-[state=open]:bg-transparent">
-                    Solutions
+                    {headerContent.nav.solutions.title}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="left-0">
                     <ul className="grid w-100 gap-1 p-4">
-                      {solutionLinks.map((link) => (
+                      {headerContent.nav.solutions.links.map((link) => (
                         <ListItem
                           key={link.href}
                           href={link.href}
@@ -152,27 +147,27 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuLink
-                    href="/pricing"
+                    href={headerContent.nav.pricing.route}
                     className="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent/10 hover:text-accent focus:bg-accent/10 focus:text-accent focus:outline-none"
                   >
-                    Pricing
+                    {headerContent.nav.pricing.title}
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuLink
-                    href="/security"
+                    href={headerContent.nav.security.route}
                     className="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent/10 hover:text-accent focus:bg-accent/10 focus:text-accent focus:outline-none"
                   >
-                    Security
+                    {headerContent.nav.security.title}
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="bg-transparent text-sm font-medium data-active:bg-transparent data-[state=open]:bg-transparent">
-                    Resources
+                    {headerContent.nav.resources.title}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="left-0">
                     <ul className="grid w-75 gap-1 p-4">
-                      {resourceLinks.map((link) => (
+                      {headerContent.nav.resources.links.map((link) => (
                         <ListItem
                           key={link.href}
                           href={link.href}
@@ -186,11 +181,11 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="bg-transparent text-sm font-medium data-active:bg-transparent data-[state=open]:bg-transparent">
-                    Company
+                    {headerContent.nav.company.title}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="left-0">
                     <ul className="grid w-75 gap-1 p-4">
-                      {companyLinks.map((link) => (
+                      {headerContent.nav.company.links.map((link) => (
                         <ListItem
                           key={link.href}
                           href={link.href}
@@ -215,14 +210,14 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
               ) : (
                 <>
                   <Button variant="ghost" size="sm" onClick={openAuthModal}>
-                    Увійти
+                    {headerContent.auth.login}
                   </Button>
                   <Button
                     size="sm"
                     className="bg-accent hover:bg-accent/90"
                     asChild
                   >
-                    <Link href="/demo">Request demo</Link>
+                    <Link href={headerContent.auth.demoRoute}>{headerContent.auth.requestDemo}</Link>
                   </Button>
                 </>
               )}
@@ -262,37 +257,37 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
             <div className="container-wide py-4 space-y-4 px-4">
               <div className="px-4">
                 <MobileNavSection
-                  title="Product"
-                  links={productLinks}
+                  title={headerContent.nav.product.title}
+                  links={headerContent.nav.product.links}
                   onClose={() => setMobileMenuOpen(false)}
                 />
                 <MobileNavSection
-                  title="Solutions"
-                  links={solutionLinks}
+                  title={headerContent.nav.solutions.title}
+                  links={headerContent.nav.solutions.links}
                   onClose={() => setMobileMenuOpen(false)}
                 />
                 <Link
-                  href="/pricing"
+                  href={headerContent.nav.pricing.route}
                   className="block py-2 text-sm font-medium text-foreground hover:text-accent"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Pricing
+                  {headerContent.nav.pricing.title}
                 </Link>
                 <Link
-                  href="/security"
+                  href={headerContent.nav.security.route}
                   className="block py-2 text-sm font-medium text-foreground hover:text-accent"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Security
+                  {headerContent.nav.security.title}
                 </Link>
                 <MobileNavSection
-                  title="Resources"
-                  links={resourceLinks}
+                  title={headerContent.nav.resources.title}
+                  links={headerContent.nav.resources.links}
                   onClose={() => setMobileMenuOpen(false)}
                 />
                 <MobileNavSection
-                  title="Company"
-                  links={companyLinks}
+                  title={headerContent.nav.company.title}
+                  links={headerContent.nav.company.links}
                   onClose={() => setMobileMenuOpen(false)}
                 />
               </div>
@@ -306,10 +301,10 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
                   >
                     <Button asChild className="w-full">
                       <Link
-                        href="/user/workspace"
+                        href={headerContent.auth.dashboardRoute}
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Дашборд
+                        {headerContent.auth.dashboard}
                       </Link>
                     </Button>
                   </div>
@@ -326,17 +321,17 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
                         setMobileMenuOpen(false);
                       }}
                     >
-                      Увійти
+                      {headerContent.auth.login}
                     </Button>
                     <Button
                       className="w-full bg-accent hover:bg-accent/90"
                       asChild
                     >
                       <Link
-                        href="/demo"
+                        href={headerContent.auth.demoRoute}
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Request demo
+                        {headerContent.auth.requestDemo}
                       </Link>
                     </Button>
                   </div>

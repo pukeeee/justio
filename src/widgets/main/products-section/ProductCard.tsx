@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { productsContent } from "@/content/root/products";
 
-export default function CapabilityCard({
+export default function ProductCard({
   title,
   description,
   href,
@@ -24,7 +25,7 @@ export default function CapabilityCard({
           </div>
           <div className="mt-auto pt-4">
             <div className="flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-              Explore
+              {productsContent.productCard.text}
               <ArrowRight className="ml-1 h-3 w-3" />
             </div>
           </div>

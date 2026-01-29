@@ -4,23 +4,23 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { ArrowRight } from "lucide-react";
-import { audiences } from "./text";
+import { solutionsContent } from "@/content/root/solutions";
 
 export default function SolutionsSection() {
+  const { header, audiences, footer } = solutionsContent;
   return (
     <section className="py-16 sm:py-20 bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header section */}
         <div className="text-center mb-12 sm:mb-16 max-w-3xl mx-auto">
           <span className="inline-block px-4 py-1.5 text-xs sm:text-sm font-medium bg-primary/10 text-primary rounded-full mb-4">
-            Solutions
+            {header.tagline}
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Designed for how you practice
+            {header.title}
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground">
-            Whether you`re a solo practitioner or an enterprise legal team,
-            Justio CRM adapts to your needs.
+            {header.description}
           </p>
         </div>
 
@@ -46,7 +46,7 @@ export default function SolutionsSection() {
                       {audience.description}
                     </p>
                     <span className="inline-flex items-center text-sm font-medium text-primary mt-auto">
-                      Learn more
+                      {footer.title}
                       <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </span>
                   </CardContent>

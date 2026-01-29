@@ -1,11 +1,11 @@
 import { ScrollToTop } from "@/shared/components/ScrollToTop";
 
-import HeroSection from "@/widgets/main-page/hero-section/HeroSection";
-import WhyWeSection from "@/widgets/main-page/why-section/WhyWeSection";
-import SolutionsSection from "@/widgets/main-page/solutions-section/SolutionsSection";
-import CapabilitiesSection from "@/widgets/main-page/capabilities-section/CapabilitiesSection";
-import SecuritySection from "@/widgets/main-page/security-section/SecuritySection";
-import FinalSection from "@/widgets/main-page/final-cta-section/FinalSection";
+import HeroSection from "@/widgets/main/hero-section/HeroSection";
+import WhyWeSection from "@/widgets/main/why-section/WhyWeSection";
+import SolutionsSection from "@/widgets/main/solutions-section/SolutionsSection";
+import CapabilitiesSection from "@/widgets/main/products-section/ProductsSection";
+import SecuritySection from "@/widgets/main/security-section/SecuritySection";
+import FinalSection from "@/widgets/main/final-cta-section/FinalSection";
 
 /**
  * Головна сторінка (Landing Page)

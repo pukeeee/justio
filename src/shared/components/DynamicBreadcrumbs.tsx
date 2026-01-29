@@ -17,7 +17,7 @@ import {
 import {
   DASHBOARD_NAV,
   DASHBOARD_SECONDARY_NAV,
-} from "@/shared/lib/config/dashboard-nav";
+} from "@/shared/config/dashboard-nav";
 
 interface DynamicBreadcrumbsProps {
   workspaceName: string;

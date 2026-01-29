@@ -1,7 +1,7 @@
 /**
  * @file NavGroup.tsx
  * @description Універсальний компонент групи навігації для sidebar
- * 
+ *
  * АРХІТЕКТУРА:
  * - Приймає тип групи як пропс (serializable)
  * - Самостійно імпортує дані, що містять компоненти іконок
@@ -24,7 +24,7 @@ import {
   type NavItem,
   DASHBOARD_NAV,
   DASHBOARD_SECONDARY_NAV,
-} from "@/shared/lib/config/dashboard-nav";
+} from "@/shared/config/dashboard-nav";
 
 /**
  * Типи груп навігації

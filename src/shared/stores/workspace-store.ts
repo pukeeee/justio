@@ -14,7 +14,7 @@
 
 import { create } from "zustand";
 import type { Database } from "@/shared/lib/types/database";
-import { WORKSPACE_TIER_LIMITS } from "@/shared/lib/config/billing";
+import { WORKSPACE_TIER_LIMITS } from "@/shared/config/billing";
 
 // ============================================================================
 // ТИПИ

@@ -18,7 +18,7 @@ import {
   getUserWorkspaces,
   getCachedUser,
 } from "@/shared/lib/auth/get-user-data";
-import { Footer } from "@/widgets/main-page/footer/Footer";
+import { Footer } from "@/widgets/footer/Footer";
 import { MainHeader } from "@/widgets/header/ui/MainHeader";
 import HeaderSkeleton from "@/widgets/header/ui/HeaderSkeleton";
 

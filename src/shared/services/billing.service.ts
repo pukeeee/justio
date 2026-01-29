@@ -7,7 +7,7 @@
 
 import type { Database } from "@/shared/lib/types/database";
 import type { SubscriptionTier } from "@/shared/lib/validations/schemas";
-import { WORKSPACE_TIER_LIMITS } from "@/shared/lib/config/billing";
+import { WORKSPACE_TIER_LIMITS } from "@/shared/config/billing";
 import * as subscriptionRepository from "@/shared/repositories/subscription.repository";
 import * as quotaRepository from "@/shared/repositories/quota.repository";
 

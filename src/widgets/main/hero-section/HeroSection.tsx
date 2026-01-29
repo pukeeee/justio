@@ -6,6 +6,8 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import Link from "next/link";
 import { ProductMockup } from "../../../shared/components/ProductMockup";
+import { heroContent } from "@/content/root/hero";
+import { routes } from "@/shared/config/routes";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -38,7 +40,7 @@ export default function HeroSection() {
                 variant="outline"
                 className="mb-6 px-4 py-1.5 text-sm font-medium"
               >
-                Trusted by 2,000+ law firms
+                {heroContent.badgeText}
               </Badge>
             </motion.div>
 
@@ -46,18 +48,18 @@ export default function HeroSection() {
               variants={fadeUp}
               className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl text-balance"
             >
-              The CRM built for
+              {heroContent.heading.main}
               <br />
-              <span className="gradient-text">legal professionals</span>
+              <span className="gradient-text">
+                {heroContent.heading.highlight}
+              </span>
             </motion.h1>
 
             <motion.p
               variants={fadeUp}
               className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto text-balance md:text-xl"
             >
-              Streamline your practice with case management, client
-              communication, billing, and document storage—all in one secure
-              platform.
+              {heroContent.description}
             </motion.p>
 
             <motion.div
@@ -69,13 +71,18 @@ export default function HeroSection() {
                 className="bg-primary hover:bg-accent/90 text-primary-foreground"
                 asChild
               >
-                <Link href="/demo">
-                  Request demo
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Link href={routes.demo}>
+                  {heroContent.buttons.demo.text}
+                  <ArrowRight
+                    className="ml-2 h-4 w-4"
+                    aria-label={heroContent.buttons.demo.iconLabel}
+                  />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/pricing">View pricing</Link>
+                <Link href={routes.pricing}>
+                  {heroContent.buttons.pricing.text}
+                </Link>
               </Button>
             </motion.div>
           </motion.div>

@@ -6,7 +6,7 @@
 // Імпортуємо необхідні типи з Next.js та клієнт Supabase для серверного середовища.
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { ALL_DASHBOARD_ROUTES } from "@/shared/lib/config/dashboard-nav";
+import { ALL_DASHBOARD_ROUTES } from "@/shared/config/dashboard-nav";
 
 // Список маршрутів, які потребують автентифікації для доступу.
 const protectedRoutes = ["/dashboard", "/docs", "/user"];

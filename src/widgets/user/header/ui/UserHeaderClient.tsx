@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { cn } from "@/shared/lib/utils";
-import { LANDING_CONTENT } from "@/shared/lib/config/landing";
+import { LANDING_CONTENT } from "@/shared/config/landing";
 import { AuthenticatedUser } from "@/widgets/header/lib/AuthenticatedUser";
 import type { FormattedUserData } from "@/shared/lib/auth/get-user-data";
 

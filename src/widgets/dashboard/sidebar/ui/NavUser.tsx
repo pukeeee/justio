@@ -1,7 +1,7 @@
 /**
  * @file NavUser.tsx
  * @description Компонент користувача в sidebar з dropdown меню
- * 
+ *
  * АРХІТЕКТУРА:
  * - Отримує дані користувача з props (передаються з серверного компонента)
  * - Використовує уніфіковану конфігурацію USER_PAGES
@@ -37,7 +37,7 @@ import {
   USER_PAGES,
   UPGRADE_ACTION,
   LOGOUT_ACTION,
-} from "@/shared/lib/config/user-pages";
+} from "@/shared/config/user-pages";
 import { signOut } from "@/features/auth/actions/auth.actions";
 import type { FormattedUserData } from "@/shared/lib/auth/get-user-data";
 
@@ -50,13 +50,13 @@ interface NavUserProps {
 
 /**
  * Компонент навігації користувача в sidebar
- * 
+ *
  * ФУНКЦІОНАЛ:
  * - Відображає аватар та інформацію користувача
  * - Dropdown меню з навігацією
  * - Опція оновлення тарифу
  * - Кнопка виходу з системи
- * 
+ *
  * @param user - Форматовані дані користувача
  */
 export function NavUser({ user }: NavUserProps) {

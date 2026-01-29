@@ -5,7 +5,7 @@
 
 import * as quotaRepository from "@/shared/repositories/quota.repository";
 import { canAddEntity as canAddEntityHelper } from "@/shared/lib/utils/helpers";
-import type { QuotaEntity } from "@/shared/lib/config/billing";
+import type { QuotaEntity } from "@/shared/config/billing";
 
 /**
  * Перевіряє, чи може воркспейс створити нову сутність (контакт, угоду, користувача)

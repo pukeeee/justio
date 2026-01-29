@@ -16,7 +16,7 @@ import {
   AvatarImage,
 } from "@/shared/components/ui/avatar";
 import { Button } from "@/shared/components/ui/button";
-import { USER_PAGES } from "@/shared/lib/config/user-pages";
+import { USER_PAGES } from "@/shared/config/user-pages";
 import { signOut } from "@/features/auth/actions/auth.actions";
 import { LogOut } from "lucide-react";
 import type { FormattedUserData } from "@/shared/lib/auth/get-user-data";
