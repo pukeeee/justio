@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/shared/supabase/server";
-import { UserSidebar } from "@/widgets/user/sidebar/ui/UserSidebar";
+import { UserSidebar } from "@/frontend/widgets/user/sidebar/ui/UserSidebar";
 
 export const metadata: Metadata = {
   title: "Кабінет | CRM4SMB",

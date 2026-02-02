@@ -12,15 +12,15 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Geist_Mono, Geist } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/widgets/theme/model/theme-provider";
-import { ClientProviders } from "@/shared/components/providers/client-providers";
+import { ThemeProvider } from "@/frontend/widgets/theme/model/theme-provider";
+import { ClientProviders } from "@/frontend/shared/components/providers/client-providers";
 import {
   getUserWorkspaces,
   getCachedUser,
-} from "@/shared/lib/auth/get-user-data";
-import { Footer } from "@/widgets/footer/Footer";
-import { MainHeader } from "@/widgets/header/ui/MainHeader";
-import HeaderSkeleton from "@/widgets/header/ui/HeaderSkeleton";
+} from "@/frontend/shared/lib/auth/get-user-data";
+import { Footer } from "@/frontend/widgets/footer/Footer";
+import { MainHeader } from "@/frontend/widgets/header/ui/MainHeader";
+import HeaderSkeleton from "@/frontend/widgets/header/ui/HeaderSkeleton";
 
 // ============================================================================
 // ШРИФТИ

@@ -5,7 +5,7 @@
  * використовуючи клієнт Supabase. Кожна функція відповідає за конкретну CRUD-операцію
  * або виклик RPC-функції.
  */
-import type { Database } from "@/shared/lib/types/database";
+import type { Database } from "@/shared/types/database";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 type Workspace = Pick<

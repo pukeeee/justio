@@ -4,7 +4,7 @@
  */
 
 import { createServerClient } from "@/shared/supabase/server";
-import type { Database } from "@/shared/lib/types/database";
+import type { Database } from "@/shared/types/database";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 type Quota = Database["public"]["Tables"]["workspace_quotas"]["Row"];
@@ -18,7 +18,7 @@ type QuotaUpdate = Database["public"]["Tables"]["workspace_quotas"]["Update"];
  */
 export async function getQuotasByWorkspaceId(
   workspaceId: string,
-  supabaseClient?: SupabaseClient<Database>
+  supabaseClient?: SupabaseClient<Database>,
 ): Promise<Quota | null> {
   const supabase = supabaseClient ?? (await createServerClient());
   const { data, error } = await supabase
@@ -48,7 +48,7 @@ export async function getQuotasByWorkspaceId(
 export async function updateQuotas(
   workspaceId: string,
   updates: QuotaUpdate,
-  supabaseClient?: SupabaseClient<Database>
+  supabaseClient?: SupabaseClient<Database>,
 ): Promise<Quota> {
   const supabase = supabaseClient ?? (await createServerClient());
   const { data, error } = await supabase

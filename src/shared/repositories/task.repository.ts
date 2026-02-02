@@ -4,7 +4,7 @@
  */
 
 import { createServerClient } from "@/shared/supabase/server";
-import type { Database } from "@/shared/lib/types/database";
+import type { Database } from "@/shared/types/database";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 type Task = Database["public"]["Tables"]["tasks"]["Row"];

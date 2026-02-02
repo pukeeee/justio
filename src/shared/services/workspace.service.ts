@@ -5,15 +5,14 @@
  * між Server Actions (шар дій) та репозиторіями (шар доступу до даних).
  */
 
-
-import { createServerClient } from '@/shared/supabase/server';
-import type { Database } from '@/shared/lib/types/database';
-import { WorkspaceRepository } from '@/shared/repositories';
+import { createServerClient } from "@/shared/supabase/server";
+import type { Database } from "@/shared/types/database";
+import { WorkspaceRepository } from "@/shared/repositories";
 
 // Визначаємо локальний тип `Workspace` як підмножина полів з таблиці `workspaces`.
 type Workspace = Pick<
-  Database['public']['Tables']['workspaces']['Row'],
-  'id' | 'name' | 'slug'
+  Database["public"]["Tables"]["workspaces"]["Row"],
+  "id" | "name" | "slug"
 >;
 
 /**

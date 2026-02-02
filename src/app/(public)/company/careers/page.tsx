@@ -1,10 +1,10 @@
 "use client";
 
-import { CareersHero } from "@/widgets/careers/ui/CareersHero";
-import { CareersWhyJoin } from "@/widgets/careers/ui/CareersWhyJoin";
-import { CareersBenefits } from "@/widgets/careers/ui/CareersBenefits";
-import { CareersOpenings } from "@/widgets/careers/ui/CareersOpenings";
-import { CTAsection } from "@/widgets/cta-section/ui/CTAsection";
+import { CareersHero } from "@/frontend/widgets/careers/ui/CareersHero";
+import { CareersWhyJoin } from "@/frontend/widgets/careers/ui/CareersWhyJoin";
+import { CareersBenefits } from "@/frontend/widgets/careers/ui/CareersBenefits";
+import { CareersOpenings } from "@/frontend/widgets/careers/ui/CareersOpenings";
+import { CTAsection } from "@/frontend/widgets/cta-section/ui/CTAsection";
 import { careersContent } from "@/content/main/company/careers";
 
 /**

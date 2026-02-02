@@ -1,7 +1,7 @@
 "use client";
 
-import { TermsHero } from "@/widgets/terms/ui/TermsHero";
-import { TermsSections } from "@/widgets/terms/ui/TermsSections";
+import { TermsHero } from "@/frontend/widgets/terms/ui/TermsHero";
+import { TermsSections } from "@/frontend/widgets/terms/ui/TermsSections";
 import { termsContent } from "@/content/main/terms";
 
 /**
@@ -12,7 +12,10 @@ export default function TermsPage() {
   return (
     <main>
       <TermsHero content={termsContent.hero} />
-      <TermsSections intro={termsContent.intro} sections={termsContent.sections} />
+      <TermsSections
+        intro={termsContent.intro}
+        sections={termsContent.sections}
+      />
     </main>
   );
 }

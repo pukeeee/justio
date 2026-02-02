@@ -4,7 +4,7 @@
  */
 
 import { createServerClient } from "@/shared/supabase/server";
-import type { Database } from "@/shared/lib/types/database";
+import type { Database } from "@/shared/types/database";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
@@ -19,7 +19,7 @@ type SubscriptionUpdate =
  */
 export async function getByWorkspaceId(
   workspaceId: string,
-  supabaseClient?: SupabaseClient<Database>
+  supabaseClient?: SupabaseClient<Database>,
 ): Promise<Subscription | null> {
   const supabase = supabaseClient ?? (await createServerClient());
   const { data, error } = await supabase
@@ -35,7 +35,9 @@ export async function getByWorkspaceId(
       // Це не помилка, а просто відсутність запису
       return null;
     }
-    console.error(`SubscriptionRepository Error (getByWorkspaceId): ${error.message}`);
+    console.error(
+      `SubscriptionRepository Error (getByWorkspaceId): ${error.message}`,
+    );
     throw new Error(error.message);
   }
 
@@ -52,7 +54,7 @@ export async function getByWorkspaceId(
 export async function update(
   workspaceId: string,
   updates: SubscriptionUpdate,
-  supabaseClient?: SupabaseClient<Database>
+  supabaseClient?: SupabaseClient<Database>,
 ): Promise<Subscription> {
   const supabase = supabaseClient ?? (await createServerClient());
   const { data, error } = await supabase

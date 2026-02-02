@@ -1,7 +1,7 @@
 "use client";
 
-import { ReleasesHero } from "@/widgets/releases/ui/ReleasesHero";
-import { ReleasesTimeline } from "@/widgets/releases/ui/ReleasesTimeline";
+import { ReleasesHero } from "@/frontend/widgets/releases/ui/ReleasesHero";
+import { ReleasesTimeline } from "@/frontend/widgets/releases/ui/ReleasesTimeline";
 import { releasesContent } from "@/content/main/resources/releases";
 
 /**
@@ -12,11 +12,13 @@ export default function ReleasesPage() {
   return (
     <main>
       <ReleasesHero content={releasesContent.hero} />
-      <ReleasesTimeline content={{
-        items: releasesContent.items,
-        types: releasesContent.types,
-        sections: releasesContent.sections
-      }} />
+      <ReleasesTimeline
+        content={{
+          items: releasesContent.items,
+          types: releasesContent.types,
+          sections: releasesContent.sections,
+        }}
+      />
     </main>
   );
 }

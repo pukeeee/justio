@@ -1,4 +1,4 @@
-import { getAllDocs } from "@/shared/lib/utils/docs";
+import { getAllDocs } from "@/frontend/shared/utils/docs";
 import { redirect } from "next/navigation";
 
 export default function DocsPage() {

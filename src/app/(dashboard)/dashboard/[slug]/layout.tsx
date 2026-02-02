@@ -8,12 +8,15 @@ import { redirect } from "next/navigation";
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger
-} from "@/shared/components/ui/sidebar";
-import { Separator } from "@/shared/components/ui/separator";
-import { AppSidebar } from "@/widgets/dashboard/sidebar/ui/Sidebar";
-import { DynamicBreadcrumbs } from "@/shared/components/DynamicBreadcrumbs";
-import { getUserWorkspaces, getCachedUser } from "@/shared/lib/auth/get-user-data";
+  SidebarTrigger,
+} from "@/frontend/shared/components/ui/sidebar";
+import { Separator } from "@/frontend/shared/components/ui/separator";
+import { AppSidebar } from "@/frontend/widgets/dashboard/sidebar/ui/Sidebar";
+import { DynamicBreadcrumbs } from "@/frontend/shared/components/DynamicBreadcrumbs";
+import {
+  getUserWorkspaces,
+  getCachedUser,
+} from "@/frontend/shared/lib/auth/get-user-data";
 
 export const metadata: Metadata = {
   title: "Дашборд | CRM4SMB",
@@ -32,7 +35,7 @@ export default async function DashboardLayout({
   // Отримуємо користувача та воркспейси (кешовано, без дублювання запитів)
   const [user, workspaces] = await Promise.all([
     getCachedUser(),
-    getUserWorkspaces()
+    getUserWorkspaces(),
   ]);
 
   if (!user) {
@@ -40,7 +43,7 @@ export default async function DashboardLayout({
   }
 
   // Знаходимо поточний воркспейс для хлібних крихт
-  const currentWorkspace = workspaces.find(w => w.slug === slug);
+  const currentWorkspace = workspaces.find((w) => w.slug === slug);
 
   return (
     <SidebarProvider>

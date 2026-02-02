@@ -1,8 +1,8 @@
 "use client";
 
-import { CookiesHero } from "@/widgets/cookies/ui/CookiesHero";
-import { CookiesTable } from "@/widgets/cookies/ui/CookiesTable";
-import { CookiesSections } from "@/widgets/cookies/ui/CookiesSections";
+import { CookiesHero } from "@/frontend/widgets/cookies/ui/CookiesHero";
+import { CookiesTable } from "@/frontend/widgets/cookies/ui/CookiesTable";
+import { CookiesSections } from "@/frontend/widgets/cookies/ui/CookiesSections";
 import { cookiesContent } from "@/content/main/cookies";
 
 /**

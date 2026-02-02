@@ -4,7 +4,7 @@
  */
 
 import { createServerClient } from "@/shared/supabase/server";
-import type { Database } from "@/shared/lib/types/database";
+import type { Database } from "@/shared/types/database";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 type Contact = Database["public"]["Tables"]["contacts"]["Row"];
@@ -138,9 +138,7 @@ export async function getByCompanyId(
   const { data, error } = await query;
 
   if (error) {
-    console.error(
-      `ContactRepository Error (getByCompanyId): ${error.message}`,
-    );
+    console.error(`ContactRepository Error (getByCompanyId): ${error.message}`);
     throw new Error(error.message);
   }
 

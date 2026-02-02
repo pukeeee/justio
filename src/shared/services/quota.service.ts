@@ -4,7 +4,7 @@
  */
 
 import * as quotaRepository from "@/shared/repositories/quota.repository";
-import { canAddEntity as canAddEntityHelper } from "@/shared/lib/utils/helpers";
+import { canAddEntity as canAddEntityHelper } from "@/frontend/shared/utils/helpers";
 import type { QuotaEntity } from "@/shared/config/billing";
 
 /**
