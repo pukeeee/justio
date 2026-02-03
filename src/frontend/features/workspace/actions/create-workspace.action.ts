@@ -1,29 +1,35 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createWorkspace } from "@/shared/services/workspace.service";
-import { Database } from "@/shared/types/database";
+import { container } from "@/backend/infrastructure/di/container";
+import { CreateWorkspaceUseCase } from "@/backend/application/use-cases/workspace/create-workspace.use-case";
+import { IAuthService } from "@/backend/application/interfaces/services/auth.service.interface";
 import { CreateWorkspaceSchema } from "@/frontend/shared/lib/validations/schemas";
 
-type Workspace = Pick<
-  Database["public"]["Tables"]["workspaces"]["Row"],
-  "id" | "name" | "slug"
->;
-
 type FormState = {
-  workspace: Workspace | null;
+  workspace: { id: string; name: string; slug: string } | null;
   error: string | null;
 };
 
 /**
- * Server Action для створення воркспейсу
+ * Server Action для створення воркспейсу через Clean Architecture
  */
 export async function createWorkspaceAction(
   prevState: FormState,
   formData: FormData,
 ): Promise<FormState> {
   try {
-    // Валідація
+    // 1. Отримуємо залежності з контейнера
+    const createWorkspaceUseCase = container.resolve(CreateWorkspaceUseCase);
+    const authService = container.resolve<IAuthService>("IAuthService");
+
+    // 2. Автентифікація
+    const user = await authService.getCurrentUser();
+    if (!user) {
+      return { workspace: null, error: "Користувач не автентифікований" };
+    }
+
+    // 3. Валідація полів
     const validatedFields = CreateWorkspaceSchema.safeParse({
       name: formData.get("name"),
     });
@@ -37,29 +43,31 @@ export async function createWorkspaceAction(
 
     const { name } = validatedFields.data;
 
-    // Створюємо через сервіс (з перевіркою квоти)
-    const { workspace, error } = await createWorkspace(name);
+    // 4. Виклик бізнес-логіки
+    const workspace = await createWorkspaceUseCase.execute({
+      name,
+      userId: user.id,
+    });
 
-    if (error || !workspace) {
-      return {
-        workspace: null,
-        error: error || "Не вдалося створити воркспейс",
-      };
-    }
-
-    // Інвалідуємо кеш
+    // 5. Інвалідуємо кеш
     revalidatePath("/user/workspace");
     revalidatePath("/dashboard");
 
     return {
-      workspace,
+      workspace: {
+        id: workspace.id,
+        name: workspace.name,
+        slug: workspace.slug,
+      },
       error: null,
     };
   } catch (error) {
     console.error("Create workspace action error:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Виникла несподівана помилка";
     return {
       workspace: null,
-      error: "Виникла несподівана помилка",
+      error: errorMessage,
     };
   }
 }

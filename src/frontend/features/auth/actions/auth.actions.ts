@@ -3,18 +3,55 @@
 /**
  * @file auth.actions.ts
  * @description Server Actions для автентифікації
- *
- * Покращення:
- * - Валідація вхідних даних
- * - Детальне логування
- * - Безпечні редіректи
- * - Правильна обробка помилок
  */
 
-import { createServerClient } from "@/shared/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { container } from "@/backend/infrastructure/di/container";
+import { IAuthService } from "@/backend/application/interfaces/services/auth.service.interface";
+import { IAuthorizationService } from "@/backend/application/interfaces/services/authorization.service.interface";
+import { getCachedUser } from "@/frontend/shared/lib/auth/get-user-data";
+
+/**
+ * Отримує роль користувача у воркспейсі за ID
+ */
+export async function getUserRoleAction(workspaceId: string) {
+  try {
+    const user = await getCachedUser();
+    if (!user) return null;
+
+    const authService = container.resolve<IAuthorizationService>(
+      "IAuthorizationService",
+    );
+    const role = await authService.getUserRole(user.id, workspaceId);
+
+    return role ? role.name : null;
+  } catch (error) {
+    console.error("[Auth Action] Помилка отримання ролі за ID:", error);
+    return null;
+  }
+}
+
+/**
+ * Отримує роль користувача у воркспейсі за слагом
+ */
+export async function getUserRoleBySlugAction(slug: string) {
+  try {
+    const user = await getCachedUser();
+    if (!user) return null;
+
+    const authService = container.resolve<IAuthorizationService>(
+      "IAuthorizationService",
+    );
+    const role = await authService.getUserRoleBySlug(user.id, slug);
+
+    return role ? role.name : null;
+  } catch (error) {
+    console.error("[Auth Action] Помилка отримання ролі за слагом:", error);
+    return null;
+  }
+}
 
 /**
  * Максимальна довжина redirect URL для безпеки
@@ -44,7 +81,7 @@ function validateRedirectUrl(url: string | null): string | null {
  */
 export async function signInWithGoogle(formData: FormData) {
   try {
-    const supabase = await createServerClient();
+    const authService = container.resolve<IAuthService>("IAuthService");
     const headersList = await headers();
     const origin = headersList.get("origin");
 
@@ -62,51 +99,22 @@ export async function signInWithGoogle(formData: FormData) {
       callbackUrl.searchParams.set("next", redirectUrl);
     }
 
-    // Логування для debugging (тільки dev)
-    if (process.env.NODE_ENV === "development") {
-      console.log("[Auth Action] Google OAuth initiation:", {
-        redirectUrl,
-        callbackUrl: callbackUrl.toString(),
-      });
-    }
+    // Викликаємо сервіс автентифікації
+    const oauthUrl = await authService.signInWithOAuth(
+      "google",
+      callbackUrl.toString(),
+    );
 
-    // Викликаємо Supabase OAuth
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: callbackUrl.toString(),
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent",
-        },
-      },
-    });
-
-    if (error) {
-      console.error("[Auth Action] OAuth помилка:", error);
-      redirect(
-        `/?error=${encodeURIComponent("Не вдалося ініціювати вхід через Google")}`,
-      );
-    }
-
-    if (!data.url) {
-      console.error("[Auth Action] Відсутній OAuth URL");
-      redirect(
-        `/?error=${encodeURIComponent("Не вдалося отримати URL для автентифікації")}`,
-      );
-    }
-
-    // Редірект на Google OAuth
-    redirect(data.url);
+    // Редірект на сторінку провайдера
+    redirect(oauthUrl);
   } catch (error) {
-    console.error("[Auth Action] Критична помилка:", error);
-
-    // Якщо це не redirect error від Next.js
-    if (error instanceof Error && !error.message.includes("NEXT_REDIRECT")) {
-      redirect(`/?error=${encodeURIComponent("Внутрішня помилка сервера")}`);
+    // Якщо це помилка редіректу Next.js - просто прокидаємо її далі
+    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+      throw error;
     }
 
-    throw error;
+    console.error("[Auth Action] Критична помилка:", error);
+    redirect(`/?error=${encodeURIComponent("Внутрішня помилка сервера")}`);
   }
 }
 
@@ -115,14 +123,8 @@ export async function signInWithGoogle(formData: FormData) {
  */
 export async function signOut() {
   try {
-    const supabase = await createServerClient();
-
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      console.error("[Auth Action] Помилка виходу:", error);
-      // Не кидаємо помилку, все одно очистимо сесію
-    }
+    const authService = container.resolve<IAuthService>("IAuthService");
+    await authService.signOut();
 
     // Очищаємо кеш для всього layout
     revalidatePath("/", "layout");
@@ -139,18 +141,8 @@ export async function signOut() {
  */
 export async function getSession() {
   try {
-    const supabase = await createServerClient();
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
-
-    if (error) {
-      console.error("[Auth Action] Помилка отримання сесії:", error);
-      return null;
-    }
-
-    return session;
+    const authService = container.resolve<IAuthService>("IAuthService");
+    return await authService.getCurrentUser();
   } catch (error) {
     console.error("[Auth Action] Критична помилка отримання сесії:", error);
     return null;
@@ -162,18 +154,8 @@ export async function getSession() {
  */
 export async function refreshSession() {
   try {
-    const supabase = await createServerClient();
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.refreshSession();
-
-    if (error) {
-      console.error("[Auth Action] Помилка оновлення сесії:", error);
-      return null;
-    }
-
-    return session;
+    const authService = container.resolve<IAuthService>("IAuthService");
+    return await authService.getCurrentUser();
   } catch (error) {
     console.error("[Auth Action] Критична помилка оновлення сесії:", error);
     return null;

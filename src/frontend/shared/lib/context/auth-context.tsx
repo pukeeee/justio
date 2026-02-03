@@ -1,12 +1,6 @@
 /**
  * @file auth-context.tsx
  * @description Провайдер контексту для керування сесією та даними користувача.
- *
- * @history
- * - 2026-01-23: Видалено логіку завантаження воркспейсу, підписок та квот.
- *   Контекст тепер відповідає лише за сесію користувача (User).
- *   Це виправляє баг, коли система неправильно обробляла наявність кількох воркспейсів
- *   і завантажувала в глобальний контекст лише один із них.
  */
 
 "use client";
@@ -18,16 +12,34 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { createBrowserClient } from "@/shared/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import { getSession } from "@/frontend/features/auth/actions/auth.actions";
 
 // ============================================================================
 // Типи
 // ============================================================================
 
+/**
+ * Інтерфейс користувача для фронтенд-контексту.
+ * Повністю відповідає нашому доменному AuthenticatedUser.
+ */
+export interface AuthUser {
+  id: string;
+  email: string;
+  fullName?: string;
+  avatarUrl?: string;
+}
+
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   loading: boolean;
+  /**
+   * Дозволяє вручну оновити дані користувача (наприклад, після зміни профілю)
+   */
+  refreshUser: () => Promise<void>;
+  /**
+   * Дозволяє примусово встановити користувача
+   */
+  setUser: (user: AuthUser | null) => void;
 }
 
 // ============================================================================
@@ -40,81 +52,51 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Провайдер
 // ============================================================================
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+interface AuthProviderProps {
+  children: React.ReactNode;
+  /**
+   * Початкові дані користувача, отримані на сервері (для уникнення миготіння)
+   */
+  initialUser?: AuthUser | null;
+}
 
-  const supabase = createBrowserClient();
+export function AuthProvider({
+  children,
+  initialUser = null,
+}: AuthProviderProps) {
+  const [user, setUser] = useState<AuthUser | null>(initialUser);
+  const [loading, setLoading] = useState(!initialUser);
 
   /**
-   * Скидає стан користувача
+   * Отримує поточну сесію через наш бекенд (Server Action)
    */
-  const clearUser = useCallback(() => {
-    setUser(null);
+  const refreshUser = useCallback(async () => {
+    try {
+      // Викликаємо наш серверний екшен, який використовує AuthService
+      const currentUser = await getSession();
+      setUser(currentUser);
+    } catch (error) {
+      console.error("[AuthContext] Помилка отримання сесії:", error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   /**
-   * Ініціалізація сесії та відстеження змін стану автентифікації.
+   * Ініціалізація при монтуванні, якщо дані не були передані через SSR
    */
   useEffect(() => {
-    let mounted = true;
-
-    // 1. Початкове завантаження даних користувача
-    const initializeAuth = async () => {
-      try {
-        const {
-          data: { user: currentUser },
-        } = await supabase.auth.getUser();
-
-        if (mounted) {
-          setUser(currentUser ?? null);
-        }
-      } catch (error) {
-        console.error("[AuthContext] Помилка ініціалізації:", error);
-        if (mounted) {
-          setUser(null);
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    initializeAuth();
-
-    // 2. Підписка на зміни стану автентифікації (вхід, вихід, оновлення токена)
-    const {
-      data: { subscription: authSubscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
-
-      // Події SIGNED_IN та TOKEN_REFRESHED обробляються однаково:
-      // ми просто встановлюємо нового користувача з сесії.
-      // Подія INITIAL_SESSION вже оброблена в `initializeAuth`.
-      if (
-        event === "SIGNED_IN" ||
-        event === "TOKEN_REFRESHED" ||
-        event === "USER_UPDATED"
-      ) {
-        setUser(session?.user ?? null);
-      }
-
-      if (event === "SIGNED_OUT") {
-        clearUser();
-      }
-    });
-
-    // Відписка при розмонтуванні компонента
-    return () => {
-      mounted = false;
-      authSubscription.unsubscribe();
-    };
-  }, [supabase, clearUser]);
+    if (!initialUser) {
+      refreshUser();
+    }
+  }, [initialUser, refreshUser]);
 
   const value: AuthContextType = {
     user,
     loading,
+    refreshUser,
+    setUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -126,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 /**
  * Хук для доступу до контексту автентифікації.
- * @returns {AuthContextType} Об'єкт з даними користувача та станом завантаження.
+ * Використовуйте для отримання поточного юзера в клієнтських компонентах.
  */
 export function useAuthContext() {
   const context = useContext(AuthContext);

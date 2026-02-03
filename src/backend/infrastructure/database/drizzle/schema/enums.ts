@@ -9,6 +9,44 @@ export const contactTypeEnum = pgEnum("contact_type", [
 ]);
 
 /**
+ * Ролі користувача в workspace.
+ */
+export const workspaceRoleEnum = pgEnum("workspace_role", [
+  "owner",
+  "admin",
+  "user",
+  "guest",
+]);
+
+/**
+ * Статус користувача в системі.
+ */
+export const userStatusEnum = pgEnum("user_status", [
+  "active",
+  "suspended",
+  "deleted",
+]);
+
+/**
+ * Статус користувача у воркспейсі.
+ */
+export const workspaceUserStatusEnum = pgEnum("workspace_user_status", [
+  "active",
+  "invited",
+  "declined",
+]);
+
+/**
+ * Рівні підписки воркспейсу.
+ */
+export const workspaceTierEnum = pgEnum("workspace_tier", [
+  "free",
+  "starter",
+  "pro",
+  "enterprise",
+]);
+
+/**
  * Ролі контактних осіб всередині компанії.
  */
 export const companyContactRoleEnum = pgEnum("company_contact_role", [

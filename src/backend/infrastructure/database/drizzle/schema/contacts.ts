@@ -1,9 +1,13 @@
 import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
 import { contactTypeEnum } from "./enums";
+import { workspaces } from "./workspaces";
+import { users } from "./users";
 
 export const contacts = pgTable("contacts", {
   id: uuid("id").defaultRandom().primaryKey(),
-  workspaceId: uuid("workspace_id").notNull(),
+  workspaceId: uuid("workspace_id")
+    .notNull()
+    .references(() => workspaces.id, { onDelete: "cascade" }),
   contactType: contactTypeEnum("contact_type").notNull(),
 
   // Спільні поля
@@ -14,7 +18,7 @@ export const contacts = pgTable("contacts", {
   tags: text("tags").array(),
 
   // Метадані
-  createdBy: uuid("created_by"), // Посилання на auth.users
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

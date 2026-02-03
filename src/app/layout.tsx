@@ -122,11 +122,7 @@ export default async function RootLayout({
             Клієнтські провайдери з SSR даними
           */}
           <ClientProviders initialWorkspaces={initialWorkspaces}>
-            <Suspense fallback={<HeaderSkeleton />}>
-              <MainHeader />
-            </Suspense>
             {children}
-            <Footer />
           </ClientProviders>
         </ThemeProvider>
       </body>

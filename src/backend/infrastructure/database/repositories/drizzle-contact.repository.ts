@@ -9,6 +9,7 @@ import {
   count,
   isNotNull,
   ne,
+  sql,
 } from "drizzle-orm";
 import { db } from "../drizzle/client";
 import { contacts, individuals, companies, companyContacts } from "../drizzle/schema";
@@ -398,5 +399,15 @@ export class DrizzleContactRepository implements IContactRepository {
       individual: IndividualMapper.toDomain(row.individual),
       role: row.role as CompanyContactRole,
     }));
+  }
+
+  async isOwner(contactId: string, userId: string): Promise<boolean> {
+    const [row] = await db
+      .select({ val: sql`1` })
+      .from(contacts)
+      .where(and(eq(contacts.id, contactId), eq(contacts.createdBy, userId)))
+      .limit(1);
+
+    return !!row;
   }
 }

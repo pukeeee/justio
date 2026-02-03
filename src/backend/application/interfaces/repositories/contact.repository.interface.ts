@@ -99,4 +99,9 @@ export interface IContactRepository {
    * Отримати всіх контактних осіб компанії.
    */
   findCompanyContacts(companyId: string): Promise<{ individual: Individual; role: CompanyContactRole }[]>;
+
+  /**
+   * Перевіряє, чи є користувач власником контакту (поле createdBy).
+   */
+  isOwner(contactId: string, userId: string): Promise<boolean>;
 }

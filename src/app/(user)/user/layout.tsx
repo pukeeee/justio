@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { createServerClient } from "@/shared/supabase/server";
+import { getCachedUser } from "@/frontend/shared/lib/auth/get-user-data";
 import { UserSidebar } from "@/frontend/widgets/user/sidebar/ui/UserSidebar";
 
 export const metadata: Metadata = {
@@ -17,11 +17,7 @@ export default async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCachedUser();
 
   // Редірект неавтентифікованих користувачів
   if (!user) {

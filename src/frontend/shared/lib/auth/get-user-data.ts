@@ -3,10 +3,10 @@
  * @description Серверні утиліти для отримання даних користувача з форматуванням
  */
 
-import { createServerClient } from "@/shared/supabase/server";
 import { cache } from "react";
-import type { User } from "@supabase/supabase-js";
-import * as WorkspaceRepository from "@/shared/repositories/workspace.repository";
+import { container } from "@/backend/infrastructure/di/container";
+import { IAuthService } from "@/backend/application/interfaces/services/auth.service.interface";
+import { IWorkspaceRepository } from "@/backend/application/interfaces/repositories/workspace.repository.interface";
 
 /**
  * Тип для форматованих даних користувача
@@ -27,9 +27,23 @@ export type FormattedUserData = {
  * буде виконано лише ОДИН РАЗ.
  */
 export const getUserWorkspaces = cache(async () => {
-  const supabase = await createServerClient();
   try {
-    return await WorkspaceRepository.findAllForUser(supabase);
+    const authService = container.resolve<IAuthService>("IAuthService");
+    const currentUser = await authService.getCurrentUser();
+
+    if (!currentUser) return [];
+
+    const workspaceRepo = container.resolve<IWorkspaceRepository>(
+      "IWorkspaceRepository",
+    );
+    const workspaces = await workspaceRepo.findAllByUserId(currentUser.id);
+
+    // Мапимо до спрощеного формату для фронтенду
+    return workspaces.map((w) => ({
+      id: w.id,
+      name: w.name,
+      slug: w.slug,
+    }));
   } catch (error) {
     console.error("[getUserWorkspaces] Помилка:", error);
     return [];
@@ -69,41 +83,21 @@ function generateInitials(email: string, fullName?: string): string {
  */
 export const getFormattedUserData = cache(
   async (): Promise<FormattedUserData | null> => {
-    const supabase = await createServerClient();
-
     try {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
+      const authService = container.resolve<IAuthService>("IAuthService");
+      const user = await authService.getCurrentUser();
 
-      if (error || !user) {
-        // Не логуємо помилку, якщо сесія просто відсутня (нормально для неавторизованих)
-        if (error && error.message !== "Auth session missing!") {
-          console.error(
-            "[getFormattedUserData] Помилка отримання користувача:",
-            error.message,
-          );
-        }
-        return null;
-      }
+      if (!user) return null;
 
-      // Отримуємо додаткові дані з user_metadata
-      const fullName =
-        user.user_metadata?.full_name ||
-        user.user_metadata?.name ||
-        user.email?.split("@")[0] ||
-        "Користувач";
-
-      const avatarUrl =
-        user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
+      const fullName = user.fullName || user.email.split("@")[0] || "Користувач";
+      const avatarUrl = user.avatarUrl || "";
 
       return {
         id: user.id,
         name: fullName,
-        email: user.email || "",
+        email: user.email,
         avatar: avatarUrl,
-        initials: generateInitials(user.email || "", fullName),
+        initials: generateInitials(user.email, user.fullName || undefined),
       };
     } catch (error) {
       console.error("[getFormattedUserData] Критична помилка:", error);
@@ -113,29 +107,12 @@ export const getFormattedUserData = cache(
 );
 
 /**
- * Отримує raw об'єкт User (для cases коли потрібен повний доступ)
+ * Отримує доменний об'єкт User
  */
-export const getCachedUser = cache(async (): Promise<User | null> => {
-  const supabase = await createServerClient();
-
+export const getCachedUser = cache(async () => {
   try {
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-
-    if (error) {
-      // Не логуємо помилку, якщо сесія просто відсутня
-      if (error.message !== "Auth session missing!") {
-        console.error(
-          "[getCachedUser] Помилка отримання користувача:",
-          error.message,
-        );
-      }
-      return null;
-    }
-
-    return user;
+    const authService = container.resolve<IAuthService>("IAuthService");
+    return await authService.getCurrentUser();
   } catch (error) {
     console.error("[getCachedUser] Критична помилка:", error);
     return null;
