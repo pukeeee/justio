@@ -8,6 +8,7 @@
  * - Передає дані клієнтським провайдерам для синхронної ініціалізації
  */
 
+import "reflect-metadata";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Geist_Mono, Geist } from "next/font/google";

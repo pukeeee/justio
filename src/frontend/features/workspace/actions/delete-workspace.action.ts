@@ -1,11 +1,10 @@
-'use server';
+"use server";
 
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { deleteWorkspace } from '@/shared/services/workspace.service';
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { deleteWorkspace } from "@/shared/services/workspace.service";
 
 /**
- * @typedef {object} FormState
  * @description Визначає структуру об'єкта, що повертається Server Action для відображення стану операції у формі.
  * @property {boolean} isSuccess - Прапорець, що вказує на успішне виконання операції.
  * @property {boolean} isError - Прапорець, що вказує на виникнення помилки.
@@ -38,7 +37,7 @@ export async function deleteWorkspaceAction(
     return {
       isSuccess: false,
       isError: true,
-      message: 'Помилка: ID воркспейсу не вказано.',
+      message: "Помилка: ID воркспейсу не вказано.",
     };
   }
 
@@ -51,7 +50,7 @@ export async function deleteWorkspaceAction(
       return {
         isSuccess: false,
         isError: true,
-        message: result.error || 'Не вдалося видалити воркспейс.',
+        message: result.error || "Не вдалося видалити воркспейс.",
       };
     }
 
@@ -61,7 +60,7 @@ export async function deleteWorkspaceAction(
   } catch (error) {
     // Обробка непередбачуваних помилок на випадок, якщо сервіс кинув виняток
     const errorMessage =
-      error instanceof Error ? error.message : 'Сталася несподівана помилка.';
+      error instanceof Error ? error.message : "Сталася несподівана помилка.";
     return {
       isSuccess: false,
       isError: true,
@@ -73,10 +72,10 @@ export async function deleteWorkspaceAction(
 
   // Очищення кешу Next.js для сторінок, які відображають списки воркспейсів.
   // Це гарантує, що користувачі побачать оновлений список без видаленого воркспейсу.
-  revalidatePath('/user/workspace'); // Сторінка вибору воркспейсів
-  revalidatePath('/dashboard', 'layout'); // Загальний лейаут дашборду, де може бути кешована інформація
+  revalidatePath("/user/workspace"); // Сторінка вибору воркспейсів
+  revalidatePath("/dashboard", "layout"); // Загальний лейаут дашборду, де може бути кешована інформація
 
   // Перенаправлення користувача на сторінку вибору воркспейсів після успішного видалення.
   // Ця функція кидає спеціальний виняток, який перериває виконання коду.
-  redirect('/user/workspace');
+  redirect("/user/workspace");
 }

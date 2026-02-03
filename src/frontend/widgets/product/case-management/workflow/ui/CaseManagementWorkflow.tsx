@@ -26,7 +26,7 @@ export function CaseManagementWorkflow({
               {content.description}
             </p>
             <blockquote className="border-l-4 border-primary pl-6 italic text-muted-foreground mb-6">
-              "{content.quote}"
+              `{content.quote}`
             </blockquote>
             <p className="font-medium">— {content.author}</p>
           </div>

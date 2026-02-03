@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/frontend/shared/components/ui/table";
-import { cn } from "@/frontend/shared/lib/utils";
 
 interface Feature {
   name: string;
@@ -68,19 +67,19 @@ export function PricingComparison({ content }: PricingComparisonProps) {
             <Table>
               <TableHeader>
                 <TableRow className="border-border hover:bg-transparent">
-                  <TableHead className="text-foreground font-bold h-14 bg-muted/30 px-6 min-w-[200px]">
+                  <TableHead className="text-foreground font-bold h-14 bg-muted/30 px-6 min-w-50">
                     {content.heads.features}
                   </TableHead>
-                  <TableHead className="text-center text-foreground font-semibold h-14 min-w-[120px]">
+                  <TableHead className="text-center text-foreground font-semibold h-14 min-w-30">
                     {content.heads.free}
                   </TableHead>
-                  <TableHead className="text-center text-foreground font-semibold h-14 min-w-[120px]">
+                  <TableHead className="text-center text-foreground font-semibold h-14 min-w-30">
                     {content.heads.solo}
                   </TableHead>
-                  <TableHead className="text-center text-foreground font-semibold bg-accent/5 h-14 min-w-[120px]">
+                  <TableHead className="text-center text-foreground font-semibold bg-accent/5 h-14 min-w-30">
                     {content.heads.firm}
                   </TableHead>
-                  <TableHead className="text-center text-foreground font-semibold h-14 min-w-[120px]">
+                  <TableHead className="text-center text-foreground font-semibold h-14 min-w-30">
                     {content.heads.enterprise}
                   </TableHead>
                 </TableRow>
