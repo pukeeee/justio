@@ -1,10 +1,5 @@
 import { Email } from '../value-objects/email.vo';
-
-export enum UserStatus {
-  ACTIVE = 'active',
-  SUSPENDED = 'suspended',
-  DELETED = 'deleted'
-}
+import { UserStatus } from '../value-objects/user-status.enum';
 
 /**
  * Сутність Користувача.

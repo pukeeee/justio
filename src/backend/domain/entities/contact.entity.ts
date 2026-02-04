@@ -1,7 +1,6 @@
 import { Email } from '../value-objects/email.vo';
 import { Phone } from '../value-objects/phone.vo';
-
-export type ContactType = 'individual' | 'company';
+import { ContactType } from '../value-objects/contact-type.enum';
 
 /**
  * Головна сутність "Контакт".

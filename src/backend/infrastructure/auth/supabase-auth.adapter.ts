@@ -21,12 +21,13 @@ import { Provider } from '@supabase/supabase-js';
 import { createSupabaseServerClient } from './supabase-server-client';
 import {
   IAuthService,
-  AuthenticatedUser,
-  AuthResult,
-  InvalidCredentialsError,
-  EmailAlreadyExistsError,
-  InvalidTokenError,
 } from '@/backend/application/interfaces/services/auth.service.interface';
+import { AuthenticatedUser, AuthResult } from '@/backend/application/dtos/auth/auth-result.dto';
+import { 
+  InvalidCredentialsError, 
+  EmailAlreadyExistsError, 
+  InvalidTokenError 
+} from '@/backend/domain/errors/auth.errors';
 
 /**
  * Реалізація IAuthService для Supabase Auth.

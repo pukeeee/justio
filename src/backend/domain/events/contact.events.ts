@@ -4,7 +4,7 @@
  */
 
 import { DomainEvent } from "./base.event";
-import { ContactType } from "@/backend/domain/entities/contact.entity";
+import { ContactType } from "@/backend/domain/value-objects/contact-type.enum";
 
 /**
  * Подія: Контакт створено.

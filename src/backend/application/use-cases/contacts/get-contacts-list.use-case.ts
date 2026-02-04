@@ -1,12 +1,8 @@
 import { injectable, inject } from 'tsyringe';
-import type { IContactRepository, FindAllContactsOptions } from '@/backend/application/interfaces/repositories/contact.repository.interface';
-import type { ContactListItemDTO } from '@/backend/application/dtos/contacts/contact-list-item.dto';
+import type { IContactRepository } from '@/backend/application/interfaces/repositories/contact.repository.interface';
+import { FindAllContactsOptions } from '@/backend/application/dtos/contacts/find-contacts-query.dto';
+import { GetContactsListResponse } from '@/backend/application/dtos/contacts/get-contacts-list-response.dto';
 import { PAGINATION_CONFIG } from '@/backend/infrastructure/config/pagination.config';
-
-export interface GetContactsListResponse {
-  items: ContactListItemDTO[];
-  total: number;
-}
 
 /**
  * Use Case: Отримання списку контактів для конкретного воркспейсу.

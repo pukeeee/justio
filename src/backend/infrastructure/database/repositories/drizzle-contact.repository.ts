@@ -12,15 +12,20 @@ import {
   sql,
 } from "drizzle-orm";
 import { db } from "../drizzle/client";
-import { contacts, individuals, companies, companyContacts } from "../drizzle/schema";
+import {
+  contacts,
+  individuals,
+  companies,
+  companyContacts,
+} from "../drizzle/schema";
 import { Contact } from "@/backend/domain/entities/contact.entity";
 import { Individual } from "@/backend/domain/entities/individual.entity";
 import { Company } from "@/backend/domain/entities/company.entity";
-import { CompanyContact, CompanyContactRole } from "@/backend/domain/entities/company-contact.entity";
-import {
-  IContactRepository,
-  FindAllContactsOptions,
-} from "@/backend/application/interfaces/repositories/contact.repository.interface";
+import { CompanyContact } from "@/backend/domain/entities/company-contact.entity";
+import { ContactType } from "@/backend/domain/value-objects/contact-type.enum";
+import { CompanyContactRole } from "@/backend/domain/value-objects/company-contact-role.enum";
+import { IContactRepository } from "@/backend/application/interfaces/repositories/contact.repository.interface";
+import { FindAllContactsOptions } from "@/backend/application/dtos/contacts/find-contacts-query.dto";
 import { ContactMapper } from "../mappers/contact.mapper";
 import { IndividualMapper } from "../mappers/individual.mapper";
 import { CompanyMapper } from "../mappers/company.mapper";
@@ -160,9 +165,9 @@ export class DrizzleContactRepository implements IContactRepository {
 
     return result.map((row) => ({
       id: row.id,
-      contactType: row.contactType as "individual" | "company",
+      contactType: row.contactType as ContactType,
       displayName:
-        row.contactType === "individual"
+        row.contactType === ContactType.INDIVIDUAL
           ? `${row.lastName} ${row.firstName}`.trim()
           : row.companyName || "Без назви",
       email: row.email,
@@ -296,8 +301,8 @@ export class DrizzleContactRepository implements IContactRepository {
     excludeContactId?: string,
   ): Promise<boolean> {
     // Нормалізуємо для пошуку (використовуємо наш VO через статик або просто базову очистку)
-    const normalizedPhone = phone.replace(/\D/g, ''); 
-    // Оскільки ми зберігаємо в базі з плюсом через Phone.create, 
+    const normalizedPhone = phone.replace(/\D/g, "");
+    // Оскільки ми зберігаємо в базі з плюсом через Phone.create,
     // пошук має бути гнучким. Для надійності краще нормалізувати перед запитом.
 
     const [row] = await db
@@ -358,34 +363,45 @@ export class DrizzleContactRepository implements IContactRepository {
   /**
    * Видалити зв'язок між компанією та фізичною особою.
    */
-  async removeCompanyContact(companyId: string, individualId: string): Promise<void> {
-    await db.delete(companyContacts).where(
-      and(
-        eq(companyContacts.companyId, companyId),
-        eq(companyContacts.individualId, individualId)
-      )
-    );
+  async removeCompanyContact(
+    companyId: string,
+    individualId: string,
+  ): Promise<void> {
+    await db
+      .delete(companyContacts)
+      .where(
+        and(
+          eq(companyContacts.companyId, companyId),
+          eq(companyContacts.individualId, individualId),
+        ),
+      );
   }
 
   /**
    * Оновити роль контактної особи в компанії.
    */
-  async updateCompanyContactRole(companyId: string, individualId: string, role: CompanyContactRole): Promise<void> {
+  async updateCompanyContactRole(
+    companyId: string,
+    individualId: string,
+    role: CompanyContactRole,
+  ): Promise<void> {
     await db
       .update(companyContacts)
       .set({ role })
       .where(
         and(
           eq(companyContacts.companyId, companyId),
-          eq(companyContacts.individualId, individualId)
-        )
+          eq(companyContacts.individualId, individualId),
+        ),
       );
   }
 
   /**
    * Отримати всіх контактних осіб компанії.
    */
-  async findCompanyContacts(companyId: string): Promise<{ individual: Individual; role: CompanyContactRole }[]> {
+  async findCompanyContacts(
+    companyId: string,
+  ): Promise<{ individual: Individual; role: CompanyContactRole }[]> {
     const result = await db
       .select({
         individual: individuals,
@@ -395,7 +411,7 @@ export class DrizzleContactRepository implements IContactRepository {
       .innerJoin(individuals, eq(companyContacts.individualId, individuals.id))
       .where(eq(companyContacts.companyId, companyId));
 
-    return result.map(row => ({
+    return result.map((row) => ({
       individual: IndividualMapper.toDomain(row.individual),
       role: row.role as CompanyContactRole,
     }));

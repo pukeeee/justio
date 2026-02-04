@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/frontend/shared/components/ui/button";
 import { Menu, X, ChevronDown } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/frontend/shared/lib/utils";
 import { useAuthModal } from "@/frontend/shared/stores/use-auth-modal.store";
 import { AuthenticatedUser } from "@/frontend/widgets/header/lib/AuthenticatedUser";
@@ -18,19 +18,42 @@ import {
 } from "@/frontend/shared/components/ui/navigation-menu";
 import { headerContent } from "@/content/main/header";
 import type { FormattedUserData } from "@/frontend/shared/lib/auth/get-user-data";
-
-interface MainHeaderClientProps {
-  user: FormattedUserData | null;
-}
+import { useUser } from "@/frontend/shared/hooks/use-auth";
+import { Skeleton } from "@/frontend/shared/components/ui/skeleton";
 
 /**
- * Client Component - получает данные о пользователе через пропсы
- * Нет loading состояния, нет race conditions, нет мигающего UI
+ * Client Component - хедер з клієнтською перевіркою авторизації
+ * Це дозволяє зберігати SSG для публічних сторінок
  */
-export function MainHeaderClient({ user }: MainHeaderClientProps) {
+export function MainHeaderClient() {
+  const { user, loading } = useUser();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { open: openAuthModal } = useAuthModal();
+
+  // Мапимо дані користувача з контексту до формату, який очікує UI
+  const formattedUser: FormattedUserData | null = useMemo(() => {
+    if (!user) return null;
+
+    const name = user.fullName || user.email.split("@")[0] || "Користувач";
+    const initials = (
+      user.fullName
+        ? user.fullName
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .substring(0, 2)
+        : user.email.substring(0, 2)
+    ).toUpperCase();
+
+    return {
+      id: user.id,
+      name,
+      email: user.email,
+      avatar: user.avatarUrl || "",
+      initials,
+    };
+  }, [user]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -205,8 +228,13 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
           <div className="flex items-center lg:justify-end lg:flex-1">
             {/* Desktop Auth Block */}
             <div className="hidden lg:flex lg:items-center lg:gap-3">
-              {isAuthenticated ? (
-                <AuthenticatedUser user={user} />
+              {loading ? (
+                <>
+                  <Skeleton className="h-6 w-15 rounded-md" />
+                  <Skeleton className="h-6 w-29 rounded-md" />
+                </>
+              ) : isAuthenticated ? (
+                <AuthenticatedUser user={formattedUser!} />
               ) : (
                 <>
                   <Button variant="ghost" size="sm" onClick={openAuthModal}>
@@ -227,11 +255,16 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
 
             {/* Mobile Menu Button */}
             <div className="flex items-center gap-2">
-              {isAuthenticated && (
+              {loading ? (
+                <Skeleton className="h-8 w-8 rounded-full lg:hidden mr-2" />
+              ) : isAuthenticated ? (
                 <div className="lg:hidden mr-2">
-                  <AuthenticatedUser user={user} showDashboardButton={false} />
+                  <AuthenticatedUser
+                    user={formattedUser!}
+                    showDashboardButton={false}
+                  />
                 </div>
-              )}
+              ) : null}
               <button
                 className="lg:hidden p-2 -mr-2"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -296,7 +329,11 @@ export function MainHeaderClient({ user }: MainHeaderClientProps) {
 
               {/* Mobile Auth Block */}
               <div className="px-4">
-                {isAuthenticated ? (
+                {loading ? (
+                  <div className="pt-4 space-y-2">
+                    <Skeleton className="h-8 w-full rounded-md" />
+                  </div>
+                ) : isAuthenticated ? (
                   <div
                     className="pt-4 space-y-2 animate-fade-in-up"
                     style={{ animationDelay: "200ms" }}

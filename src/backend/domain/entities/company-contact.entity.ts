@@ -1,18 +1,4 @@
-/**
- * Ролі контактних осіб всередині компанії.
- * Відповідає enum у базі даних.
- */
-export type CompanyContactRole =
-  | "director"
-  | "founder"
-  | "attorney"
-  | "head"
-  | "acting_director"
-  | "contact_person"
-  | "accountant"
-  | "lawyer"
-  | "manager"
-  | "other";
+import { CompanyContactRole } from '../value-objects/company-contact-role.enum';
 
 /**
  * Сутність, що представляє зв'язок між компанією та фізичною особою.

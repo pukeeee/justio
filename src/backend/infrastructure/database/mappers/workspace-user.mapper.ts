@@ -1,4 +1,5 @@
-import { WorkspaceUser, WorkspaceUserStatus } from '@/backend/domain/entities/workspace-user.entity';
+import { WorkspaceUser } from '@/backend/domain/entities/workspace-user.entity';
+import { WorkspaceUserStatus } from '@/backend/domain/value-objects/workspace-user-status.enum';
 import { Role } from '@/backend/domain/value-objects/role.vo';
 
 type DbWorkspaceUser = {

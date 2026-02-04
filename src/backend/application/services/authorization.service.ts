@@ -1,14 +1,12 @@
 import { inject, injectable } from "tsyringe";
-import {
-  IAuthorizationService,
-  AuthorizationContext,
-  ForbiddenError,
-} from "../interfaces/services/authorization.service.interface";
+import { IAuthorizationService } from "../interfaces/services/authorization.service.interface";
+import { AuthorizationContext } from "@/backend/application/dtos/auth/authorization-context.dto";
+import { ForbiddenError } from "@/backend/domain/errors/authorization.errors";
 import type { IAuthRepository } from "../interfaces/repositories/auth.repository.interface";
 import type { IWorkspaceRepository } from "../interfaces/repositories/workspace.repository.interface";
 import { Permission } from "@/backend/domain/value-objects/permission.enum";
 import { Role } from "@/backend/domain/value-objects/role.vo";
-import { WorkspaceUserStatus } from "@/backend/domain/entities/workspace-user.entity";
+import { WorkspaceUserStatus } from "@/backend/domain/value-objects/workspace-user-status.enum";
 
 @injectable()
 export class AuthorizationService implements IAuthorizationService {

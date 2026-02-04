@@ -1,4 +1,5 @@
-import { Contact, ContactType } from '@/backend/domain/entities/contact.entity';
+import { Contact } from '@/backend/domain/entities/contact.entity';
+import { ContactType } from '@/backend/domain/value-objects/contact-type.enum';
 
 /**
  * Тип, що відповідає структурі таблиці 'contacts' у Drizzle.

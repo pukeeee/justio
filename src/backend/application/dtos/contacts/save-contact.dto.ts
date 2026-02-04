@@ -1,5 +1,5 @@
-import { ContactType } from '@/backend/domain/entities/contact.entity';
-import { PassportDetails } from '@/backend/domain/entities/individual.entity';
+import { ContactType } from "@/backend/domain/value-objects/contact-type.enum";
+import { PassportDetailsProps } from "@/backend/domain/value-objects/passport-details.vo";
 
 /**
  * Універсальний DTO для створення або оновлення будь-якого контакту.
@@ -23,7 +23,7 @@ export interface SaveContactDTO {
   middleName?: string | null;
   dateOfBirth?: Date | null;
   taxNumber?: string | null;
-  passportDetails?: PassportDetails | null;
+  passportDetails?: PassportDetailsProps | null;
 
   // Поля компанії (тільки для contactType: 'company')
   companyName?: string;

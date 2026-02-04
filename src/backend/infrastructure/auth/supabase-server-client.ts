@@ -11,6 +11,7 @@ export async function createSupabaseServerClient() {
   try {
     cookieStore = await cookies();
   } catch (error) {
+    console.log(error);
     // Якщо cookies() недоступні (наприклад, під час статичної генерації),
     // ми створюємо клієнт без доступу до cookies.
     return createClient(
@@ -18,8 +19,10 @@ export async function createSupabaseServerClient() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          getAll() { return []; },
-          setAll() { },
+          getAll() {
+            return [];
+          },
+          setAll() {},
         },
       },
     );

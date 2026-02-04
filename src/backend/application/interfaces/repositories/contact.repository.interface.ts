@@ -2,14 +2,9 @@ import { Contact } from '@/backend/domain/entities/contact.entity';
 import { Individual } from '@/backend/domain/entities/individual.entity';
 import { Company } from '@/backend/domain/entities/company.entity';
 import { ContactListItemDTO } from '@/backend/application/dtos/contacts/contact-list-item.dto';
-import { CompanyContact, CompanyContactRole } from '@/backend/domain/entities/company-contact.entity';
-
-export interface FindAllContactsOptions {
-  limit?: number;
-  offset?: number;
-  search?: string;
-  onlyDeleted?: boolean;
-}
+import { CompanyContact } from '@/backend/domain/entities/company-contact.entity';
+import { CompanyContactRole } from '@/backend/domain/value-objects/company-contact-role.enum';
+import { FindAllContactsOptions } from '@/backend/application/dtos/contacts/find-contacts-query.dto';
 
 /**
  * Інтерфейс для роботи з контактами.

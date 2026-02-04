@@ -10,18 +10,10 @@
 
 import "reflect-metadata";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { Geist_Mono, Geist } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/frontend/widgets/theme/model/theme-provider";
 import { ClientProviders } from "@/frontend/shared/components/providers/client-providers";
-import {
-  getUserWorkspaces,
-  getCachedUser,
-} from "@/frontend/shared/lib/auth/get-user-data";
-import { Footer } from "@/frontend/widgets/footer/Footer";
-import { MainHeader } from "@/frontend/widgets/header/ui/MainHeader";
-import HeaderSkeleton from "@/frontend/widgets/header/ui/HeaderSkeleton";
 
 // ============================================================================
 // ШРИФТИ
@@ -77,24 +69,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // ===== ЗАВАНТАЖЕННЯ ДАНИХ (SSR) =====
-
-  /**
-   * Отримуємо користувача та його воркспейси паралельно
-   * getUserWorkspaces вже загорнута в cache() та використовує репозиторій
-   */
-  const [user, initialWorkspaces] = await Promise.all([
-    getCachedUser(),
-    getUserWorkspaces(),
-  ]);
-
-  // Debug логування (тільки dev)
-  if (process.env.NODE_ENV === "development" && user) {
-    console.log(
-      `[RootLayout] Завантажено ${initialWorkspaces.length} воркспейсів для користувача ${user.id}`,
-    );
-  }
-
   // ===== РЕНДЕРИНГ HTML =====
 
   /**
@@ -119,9 +93,11 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           {/*
-            Клієнтські провайдери з SSR даними
+            Клієнтські провайдери.
+            Для SSG ми не передаємо початкові дані з сервера.
+            Вони будуть завантажені на клієнті або в специфічних layout'ах.
           */}
-          <ClientProviders initialWorkspaces={initialWorkspaces}>
+          <ClientProviders>
             {children}
           </ClientProviders>
         </ThemeProvider>

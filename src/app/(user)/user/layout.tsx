@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCachedUser } from "@/frontend/shared/lib/auth/get-user-data";
+import {
+  getCachedUser,
+  getUserWorkspaces,
+} from "@/frontend/shared/lib/auth/get-user-data";
 import { UserSidebar } from "@/frontend/widgets/user/sidebar/ui/UserSidebar";
+import { WorkspaceStoreSync } from "@/frontend/shared/components/providers/workspace-store-sync";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Кабінет | CRM4SMB",
+  title: "Кабінет | Justio",
   description: "Керування профілем та воркспейсами",
 };
 
@@ -17,7 +23,10 @@ export default async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getCachedUser();
+  const [user, workspaces] = await Promise.all([
+    getCachedUser(),
+    getUserWorkspaces(),
+  ]);
 
   // Редірект неавтентифікованих користувачів
   if (!user) {
@@ -26,6 +35,7 @@ export default async function Layout({
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <WorkspaceStoreSync workspaces={workspaces} />
       <div className="container flex flex-1 py-6">
         <div className="hidden md:flex">
           <UserSidebar />

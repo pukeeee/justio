@@ -13,7 +13,7 @@ export default function PublicLayout({
       <Suspense fallback={<HeaderSkeleton />}>
         <MainHeader />
       </Suspense>
-      <main className="flex-grow">{children}</main>
+      <main className="grow">{children}</main>
       <Footer />
     </div>
   );

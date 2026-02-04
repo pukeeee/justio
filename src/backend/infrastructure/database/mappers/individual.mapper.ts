@@ -1,4 +1,5 @@
-import { Individual, PassportDetails } from '@/backend/domain/entities/individual.entity';
+import { Individual } from "@/backend/domain/entities/individual.entity";
+import { PassportDetailsProps } from "@/backend/domain/value-objects/passport-details.vo";
 
 /**
  * Тип для рядка з таблиці individuals.
@@ -17,15 +18,17 @@ type DbIndividual = {
 export class IndividualMapper {
   static toDomain(raw: DbIndividual): Individual {
     const rawPassport = raw.passportDetails as Record<string, unknown> | null;
-    let passportDetails: PassportDetails | null = null;
-    
-    // Якщо дані паспорта є в JSON, конвертуємо рядок дати назад у Date
-    if (rawPassport && typeof rawPassport.number === 'string') {
-      passportDetails = {
+    let passportProps: PassportDetailsProps | null = null;
+
+    // Якщо дані паспорта є в JSON, готуємо пропсу для доменної сутності
+    if (rawPassport && typeof rawPassport.number === "string") {
+      passportProps = {
         series: (rawPassport.series as string) ?? null,
         number: rawPassport.number,
-        issuedBy: (rawPassport.issuedBy as string) ?? '',
-        issuedDate: rawPassport.issuedDate ? new Date(rawPassport.issuedDate as string) : new Date(),
+        issuedBy: (rawPassport.issuedBy as string) ?? "",
+        issuedDate: rawPassport.issuedDate
+          ? new Date(rawPassport.issuedDate as string)
+          : new Date(),
       };
     }
 
@@ -37,20 +40,30 @@ export class IndividualMapper {
       middleName: raw.middleName,
       dateOfBirth: raw.dateOfBirth ? new Date(raw.dateOfBirth) : null,
       taxNumber: raw.taxNumber,
-      passportDetails: passportDetails as PassportDetails | null,
+      passportDetails: passportProps,
     });
   }
 
   static toPersistence(individual: Individual) {
+    const passport = individual.passportDetails;
+
     return {
       id: individual.id,
       contactId: individual.contactId,
       firstName: individual.firstName,
       lastName: individual.lastName,
       middleName: individual.middleName,
-      dateOfBirth: individual.dateOfBirth?.toISOString().split('T')[0] ?? null,
+      dateOfBirth: individual.dateOfBirth?.toISOString().split("T")[0] ?? null,
       taxNumber: individual.taxNumber,
-      passportDetails: individual.passportDetails,
+      // Конвертуємо Value Object назад у простий об'єкт для JSONB
+      passportDetails: passport
+        ? {
+            series: passport.series,
+            number: passport.number,
+            issuedBy: passport.issuedBy,
+            issuedDate: passport.issuedDate.toISOString(),
+          }
+        : null,
     };
   }
 }

@@ -1,12 +1,9 @@
-import { getFormattedUserData } from "@/frontend/shared/lib/auth/get-user-data";
 import { MainHeaderClient } from "./MainHeaderClient";
 
 /**
- * Server Component - получает данные о пользователе на сервере
- * Это решает проблемы с гидратацией и мигающим UI
+ * Server Component - обгортка для хедера.
+ * Дані користувача завантажуються на клієнті для підтримки SSG публічних сторінок.
  */
-export async function MainHeader() {
-  const user = await getFormattedUserData();
-
-  return <MainHeaderClient user={user} />;
+export function MainHeader() {
+  return <MainHeaderClient />;
 }

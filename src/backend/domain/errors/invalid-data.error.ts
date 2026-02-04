@@ -63,6 +63,15 @@ export class InvalidEdrpouError extends DomainError {
 }
 
 /**
+ * Помилка для невалідних паспортних даних.
+ */
+export class InvalidPassportError extends DomainError {
+  constructor(message: string) {
+    super(`Невалідні паспортні дані: ${message}`);
+  }
+}
+
+/**
  * Помилка: Сутність не знайдено.
  */
 export class EntityNotFoundError extends DomainError {

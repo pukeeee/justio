@@ -20,6 +20,8 @@ import { USER_PAGES } from "@/shared/config/user-pages";
 import { signOut } from "@/frontend/features/auth/actions/auth.actions";
 import { LogOut } from "lucide-react";
 import type { FormattedUserData } from "@/frontend/shared/lib/auth/get-user-data";
+import { useAuthContext } from "@/frontend/shared/lib/context/auth-context";
+import { useWorkspaceStore } from "@/frontend/shared/stores/workspace-store";
 
 interface AuthenticatedUserProps {
   user: FormattedUserData;
@@ -36,6 +38,8 @@ export function AuthenticatedUser({
 }: AuthenticatedUserProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const { setUser } = useAuthContext();
+  const resetWorkspaces = useWorkspaceStore((state) => state.reset);
 
   /**
    * Обробник виходу з системи
@@ -43,15 +47,22 @@ export function AuthenticatedUser({
   const handleSignOut = () => {
     setError(null);
 
+    // Миттєво оновлюємо клієнтський стан для кращого UX
+    setUser(null);
+    resetWorkspaces();
+
     startTransition(async () => {
       try {
         await signOut();
       } catch (err) {
-        if (err instanceof Error && !err.message.includes("NEXT_REDIRECT")) {
-          console.error("Помилка виходу:", err);
-          setError("Не вдалося вийти. Спробуйте ще раз.");
-          setTimeout(() => setError(null), 3000);
+        // Якщо це помилка редіректу Next.js - ігноруємо, це нормальна поведінка
+        if (err instanceof Error && err.message.includes("NEXT_REDIRECT")) {
+          return;
         }
+        
+        console.error("Помилка виходу:", err);
+        setError("Не вдалося вийти. Спробуйте ще раз.");
+        setTimeout(() => setError(null), 3000);
       }
     });
   };

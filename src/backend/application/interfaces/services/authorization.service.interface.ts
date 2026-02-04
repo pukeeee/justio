@@ -1,24 +1,16 @@
-import { Permission } from '@/backend/domain/value-objects/permission.enum';
-import { Role } from '@/backend/domain/value-objects/role.vo';
+import { Permission } from "@/backend/domain/value-objects/permission.enum";
+import { Role } from "@/backend/domain/value-objects/role.vo";
+import { AuthorizationContext } from "@/backend/application/dtos/auth/authorization-context.dto";
 
 /**
  * Інтерфейс для сервісу авторизації (управління правами доступу).
- * 
+ *
  * РІЗНИЦЯ МІЖ AUTHENTICATION ТА AUTHORIZATION:
  * - Authentication (IAuthService): "Хто ти?" - перевірка ідентичності користувача
  * - Authorization (IAuthorizationService): "Що ти можеш робити?" - перевірка прав доступу
- * 
+ *
  * ПАТТЕРН: Role-Based Access Control (RBAC)
  */
-
-/**
- * Контекст авторизації - вся необхідна інформація для перевірки прав.
- */
-export interface AuthorizationContext {
-  userId: string;
-  workspaceId: string;
-  role: Role;
-}
 
 /**
  * Інтерфейс сервісу авторизації.
@@ -26,7 +18,7 @@ export interface AuthorizationContext {
 export interface IAuthorizationService {
   /**
    * Отримує роль користувача в workspace.
-   * 
+   *
    * @param userId - ID користувача
    * @param workspaceId - ID workspace
    * @returns Роль або null, якщо користувач не має доступу до workspace
@@ -40,7 +32,7 @@ export interface IAuthorizationService {
 
   /**
    * Перевіряє, чи має користувач певний дозвіл у воркспейсі.
-   * 
+   *
    * @param userId - ID користувача
    * @param workspaceId - ID workspace
    * @returns true якщо користувач має будь-який доступ до workspace
@@ -49,24 +41,32 @@ export interface IAuthorizationService {
 
   /**
    * Перевіряє наявність конкретного дозволу.
-   * 
+   *
    * @param userId - ID користувача
    * @param permission - Дозвіл для перевірки
    * @param workspaceId - ID workspace
    * @returns true якщо дозволено
    */
-  hasPermission(userId: string, permission: Permission, workspaceId: string): Promise<boolean>;
+  hasPermission(
+    userId: string,
+    permission: Permission,
+    workspaceId: string,
+  ): Promise<boolean>;
 
   /**
    * Перевіряє наявність дозволу і кидає помилку ForbiddenError, якщо немає.
-   * 
+   *
    * @throws ForbiddenError
    */
-  ensureHasPermission(userId: string, permission: Permission, workspaceId: string): Promise<void>;
+  ensureHasPermission(
+    userId: string,
+    permission: Permission,
+    workspaceId: string,
+  ): Promise<void>;
 
   /**
    * Перевіряє доступ до workspace і кидає помилку ForbiddenError, якщо немає.
-   * 
+   *
    * @throws ForbiddenError
    */
   ensureCanAccessWorkspace(userId: string, workspaceId: string): Promise<void>;
@@ -74,28 +74,11 @@ export interface IAuthorizationService {
   /**
    * Отримує повний контекст авторизації для поточного запиту.
    * Використовується в middleware для додавання контексту до req.
-   * 
+   *
    * @returns Контекст авторизації або null
    */
-  getAuthorizationContext(userId: string, workspaceId: string): Promise<AuthorizationContext | null>;
-}
-
-/**
- * Domain Error: Немає прав доступу
- */
-export class ForbiddenError extends Error {
-  constructor(message: string = 'Доступ заборонено') {
-    super(message);
-    this.name = 'ForbiddenError';
-  }
-}
-
-/**
- * Domain Error: Потрібна автентифікація
- */
-export class UnauthorizedError extends Error {
-  constructor(message: string = 'Потрібна автентифікація') {
-    super(message);
-    this.name = 'UnauthorizedError';
-  }
+  getAuthorizationContext(
+    userId: string,
+    workspaceId: string,
+  ): Promise<AuthorizationContext | null>;
 }

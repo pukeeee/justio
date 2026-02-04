@@ -1,15 +1,6 @@
 import { TaxNumber } from '../value-objects/tax-number.vo';
+import { PassportDetails, PassportDetailsProps } from '../value-objects/passport-details.vo';
 import { MissingRequiredFieldError } from '../errors/invalid-data.error';
-
-/**
- * Тип для паспортних даних.
- */
-export type PassportDetails = {
-  series: string | null;
-  number: string;
-  issuedBy: string;
-  issuedDate: Date;
-};
 
 /**
  * Сутність "Фізична особа".
@@ -56,12 +47,13 @@ export class Individual {
     middleName?: string | null;
     dateOfBirth?: Date | null;
     taxNumber?: string | null;
-    passportDetails?: PassportDetails | null;
+    passportDetails?: PassportDetailsProps | null;
   }): Individual {
     if (!props.firstName?.trim()) throw new MissingRequiredFieldError('Ім’я');
     if (!props.lastName?.trim()) throw new MissingRequiredFieldError('Прізвище');
 
     const taxNumber = props.taxNumber ? TaxNumber.create(props.taxNumber) : null;
+    const passportDetails = props.passportDetails ? PassportDetails.create(props.passportDetails) : null;
 
     return new Individual({
       id: props.id ?? crypto.randomUUID(),
@@ -71,7 +63,7 @@ export class Individual {
       middleName: props.middleName ?? null,
       dateOfBirth: props.dateOfBirth ?? null,
       taxNumber: taxNumber,
-      passportDetails: props.passportDetails ?? null,
+      passportDetails: passportDetails,
     });
   }
 
@@ -121,7 +113,7 @@ export class Individual {
     middleName?: string | null;
     dateOfBirth?: Date | null;
     taxNumber?: string | null;
-    passportDetails?: PassportDetails | null;
+    passportDetails?: PassportDetailsProps | null;
   }): void {
     if (props.firstName !== undefined) {
       if (!props.firstName?.trim()) throw new MissingRequiredFieldError('Ім’я');
@@ -140,6 +132,8 @@ export class Individual {
       this._taxNumber = props.taxNumber ? TaxNumber.create(props.taxNumber) : null;
     }
 
-    if (props.passportDetails !== undefined) this._passportDetails = props.passportDetails;
+    if (props.passportDetails !== undefined) {
+      this._passportDetails = props.passportDetails ? PassportDetails.create(props.passportDetails) : null;
+    }
   }
 }

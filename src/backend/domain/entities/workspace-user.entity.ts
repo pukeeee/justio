@@ -1,11 +1,6 @@
 import { Role } from '../value-objects/role.vo';
 import { Permission } from '../value-objects/permission.enum';
-
-export enum WorkspaceUserStatus {
-  ACTIVE = 'active',
-  INVITED = 'invited',
-  DECLINED = 'declined'
-}
+import { WorkspaceUserStatus } from '../value-objects/workspace-user-status.enum';
 
 /**
  * Сутність-зв'язок Користувача та Робочого простору.

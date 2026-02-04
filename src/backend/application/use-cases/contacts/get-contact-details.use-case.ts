@@ -2,6 +2,7 @@ import { injectable, inject } from 'tsyringe';
 import type { IContactRepository } from '@/backend/application/interfaces/repositories/contact.repository.interface';
 import type { ContactDetailsDTO } from '@/backend/application/dtos/contacts/contact-details.dto';
 import { EntityNotFoundError } from '@/backend/domain/errors/invalid-data.error';
+import { ContactType } from '@/backend/domain/value-objects/contact-type.enum';
 
 /**
  * Use Case: Отримання повної інформації про контакт за його ID.
@@ -25,7 +26,7 @@ export class GetContactDetailsUseCase {
     let company = null;
 
     // 2. Завантажуємо деталі залежно від типу
-    if (contact.contactType === 'individual') {
+    if (contact.contactType === ContactType.INDIVIDUAL) {
       individual = await this.contactRepository.findIndividualByContactId(contactId);
     } else {
       company = await this.contactRepository.findCompanyByContactId(contactId);

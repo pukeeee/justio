@@ -1,4 +1,5 @@
-import { User, UserStatus } from '@/backend/domain/entities/user.entity';
+import { User } from '@/backend/domain/entities/user.entity';
+import { UserStatus } from '@/backend/domain/value-objects/user-status.enum';
 
 type DbUser = {
   id: string;
