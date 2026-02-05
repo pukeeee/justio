@@ -31,7 +31,8 @@ container.register<IAuthRepository>('IAuthRepository', { useClass: DrizzleAuthRe
 container.register<IAuthorizationService>('IAuthorizationService', { useClass: AuthorizationService });
 
 // --- Реєстрація Use Cases ---
-import { SaveContactUseCase } from '@/backend/application/use-cases/contacts/save-contact.use-case';
+import { CreateContactUseCase } from '@/backend/application/use-cases/contacts/create-contact.use-case';
+import { UpdateContactUseCase } from '@/backend/application/use-cases/contacts/update-contact.use-case';
 import { GetContactsListUseCase } from '@/backend/application/use-cases/contacts/get-contacts-list.use-case';
 import { GetContactDetailsUseCase } from '@/backend/application/use-cases/contacts/get-contact-details.use-case';
 import { DeleteContactUseCase } from '@/backend/application/use-cases/contacts/delete-contact.use-case';
@@ -39,8 +40,12 @@ import { RestoreContactUseCase } from '@/backend/application/use-cases/contacts/
 import { CreateWorkspaceUseCase } from '@/backend/application/use-cases/workspace/create-workspace.use-case';
 import { DeleteWorkspaceUseCase } from '@/backend/application/use-cases/workspace/delete-workspace.use-case';
 
-container.register(SaveContactUseCase, {
-  useClass: SaveContactUseCase
+container.register(CreateContactUseCase, {
+  useClass: CreateContactUseCase
+});
+
+container.register(UpdateContactUseCase, {
+  useClass: UpdateContactUseCase
 });
 
 container.register(GetContactsListUseCase, {
