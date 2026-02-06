@@ -1,4 +1,4 @@
-import { Button } from "@/shared/components/ui/button";
+import { Button } from "@/frontend/shared/components/ui/button";
 import Link from "next/link";
 
 /**

@@ -1,8 +1,8 @@
 "use client";
 
-import { ContactHero } from "@/widgets/contact/ui/ContactHero";
-import { ContactMethods } from "@/widgets/contact/ui/ContactMethods";
-import { ContactForm } from "@/widgets/contact/ui/ContactForm";
+import { ContactHero } from "@/frontend/widgets/contact/ui/ContactHero";
+import { ContactMethods } from "@/frontend/widgets/contact/ui/ContactMethods";
+import { ContactForm } from "@/frontend/widgets/contact/ui/ContactForm";
 import { contactContent } from "@/content/main/company/contact";
 
 /**

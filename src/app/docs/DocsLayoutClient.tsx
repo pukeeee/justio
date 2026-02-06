@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DocsSidebar } from "@/shared/components/DocsSidebar";
+import { DocsSidebar } from "@/frontend/shared/components/DocsSidebar";
 import { Menu } from "lucide-react";
 
 export function DocsLayoutClient({

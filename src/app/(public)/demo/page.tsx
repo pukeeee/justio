@@ -1,7 +1,7 @@
 "use client";
 
-import { DemoInfo } from "@/widgets/demo/ui/DemoInfo";
-import { DemoForm } from "@/widgets/demo/ui/DemoForm";
+import { DemoInfo } from "@/frontend/widgets/demo/ui/DemoInfo";
+import { DemoForm } from "@/frontend/widgets/demo/ui/DemoForm";
 import { demoContent } from "@/content/main/demo";
 
 /**

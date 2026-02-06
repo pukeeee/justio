@@ -8,15 +8,21 @@ import { redirect } from "next/navigation";
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger
-} from "@/shared/components/ui/sidebar";
-import { Separator } from "@/shared/components/ui/separator";
-import { AppSidebar } from "@/widgets/dashboard/sidebar/ui/Sidebar";
-import { DynamicBreadcrumbs } from "@/shared/components/DynamicBreadcrumbs";
-import { getUserWorkspaces, getCachedUser } from "@/shared/lib/auth/get-user-data";
+  SidebarTrigger,
+} from "@/frontend/shared/components/ui/sidebar";
+import { Separator } from "@/frontend/shared/components/ui/separator";
+import { AppSidebar } from "@/frontend/widgets/dashboard/sidebar/ui/Sidebar";
+import { DynamicBreadcrumbs } from "@/frontend/shared/components/DynamicBreadcrumbs";
+import { WorkspaceStoreSync } from "@/frontend/shared/components/providers/workspace-store-sync";
+import {
+  getUserWorkspaces,
+  getCachedUser,
+} from "@/frontend/shared/lib/auth/get-user-data";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Дашборд | CRM4SMB",
+  title: "Дашборд | Justio",
   description: "Управління воркспейсом",
 };
 
@@ -32,7 +38,7 @@ export default async function DashboardLayout({
   // Отримуємо користувача та воркспейси (кешовано, без дублювання запитів)
   const [user, workspaces] = await Promise.all([
     getCachedUser(),
-    getUserWorkspaces()
+    getUserWorkspaces(),
   ]);
 
   if (!user) {
@@ -40,10 +46,11 @@ export default async function DashboardLayout({
   }
 
   // Знаходимо поточний воркспейс для хлібних крихт
-  const currentWorkspace = workspaces.find(w => w.slug === slug);
+  const currentWorkspace = workspaces.find((w) => w.slug === slug);
 
   return (
     <SidebarProvider>
+      <WorkspaceStoreSync workspaces={workspaces} currentSlug={slug} />
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

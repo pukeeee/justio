@@ -9,13 +9,15 @@
  * - Обробка edge cases
  */
 
-import { createServerClient } from "@/shared/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
+import { container } from "@/backend/infrastructure/di/container";
+import { IAuthService } from "@/backend/application/interfaces/services/auth.service.interface";
 
 /**
  * Список дозволених шляхів для редіректу (захист від open redirect)
+ * Має відповідати основним розділам додатку.
  */
-const ALLOWED_REDIRECT_PATHS = ["/dashboard", "/docs", "/profile", "/settings"];
+const ALLOWED_REDIRECT_PATHS = ["/dashboard", "/docs", "/user"];
 
 /**
  * Валідує та санітизує redirect path
@@ -78,19 +80,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // 3. Обмін коду на сесію
-    const supabase = await createServerClient();
-
-    const { data, error: exchangeError } =
-      await supabase.auth.exchangeCodeForSession(code);
-
-    if (exchangeError) {
-      throw exchangeError;
-    }
-
-    if (!data?.session) {
-      throw new Error("Не вдалося створити сесію");
-    }
+    // 3. Обмін коду на сесію за допомогою нашого сервісу
+    const authService = container.resolve<IAuthService>("IAuthService");
+    await authService.exchangeCodeForSession(code);
 
     // 4. Успішна автентифікація - безпечний редірект
     const redirectPath = getSafeRedirectPath(next, origin);

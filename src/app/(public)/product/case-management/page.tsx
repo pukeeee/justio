@@ -1,10 +1,10 @@
 import { caseManagementContent } from "@/content/main/product/case-management";
-import { HeroSubpage } from "@/widgets/product/shared/hero-subpage/ui/HeroSubpage";
-import { ProblemSolutionSubpage } from "@/widgets/product/shared/problem-solution-subpage/ui/ProblemSolutionSubpage";
-import { FeaturesSubpage } from "@/widgets/product/shared/features-subpage/ui/FeaturesSubpage";
-import { CaseManagementWorkflow } from "@/widgets/product/case-management/workflow/ui/CaseManagementWorkflow";
-import { CaseManagementUseCases } from "@/widgets/product/case-management/use-cases/ui/CaseManagementUseCases";
-import { CTAsection } from "@/widgets/cta-section/ui/CTAsection";
+import { HeroSubpage } from "@/frontend/widgets/product/shared/hero-subpage/ui/HeroSubpage";
+import { ProblemSolutionSubpage } from "@/frontend/widgets/product/shared/problem-solution-subpage/ui/ProblemSolutionSubpage";
+import { FeaturesSubpage } from "@/frontend/widgets/product/shared/features-subpage/ui/FeaturesSubpage";
+import { CaseManagementWorkflow } from "@/frontend/widgets/product/case-management/workflow/ui/CaseManagementWorkflow";
+import { CaseManagementUseCases } from "@/frontend/widgets/product/case-management/use-cases/ui/CaseManagementUseCases";
+import { CTAsection } from "@/frontend/widgets/cta-section/ui/CTAsection";
 
 export default function ProductCaseManagement() {
   const { hero, problemSolution, features, workflow, useCases, cta } =
