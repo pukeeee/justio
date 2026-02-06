@@ -250,29 +250,33 @@ export function WorkspaceSwitcher() {
             </DropdownMenuLabel>
 
             {/* Список воркспейсів */}
-            {workspaces.map((workspace) => (
-              <DropdownMenuItem
-                key={workspace.id}
-                onClick={() => handleWorkspaceSwitch(workspace.slug)}
-                className="gap-2 p-2"
-                disabled={workspace.slug === currentSlug}
-              >
-                {/* Іконка */}
-                <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                  <Building2 className="size-4 shrink-0" />
-                </div>
+            {workspaces.map((workspace) => {
+              const isActive = workspace.slug === currentSlug;
+              
+              return (
+                <DropdownMenuItem
+                  key={workspace.id}
+                  onClick={() => handleWorkspaceSwitch(workspace.slug)}
+                  className="gap-2 p-2"
+                  disabled={isActive}
+                >
+                  {/* Іконка */}
+                  <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                    <Building2 className="size-4 shrink-0" />
+                  </div>
 
-                {/* Назва */}
-                <span className="truncate">{workspace.name}</span>
+                  {/* Назва */}
+                  <span className="truncate">{workspace.name}</span>
 
-                {/* Індикатор активного */}
-                {workspace.slug === currentSlug && (
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    Активний
-                  </span>
-                )}
-              </DropdownMenuItem>
-            ))}
+                  {/* Індикатор активного */}
+                  {isActive && (
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      Активний
+                    </span>
+                  )}
+                </DropdownMenuItem>
+              );
+            })}
 
             {/* Кнопка створення нового (якщо можна) */}
             {canCreate && (

@@ -7,6 +7,7 @@ import { cache } from "react";
 import { container } from "@/backend/infrastructure/di/container";
 import { IAuthService } from "@/backend/application/interfaces/services/auth.service.interface";
 import { IWorkspaceRepository } from "@/backend/application/interfaces/repositories/workspace.repository.interface";
+import type { Workspace } from "@/frontend/entities/workspace/model/type";
 
 /**
  * Тип для форматованих даних користувача
@@ -26,7 +27,7 @@ export type FormattedUserData = {
  * Server Components під час одного запиту, реальний запит до БД 
  * буде виконано лише ОДИН РАЗ.
  */
-export const getUserWorkspaces = cache(async () => {
+export const getUserWorkspaces = cache(async (): Promise<Workspace[]> => {
   try {
     const authService = container.resolve<IAuthService>("IAuthService");
     const currentUser = await authService.getCurrentUser();
@@ -42,7 +43,7 @@ export const getUserWorkspaces = cache(async () => {
     return workspaces.map((w) => ({
       id: w.id,
       name: w.name,
-      slug: w.slug,
+      slug: w.slug.value,
     }));
   } catch (error) {
     console.error("[getUserWorkspaces] Помилка:", error);

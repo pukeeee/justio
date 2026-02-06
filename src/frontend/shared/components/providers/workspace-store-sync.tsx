@@ -8,12 +8,7 @@
 
 import { useWorkspaceStore } from "@/frontend/shared/stores/workspace-store";
 import { useEffect } from "react";
-import type { Database } from "@/shared/types/database";
-
-type Workspace = Pick<
-  Database["public"]["Tables"]["workspaces"]["Row"],
-  "id" | "name" | "slug"
->;
+import type { Workspace } from "@/frontend/entities/workspace/model/type";
 
 interface WorkspaceStoreSyncProps {
   workspaces: Workspace[];
@@ -23,16 +18,19 @@ interface WorkspaceStoreSyncProps {
 /**
  * Компонент синхронізації.
  * Він не рендерить нічого в DOM, але виконує синхронізацію стору.
- * 
+ *
  * ОПТИМІЗАЦІЯ:
  * 1. Синхронна ініціалізація під час рендеру (запобігає миготінню UI).
  * 2. useEffect для оновлення при зміні пропсів (наприклад, зміна slug в URL).
  */
-export function WorkspaceStoreSync({ workspaces, currentSlug }: WorkspaceStoreSyncProps) {
+export function WorkspaceStoreSync({
+  workspaces,
+  currentSlug,
+}: WorkspaceStoreSyncProps) {
   const store = useWorkspaceStore.getState();
-  
+
   // 1. СИНХРОННА ІНІЦІАЛІЗАЦІЯ (тільки для першого рендеру клієнта)
-  // Якщо стор ще не ініціалізований, ми робимо це негайно, 
+  // Якщо стор ще не ініціалізований, ми робимо це негайно,
   // щоб дочірні компоненти вже бачили дані.
   if (!store.initialized && typeof window !== "undefined") {
     store.setWorkspaces(workspaces);
@@ -42,7 +40,9 @@ export function WorkspaceStoreSync({ workspaces, currentSlug }: WorkspaceStoreSy
   }
 
   const setWorkspaces = useWorkspaceStore((state) => state.setWorkspaces);
-  const setCurrentWorkspace = useWorkspaceStore((state) => state.setCurrentWorkspace);
+  const setCurrentWorkspace = useWorkspaceStore(
+    (state) => state.setCurrentWorkspace,
+  );
 
   // 2. АСИНХРОННЕ ОНОВЛЕННЯ (при зміні пропсів)
   useEffect(() => {

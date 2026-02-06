@@ -3,7 +3,7 @@
  * @description Zustand store для управління воркспейсами користувача
  *
  * АРХІТЕКТУРА:
- * - SSR-friendly: store ініціалізується на сервері через getServerSideProps
+ * - SSR-friendly: store ініціалізується на сервері та синхронізується з клієнтом
  * - Hydration-safe: немає розбіжностей між сервером та клієнтом
  * - Singleton pattern: один екземпляр store на весь додаток
  *
@@ -13,21 +13,12 @@
  */
 
 import { create } from "zustand";
-import type { Database } from "@/shared/types/database";
 import { WORKSPACE_TIER_LIMITS } from "@/shared/config/billing";
+import type { Workspace } from "@/frontend/entities/workspace/model/type";
 
 // ============================================================================
-// ТИПИ
+// ТИПИ СТАНУ
 // ============================================================================
-
-/**
- * Мінімальний тип воркспейсу для store
- * Використовуємо Pick для type-safety з базою даних
- */
-type Workspace = Pick<
-  Database["public"]["Tables"]["workspaces"]["Row"],
-  "id" | "name" | "slug"
->;
 
 /**
  * Інтерфейс стану Zustand store
@@ -84,7 +75,7 @@ interface WorkspaceState {
    * Встановлює активний воркспейс за slug
    * Викликається при навігації між воркспейсами
    */
-  setCurrentWorkspace: (slug: string) => void;
+  setCurrentWorkspace: (slug: string | null) => void;
 
   /**
    * Додає новий воркспейс до списку
@@ -116,7 +107,6 @@ interface WorkspaceState {
  * - Легкий (~1kB) та швидкий
  * - Не потребує Provider (на відміну від Context API)
  * - Підтримує SSR out of the box
- * - Селективні підписки (компоненти ре-рендеряться тільки при зміні потрібних даних)
  */
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   // ===== ПОЧАТКОВИЙ СТАН =====
@@ -173,12 +163,16 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
    *
    * ВАЖЛИВО:
    * - Викликається ОДИН РАЗ при завантаженні додатку
-   * - Захищено від повторних викликів через перевірку `initialized`
-   * - Встановлює прапорець `initialized` для запобігання миготінню
+   * - Гарантує унікальність воркспейсів за ID
    */
   setWorkspaces: (workspaces) => {
+    // Використовуємо Map для гарантії унікальності за ID
+    const uniqueWorkspaces = Array.from(
+      new Map(workspaces.map((w) => [w.id, w])).values(),
+    );
+
     set({
-      workspaces,
+      workspaces: uniqueWorkspaces,
       initialized: true,
     });
   },
@@ -188,19 +182,20 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
    *
    * ВАЛІДАЦІЯ:
    * - Перевіряє, чи існує воркспейс з таким slug
-   * - Логує попередження, якщо спроба встановити неіснуючий воркспейс
-   * - Не змінює стан при невалідному slug
    */
   setCurrentWorkspace: (slug) => {
     const { workspaces } = get();
 
-    // Валідація: перевіряємо існування воркспейсу
+    if (slug === null) {
+      set({ currentWorkspaceSlug: null });
+      return;
+    }
+
     const exists = workspaces.some((w) => w.slug === slug);
 
     if (!exists) {
       console.warn(
-        `[WorkspaceStore] Спроба встановити неіснуючий воркспейс: ${slug}. ` +
-          `Доступні: ${workspaces.map((w) => w.slug).join(", ")}`,
+        `[WorkspaceStore] Спроба встановити неіснуючий воркспейс: ${slug}`,
       );
       return;
     }
@@ -212,27 +207,25 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
    * Додає новий воркспейс до списку
    *
    * КОЛИ ВИКЛИКАЄТЬСЯ:
-   * - Після успішного створення воркспейсу через createWorkspaceAction
-   *
-   * ОПТИМІЗАЦІЯ:
-   * - Immutable update через spread operator
-   * - Zustand автоматично оповіщає підписників
+   * - Після успішного створення воркспейсу через Server Action
    */
   addWorkspace: (workspace) => {
-    set((state) => ({
-      workspaces: [...state.workspaces, workspace],
-    }));
+    set((state) => {
+      // Перевіряємо, чи вже існує воркспейс з таким ID
+      const exists = state.workspaces.some((w) => w.id === workspace.id);
+      if (exists) return state;
+
+      return {
+        workspaces: [...state.workspaces, workspace],
+      };
+    });
   },
 
   /**
    * Видаляє воркспейс зі списку
    *
-   * КОЛИ ВИКЛИКАЄТЬСЯ:
-   * - Після успішного видалення воркспейсу через deleteWorkspaceAction
-   *
    * ДОДАТКОВА ЛОГІКА:
    * - Якщо видалений воркспейс був активним, скидає currentWorkspaceSlug
-   * - Це запобігає помилкам при спробі доступу до видаленого воркспейсу
    */
   removeWorkspace: (id) => {
     set((state) => {
@@ -240,7 +233,6 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 
       return {
         workspaces: state.workspaces.filter((w) => w.id !== id),
-        // Скидаємо активний воркспейс, якщо він був видалений
         currentWorkspaceSlug:
           currentWorkspace?.id === id ? null : state.currentWorkspaceSlug,
       };
@@ -252,11 +244,6 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
    *
    * КОЛИ ВИКЛИКАЄТЬСЯ:
    * - При logout користувача
-   * - При критичних помилках автентифікації
-   *
-   * БЕЗПЕКА:
-   * - Очищує всі дані про воркспейси
-   * - Скидає прапорець ініціалізації
    */
   reset: () => {
     set({
@@ -268,7 +255,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 }));
 
 // ============================================================================
-// ДОПОМІЖНІ ХУКИ (для зручності використання)
+// ДОПОМІЖНІ ХУКИ
 // ============================================================================
 
 /**

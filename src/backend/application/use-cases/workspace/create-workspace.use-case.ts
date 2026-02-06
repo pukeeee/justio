@@ -1,5 +1,6 @@
 import { injectable, inject } from 'tsyringe';
 import { Workspace } from '@/backend/domain/entities/workspace.entity';
+import { WorkspaceSlug } from '@/backend/domain/value-objects/workspace-slug.vo';
 import type { IWorkspaceRepository } from '@/backend/application/interfaces/repositories/workspace.repository.interface';
 
 /**
@@ -21,20 +22,20 @@ export class CreateWorkspaceUseCase {
       throw new Error('Назва воркспейсу має бути від 2 до 100 символів');
     }
 
-    // 2. Генерація слага (рандомний ідентифікатор)
-    let slug = this.generateSlug();
+    // 2. Генерація унікального слага через Domain Value Object
+    let slugVo = WorkspaceSlug.generate();
     
     // Перевірка на конфлікт слагів (хоча шанс мінімальний)
-    let existing = await this.workspaceRepository.findBySlug(slug);
+    let existing = await this.workspaceRepository.findBySlug(slugVo.value);
     while (existing) {
-      slug = this.generateSlug();
-      existing = await this.workspaceRepository.findBySlug(slug);
+      slugVo = WorkspaceSlug.generate();
+      existing = await this.workspaceRepository.findBySlug(slugVo.value);
     }
 
     // 3. Створення сутності
     const workspace = Workspace.create({
       name: trimmedName,
-      slug: slug,
+      slug: slugVo,
       ownerId: userId,
     });
 
@@ -42,19 +43,5 @@ export class CreateWorkspaceUseCase {
     await this.workspaceRepository.save(workspace);
 
     return workspace;
-  }
-
-  /**
-   * Генерує рандомний короткий ідентифікатор для слага.
-   * Використовує алфавітно-цифрові символи.
-   */
-  private generateSlug(): string {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    const length = 10;
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
   }
 }

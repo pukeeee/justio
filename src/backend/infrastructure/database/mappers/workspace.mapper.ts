@@ -54,7 +54,7 @@ export class WorkspaceMapper {
     return {
       id: domain.id,
       name: domain.name,
-      slug: domain.slug,
+      slug: domain.slug.value,
       ownerId: domain.ownerId,
       tier: domain.subscriptionTier.name as "free" | "starter" | "pro" | "enterprise",
       settings: {

@@ -7,15 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/frontend/shared/components/ui/card";
-import type { Database } from "@/shared/types/database";
 import { Building2 } from "lucide-react";
-
-// Локально визначаємо тип Workspace як підмножину полів з авто-згенерованого типу бази даних.
-// Це гарантує консистентність з БД і не вимагає створення окремих файлів типів.
-type Workspace = Pick<
-  Database["public"]["Tables"]["workspaces"]["Row"],
-  "id" | "name" | "slug"
->;
+import type { Workspace } from "../model/type";
 
 /**
  * @description Пропси для компонента `WorkspaceCard`.

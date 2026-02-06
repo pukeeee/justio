@@ -1,8 +1,10 @@
 import { SubscriptionTier } from '../value-objects/subscription-tier.vo';
+import { WorkspaceSlug } from '../value-objects/workspace-slug.vo';
 
 /**
  * Налаштування робочого простору.
  */
+// ... (WorkspaceSettings remains same)
 export class WorkspaceSettings {
   constructor(
     public readonly visibilityMode: 'all' | 'private' = 'all',
@@ -24,7 +26,7 @@ export class Workspace {
   private constructor(
     public readonly id: string,
     private _name: string,
-    public readonly slug: string,
+    public readonly slug: WorkspaceSlug,
     public readonly ownerId: string,
     private _subscriptionTier: SubscriptionTier,
     private _settings: WorkspaceSettings,
@@ -36,7 +38,7 @@ export class Workspace {
   static create(props: {
     id?: string;
     name: string;
-    slug: string;
+    slug: string | WorkspaceSlug;
     ownerId: string;
     tier?: SubscriptionTier;
     settings?: WorkspaceSettings;
@@ -44,10 +46,14 @@ export class Workspace {
     updatedAt?: Date;
     deletedAt?: Date | null;
   }): Workspace {
+    const slug = typeof props.slug === 'string' 
+      ? WorkspaceSlug.create(props.slug) 
+      : props.slug;
+
     return new Workspace(
       props.id ?? crypto.randomUUID(),
       props.name,
-      props.slug,
+      slug,
       props.ownerId,
       props.tier ?? SubscriptionTier.FREE,
       props.settings ?? WorkspaceSettings.default(),
