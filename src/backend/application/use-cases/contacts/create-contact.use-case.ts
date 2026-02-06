@@ -9,6 +9,8 @@ import {
 } from "@/backend/domain/errors/invalid-data.error";
 import type { IContactRepository } from "@/backend/application/interfaces/repositories/contact.repository.interface";
 import type { CreateContactDTO } from "@/backend/application/dtos/contacts/create-contact.dto";
+// import { ContactCreatedEvent } from "@/backend/domain/events/contact.events";
+// import { eventDispatcher } from "@/backend/infrastructure/events/event-dispatcher";
 
 /**
  * Use Case для створення нового контакту.
@@ -34,11 +36,7 @@ export class CreateContactUseCase {
           dto.taxNumber,
         );
         if (isDuplicate)
-          throw new DuplicateEntityError(
-            "Фізична особа",
-            "ІПН",
-            dto.taxNumber,
-          );
+          throw new DuplicateEntityError("Фізична особа", "ІПН", dto.taxNumber);
       }
     } else {
       if (!dto.companyName)
@@ -71,11 +69,7 @@ export class CreateContactUseCase {
         dto.phone,
       );
       if (isDuplicate)
-        throw new DuplicateEntityError(
-          "Контакт",
-          "номер телефону",
-          dto.phone,
-        );
+        throw new DuplicateEntityError("Контакт", "номер телефону", dto.phone);
     }
 
     // 4. Створення сутностей
@@ -112,6 +106,16 @@ export class CreateContactUseCase {
 
     // 5. Збереження в БД (транзакційно)
     await this.contactRepository.saveFullContact(contact, details);
+
+    // const event = new ContactCreatedEvent(
+    //   contact.id,
+    //   contact.workspaceId,
+    //   contact.contactType,
+    //   contact.createdBy,
+    // );
+
+    // // 3. Відправка події (важливо await, щоб Server Action не вмер завчасно)
+    // await eventDispatcher.dispatch(event);
 
     return { contact, details };
   }
