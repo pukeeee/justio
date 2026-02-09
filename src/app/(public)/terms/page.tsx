@@ -1,7 +1,7 @@
 "use client";
 
-import { TermsHero } from "@/frontend/widgets/terms/ui/TermsHero";
-import { TermsSections } from "@/frontend/widgets/terms/ui/TermsSections";
+import { TermsHero } from "@/frontend/widgets/root/terms/ui/TermsHero";
+import { TermsSections } from "@/frontend/widgets/root/terms/ui/TermsSections";
 import { termsContent } from "@/content/main/terms";
 
 /**

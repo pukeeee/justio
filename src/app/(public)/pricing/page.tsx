@@ -1,10 +1,10 @@
 "use client";
 
-import { PricingHero } from "@/frontend/widgets/pricing/ui/PricingHero";
-import { PricingCards } from "@/frontend/widgets/pricing/ui/PricingCards";
-import { PricingComparison } from "@/frontend/widgets/pricing/ui/PricingComparison";
-import { PricingFAQ } from "@/frontend/widgets/pricing/ui/PricingFAQ";
-import { CTAsection } from "@/frontend/widgets/cta-section/ui/CTAsection";
+import { PricingHero } from "@/frontend/widgets/root/pricing/ui/PricingHero";
+import { PricingCards } from "@/frontend/widgets/root/pricing/ui/PricingCards";
+import { PricingComparison } from "@/frontend/widgets/root/pricing/ui/PricingComparison";
+import { PricingFAQ } from "@/frontend/widgets/root/pricing/ui/PricingFAQ";
+import { CTAsection } from "@/frontend/widgets/root/cta-section/ui/CTAsection";
 import { pricingContent } from "@/content/main/pricing";
 
 /**

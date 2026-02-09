@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { cn } from "@/frontend/shared/lib/utils";
-import { AuthenticatedUser } from "@/frontend/widgets/header/lib/AuthenticatedUser";
+import { AuthenticatedUser } from "@/frontend/widgets/root/header/lib/AuthenticatedUser";
 import type { FormattedUserData } from "@/frontend/shared/lib/auth/get-user-data";
 
 interface UserHeaderClientProps {

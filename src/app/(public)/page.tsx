@@ -1,10 +1,10 @@
 import { ScrollToTop } from "@/frontend/shared/components/ScrollToTop";
-import HeroSection from "@/frontend/widgets/main/hero-section/HeroSection";
-import WhyWeSection from "@/frontend/widgets/main/why-section/WhyWeSection";
-import SolutionsSection from "@/frontend/widgets/main/solutions-section/SolutionsSection";
-import ProductsSection from "@/frontend/widgets/main/products-section/ProductsSection";
-import SecuritySection from "@/frontend/widgets/main/security-section/SecuritySection";
-import FinalSection from "@/frontend/widgets/main/final-cta-section/FinalSection";
+import HeroSection from "@/frontend/widgets/root/main/hero-section/HeroSection";
+import WhyWeSection from "@/frontend/widgets/root/main/why-section/WhyWeSection";
+import SolutionsSection from "@/frontend/widgets/root/main/solutions-section/SolutionsSection";
+import ProductsSection from "@/frontend/widgets/root/main/products-section/ProductsSection";
+import SecuritySection from "@/frontend/widgets/root/main/security-section/SecuritySection";
+import FinalSection from "@/frontend/widgets/root/main/final-cta-section/FinalSection";
 import { mainPageContent } from "@/content/main";
 
 /**

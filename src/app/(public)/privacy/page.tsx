@@ -1,7 +1,7 @@
 "use client";
 
-import { PrivacyHero } from "@/frontend/widgets/privacy/ui/PrivacyHero";
-import { PrivacySections } from "@/frontend/widgets/privacy/ui/PrivacySections";
+import { PrivacyHero } from "@/frontend/widgets/root/privacy/ui/PrivacyHero";
+import { PrivacySections } from "@/frontend/widgets/root/privacy/ui/PrivacySections";
 import { privacyContent } from "@/content/main/privacy";
 
 /**

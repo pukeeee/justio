@@ -6,7 +6,7 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/frontend/shared/lib/utils";
 import { useAuthModal } from "@/frontend/shared/stores/use-auth-modal.store";
-import { AuthenticatedUser } from "@/frontend/widgets/header/lib/AuthenticatedUser";
+import { AuthenticatedUser } from "@/frontend/widgets/root/header/lib/AuthenticatedUser";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   NavigationMenu,

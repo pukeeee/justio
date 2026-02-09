@@ -8,7 +8,7 @@
  * - Дані завантажуються в RootLayout та зберігаються в store
  */
 
-import { WorkspaceClientPage } from "@/frontend/widgets/workspace/ui/WorkspaceClientPage";
+import { WorkspaceClientPage } from "@/frontend/widgets/user/workspace/ui/WorkspaceClientPage";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
