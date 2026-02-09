@@ -23,6 +23,8 @@ export class CreateClientUseCase {
   async execute(
     dto: CreateClientDTO,
   ): Promise<{ client: Client; details: Individual | Company }> {
+    const entityName = dto.clientType === ClientType.INDIVIDUAL ? "Фізична особа" : "Компанія";
+
     // 1. Валідація обов'язкових полів залежно від типу
     if (dto.clientType === ClientType.INDIVIDUAL) {
       if (!dto.firstName) throw new MissingRequiredFieldError("Ім’я");
@@ -35,9 +37,10 @@ export class CreateClientUseCase {
         );
         if (isDuplicate)
           throw new DuplicateEntityError(
-            "Фізична особа",
+            entityName,
             "РНОКПП",
             dto.taxNumber,
+            "taxNumber",
           );
       }
     } else {
@@ -50,7 +53,12 @@ export class CreateClientUseCase {
           dto.taxId,
         );
         if (isDuplicate)
-          throw new DuplicateEntityError("Компанія", "ЄДРПОУ", dto.taxId);
+          throw new DuplicateEntityError(
+            entityName,
+            "ЄДРПОУ",
+            dto.taxId,
+            "taxId",
+          );
       }
     }
 
@@ -61,7 +69,7 @@ export class CreateClientUseCase {
         dto.email,
       );
       if (isDuplicate)
-        throw new DuplicateEntityError("Клієнт", "Email", dto.email);
+        throw new DuplicateEntityError(entityName, "Email", dto.email, "email");
     }
 
     // 3. Перевірка унікальності телефону
@@ -71,7 +79,12 @@ export class CreateClientUseCase {
         dto.phone,
       );
       if (isDuplicate)
-        throw new DuplicateEntityError("Клієнт", "номер телефону", dto.phone);
+        throw new DuplicateEntityError(
+          entityName,
+          "номером телефону",
+          dto.phone,
+          "phone",
+        );
     }
 
     // 4. Створення сутностей

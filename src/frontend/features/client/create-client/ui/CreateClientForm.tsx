@@ -21,12 +21,10 @@ export function CreateClientForm({
 
     if (result.success) {
       toast.success("Клієнта успішно створено");
-      onSuccess?.();
-    } else {
-      toast.error(result.error || "Не вдалося створити клієнта");
-      // Кидаємо помилку, щоб форма не очистилася і показала стан помилки (якщо потрібно)
-      // Але в даному випадку ми просто показуємо тост
+      // Ми не викликаємо onSuccess тут, бо ClientForm зробить це, якщо результат успішний
     }
+    
+    return result;
   };
 
   return (

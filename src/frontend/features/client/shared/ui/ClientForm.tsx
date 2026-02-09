@@ -8,6 +8,7 @@ import {
   FieldErrors,
   SubmitHandler,
   Controller,
+  Path,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClientSchema } from "@/frontend/entities/client/model/schema";
@@ -46,7 +47,11 @@ type CreateCompany = Extract<CreateClient, { clientType: "company" }>;
 interface ClientFormProps {
   workspaceId: string;
   onSuccess?: () => void;
-  onSubmit: (data: CreateClient) => Promise<void>;
+  onSubmit: (data: CreateClient) => Promise<{
+    success: boolean;
+    error: string | null;
+    validationErrors?: Record<string, string>;
+  }>;
   defaultValues?: Partial<CreateClient>;
   mode: "create" | "edit";
   className?: string;
@@ -112,6 +117,7 @@ export function ClientForm({
     control,
     handleSubmit,
     reset,
+    setError,
     formState: { errors, isSubmitting: formIsSubmitting, isDirty },
   } = form;
 
@@ -182,10 +188,25 @@ export function ClientForm({
         }
       }
 
-      await onSubmit(cleanData);
-      onSuccess?.();
+      const result = await onSubmit(cleanData);
+      
+      if (result.success) {
+        onSuccess?.();
+      } else if (result.validationErrors) {
+        // Встановлюємо помилки для кожного поля
+        Object.entries(result.validationErrors).forEach(([field, message]) => {
+          setError(field as Path<CreateClient>, {
+            type: "manual",
+            message: message,
+          });
+        });
+        toast.error("Перевірте вказані дані");
+      } else {
+        toast.error(result.error || "Сталася помилка");
+      }
     } catch (error) {
       console.error("Form submission error:", error);
+      toast.error("Сталася непередбачувана помилка");
     }
   };
 

@@ -7,6 +7,7 @@ import { IAuthService } from "@/backend/application/interfaces/services/auth.ser
 import { IWorkspaceRepository } from "@/backend/application/interfaces/repositories/workspace.repository.interface";
 import { updateClientSchema } from "@/frontend/entities/client/model/schema";
 import { UpdateClient } from "@/frontend/entities/client/model/types";
+import { DuplicateEntityError } from "@/backend/domain/errors/invalid-data.error";
 
 /**
  * @description Допоміжна функція для конвертації значень у дату
@@ -22,7 +23,11 @@ const toDate = (val: string | Date | null | undefined): Date | null => {
  */
 export async function updateClientAction(
   data: UpdateClient,
-): Promise<{ success: boolean; error: string | null }> {
+): Promise<{ 
+  success: boolean; 
+  error: string | null;
+  validationErrors?: Record<string, string>;
+}> {
   try {
     // 1. Отримуємо залежності з контейнера
     const updateClientUseCase = container.resolve(UpdateClientUseCase);
@@ -73,6 +78,9 @@ export async function updateClientAction(
                 success: false,
                 error:
                   "Дата видачі паспорта обов'язкова, якщо заповнено інші поля паспорта",
+                validationErrors: {
+                  "passportDetails.issuedDate": "Дата видачі обов'язкова",
+                }
               };
             }
           } else {
@@ -118,6 +126,16 @@ export async function updateClientAction(
     return { success: true, error: null };
   } catch (error) {
     console.error("Update client action error:", error);
+
+    if (error instanceof DuplicateEntityError && error.fieldKey) {
+      return {
+        success: false,
+        error: error.message,
+        validationErrors: {
+          [error.fieldKey]: error.message
+        }
+      };
+    }
 
     const errorMessage =
       error instanceof Error ? error.message : "Не вдалося оновити клієнта";

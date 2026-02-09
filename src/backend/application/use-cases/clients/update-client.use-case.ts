@@ -27,6 +27,8 @@ export class UpdateClientUseCase {
     const client = await this.clientRepository.findById(dto.id);
     if (!client) throw new EntityNotFoundError("Клієнт", dto.id);
 
+    const entityName = client.clientType === ClientType.INDIVIDUAL ? "Фізична особа" : "Компанія";
+
     // 2. Перевірка унікальності Email при оновленні
     if (dto.email && dto.email !== client.email) {
       const isDuplicate = await this.clientRepository.existsByEmail(
@@ -35,7 +37,7 @@ export class UpdateClientUseCase {
         client.id,
       );
       if (isDuplicate)
-        throw new DuplicateEntityError("Клієнт", "Email", dto.email);
+        throw new DuplicateEntityError(entityName, "Email", dto.email, "email");
     }
 
     // 3. Перевірка унікальності Телефону при оновленні
@@ -46,7 +48,12 @@ export class UpdateClientUseCase {
         client.id,
       );
       if (isDuplicate)
-        throw new DuplicateEntityError("Клієнт", "номер телефону", dto.phone);
+        throw new DuplicateEntityError(
+          entityName,
+          "номером телефону",
+          dto.phone,
+          "phone",
+        );
     }
 
     // Оновлення базових полів клієнта
@@ -75,9 +82,10 @@ export class UpdateClientUseCase {
         );
         if (isDuplicate)
           throw new DuplicateEntityError(
-            "Фізична особа",
+            entityName,
             "РНОКПП",
             dto.taxNumber,
+            "taxNumber",
           );
       }
 
@@ -104,7 +112,12 @@ export class UpdateClientUseCase {
           client.id,
         );
         if (isDuplicate)
-          throw new DuplicateEntityError("Компанія", "ЄДРПОУ", dto.taxId);
+          throw new DuplicateEntityError(
+            entityName,
+            "ЄДРПОУ",
+            dto.taxId,
+            "taxId",
+          );
       }
 
       company.update({

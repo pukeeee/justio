@@ -7,6 +7,7 @@ import { IAuthService } from "@/backend/application/interfaces/services/auth.ser
 import { createClientSchema } from "@/frontend/entities/client/model/schema";
 import { CreateClient } from "@/frontend/entities/client/model/types";
 import { ClientType } from "@/backend/domain/value-objects/client-type.enum";
+import { DuplicateEntityError } from "@/backend/domain/errors/invalid-data.error";
 
 /**
  * @description Допоміжна функція для конвертації значень у дату
@@ -23,7 +24,11 @@ const toDate = (val: string | Date | null | undefined): Date | null => {
  */
 export async function createClientAction(
   data: CreateClient,
-): Promise<{ success: boolean; error: string | null }> {
+): Promise<{ 
+  success: boolean; 
+  error: string | null;
+  validationErrors?: Record<string, string>;
+}> {
   try {
     // 1. Отримуємо залежності з контейнера
     const createClientUseCase = container.resolve(CreateClientUseCase);
@@ -77,6 +82,9 @@ export async function createClientAction(
                 success: false,
                 error:
                   "Дата видачі паспорта обов'язкова, якщо заповнено інші поля паспорта",
+                validationErrors: {
+                  "passportDetails.issuedDate": "Дата видачі обов'язкова",
+                }
               };
             }
           } else {
@@ -116,6 +124,16 @@ export async function createClientAction(
     return { success: true, error: null };
   } catch (error) {
     console.error("Create client action error:", error);
+
+    if (error instanceof DuplicateEntityError && error.fieldKey) {
+      return {
+        success: false,
+        error: error.message,
+        validationErrors: {
+          [error.fieldKey]: error.message
+        }
+      };
+    }
 
     const errorMessage =
       error instanceof Error ? error.message : "Не вдалося створити клієнта";

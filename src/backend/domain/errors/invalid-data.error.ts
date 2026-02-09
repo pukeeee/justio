@@ -84,7 +84,12 @@ export class EntityNotFoundError extends DomainError {
  * Помилка: Сутність вже існує (дублікат).
  */
 export class DuplicateEntityError extends DomainError {
-  constructor(entityName: string, field: string, value: string) {
-    super(`${entityName} з ${field} "${value}" вже існує в системі`);
+  constructor(
+    public readonly entityName: string,
+    public readonly field: string,
+    public readonly value: string,
+    public readonly fieldKey?: string,
+  ) {
+    super(`${entityName} з таким ${field} вже існує`);
   }
 }

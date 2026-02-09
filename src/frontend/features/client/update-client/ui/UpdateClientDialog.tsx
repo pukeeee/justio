@@ -65,7 +65,9 @@ export function UpdateClientDialog({
   const handleSubmit = async (data: any) => {
     // data приходить як CreateClient, але ми знаємо що це update, тому додаємо ID
     // ClientForm повертає CreateClient, тому нам треба додати ID
-    if (!clientId) return;
+    if (!clientId) {
+      return { success: false, error: "ID клієнта відсутній" };
+    }
 
     const updateData: UpdateClient = {
       ...data,
@@ -76,11 +78,9 @@ export function UpdateClientDialog({
 
     if (result.success) {
       toast.success("Клієнта успішно оновлено");
-      onOpenChange(false);
-      onSuccess?.();
-    } else {
-      toast.error(result.error || "Не вдалося оновити клієнта");
     }
+    
+    return result;
   };
 
   return (
@@ -104,6 +104,10 @@ export function UpdateClientDialog({
               mode="edit"
               defaultValues={defaultValues}
               onSubmit={handleSubmit}
+              onSuccess={() => {
+                onOpenChange(false);
+                onSuccess?.();
+              }}
               className="flex-1 min-h-0"
             />
           )
