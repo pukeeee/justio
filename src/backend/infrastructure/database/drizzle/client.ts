@@ -14,7 +14,11 @@ if (!connectionString) {
 }
 
 // Створюємо клієнт для запитів (query client)
-const queryClient = postgres(connectionString);
+// prepare: false обов'язковий для роботи з PgBouncer (Supabase Transaction Mode)
+const queryClient = postgres(connectionString, { 
+  prepare: false,
+  max: process.env.NODE_ENV === 'production' ? 1 : undefined 
+});
 
 // Створюємо екземпляр Drizzle з нашою схемою
 export const db = drizzle(queryClient, { schema });

@@ -47,6 +47,14 @@ export interface IClientRepository {
   saveFullClient(client: Client, details: Individual | Company): Promise<void>;
 
   /**
+   * Атомарне оновлення клієнту та його деталей (транзакційно).
+   */
+  updateFullClient(
+    client: Client,
+    details: Individual | Company,
+  ): Promise<void>;
+
+  /**
    * М'яке видалення клієнту.
    */
   softDelete(id: string): Promise<void>;
@@ -57,7 +65,7 @@ export interface IClientRepository {
   restore(id: string): Promise<void>;
 
   /**
-   * Перевірити, чи існує фізична особа з таким ІПН (РНОКПП) у воркспейсі.
+   * Перевірити, чи існує фізична особа з таким РНОКПП у воркспейсі.
    */
   existsByTaxNumber(
     workspaceId: string,

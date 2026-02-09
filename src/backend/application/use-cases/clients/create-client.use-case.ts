@@ -34,7 +34,11 @@ export class CreateClientUseCase {
           dto.taxNumber,
         );
         if (isDuplicate)
-          throw new DuplicateEntityError("Фізична особа", "ІПН", dto.taxNumber);
+          throw new DuplicateEntityError(
+            "Фізична особа",
+            "РНОКПП",
+            dto.taxNumber,
+          );
       }
     } else {
       if (!dto.companyName)

@@ -45,11 +45,11 @@ export class ImmutableFieldUpdateError extends DomainError {
 }
 
 /**
- * Помилка для невалідного РНОКПП (ІПН).
+ * Помилка для невалідного РНОКПП.
  */
 export class InvalidTaxNumberError extends DomainError {
   constructor(value: string) {
-    super(`Невалідний РНОКПП (ІПН): ${value}. Очікується 10 цифр.`);
+    super(`Невалідний РНОКПП: ${value}. Очікується 10 цифр.`);
   }
 }
 

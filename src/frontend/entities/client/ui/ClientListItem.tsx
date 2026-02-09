@@ -2,18 +2,11 @@
 
 import { Client } from "../model/types";
 import { Avatar, AvatarFallback } from "@/frontend/shared/components/ui/avatar";
-import { Button } from "@/frontend/shared/components/ui/button";
 import { TableCell, TableRow } from "@/frontend/shared/components/ui/table";
-import { MoreVertical, Pencil, Trash2, Mail, Phone } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/frontend/shared/components/ui/dropdown-menu";
+import { Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/frontend/shared/lib/utils";
+import { ClientActions } from "./ClientActions";
 
 interface ClientListItemProps {
   client: Client;
@@ -127,32 +120,12 @@ export function ClientListItem({
       </TableCell>
 
       <TableCell className="py-3 px-4 text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Дії</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem onClick={() => onEdit?.(client)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Редагувати
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => onDelete?.(client)}
-              className="text-destructive focus:text-destructive"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Видалити
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ClientActions
+          client={client}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          triggerClassName="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+        />
       </TableCell>
     </TableRow>
   );

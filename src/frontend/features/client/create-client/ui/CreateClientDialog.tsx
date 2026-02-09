@@ -37,7 +37,7 @@ export function CreateClientDialog({ workspaceId }: CreateClientDialogProps) {
   };
 
   const TriggerButton = (
-    <Button className="flex gap-2">
+    <Button className="flex gap-2 cursor-pointer">
       <Plus className="h-4 w-4" />
       Додати клієнта
     </Button>

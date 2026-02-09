@@ -66,7 +66,7 @@ export class UpdateClientUseCase {
       if (!individual)
         throw new EntityNotFoundError("Профіль фізичної особи", dto.id);
 
-      // Перевірка унікальності ІПН
+      // Перевірка унікальності РНОКПП
       if (dto.taxNumber && dto.taxNumber !== individual.taxNumber) {
         const isDuplicate = await this.clientRepository.existsByTaxNumber(
           client.workspaceId,
@@ -74,7 +74,11 @@ export class UpdateClientUseCase {
           client.id,
         );
         if (isDuplicate)
-          throw new DuplicateEntityError("Фізична особа", "ІПН", dto.taxNumber);
+          throw new DuplicateEntityError(
+            "Фізична особа",
+            "РНОКПП",
+            dto.taxNumber,
+          );
       }
 
       individual.update({
@@ -86,6 +90,7 @@ export class UpdateClientUseCase {
         isFop: dto.isFop,
         passportDetails: dto.passportDetails,
       });
+
       details = individual;
     } else {
       const company = await this.clientRepository.findCompanyByClientId(dto.id);
@@ -110,7 +115,7 @@ export class UpdateClientUseCase {
     }
 
     // 4. Збереження в БД (транзакційно)
-    await this.clientRepository.saveFullClient(client, details);
+    await this.clientRepository.updateFullClient(client, details);
 
     return { client, details };
   }

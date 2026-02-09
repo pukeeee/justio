@@ -101,11 +101,16 @@ export const createClientSchema = z.discriminatedUnion("clientType", [
     companyName: z.string().min(1, "Назва компанії обов'язкова"),
     taxId: z
       .string()
-      .min(8, "ЄДРПОУ має містити 8 або 12 цифр")
-      .max(12)
+      .length(8, "ЄДРПОУ має містити 8 цифр")
       .regex(/^\d+$/, "Тільки цифри")
       .nullable()
       .optional()
       .or(z.literal("")),
   }),
+]);
+
+/** @description Схема для оновлення клієнта */
+export const updateClientSchema = z.discriminatedUnion("clientType", [
+  createClientSchema.options[0].extend({ id: z.uuid() }),
+  createClientSchema.options[1].extend({ id: z.uuid() }),
 ]);

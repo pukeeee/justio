@@ -2,8 +2,8 @@ import { Client } from "../model/types";
 import { Card, CardContent } from "@/frontend/shared/components/ui/card";
 import { Avatar, AvatarFallback } from "@/frontend/shared/components/ui/avatar";
 import { Badge } from "@/frontend/shared/components/ui/badge";
-import { Button } from "@/frontend/shared/components/ui/button";
-import { Phone, Mail, MoreHorizontal } from "lucide-react";
+import { Phone, Mail } from "lucide-react";
+import { ClientActions } from "./ClientActions";
 
 interface ClientCardProps {
   client: Client;
@@ -62,9 +62,13 @@ export function ClientCard({ client, onEdit, onDelete }: ClientCardProps) {
             </div>
           </div>
 
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
+          <ClientActions
+            client={client}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            icon="horizontal"
+            triggerClassName="h-8 w-8"
+          />
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-2">

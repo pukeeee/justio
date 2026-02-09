@@ -1,7 +1,7 @@
-import { InvalidTaxNumberError } from '../errors/invalid-data.error';
+import { InvalidTaxNumberError } from "../errors/invalid-data.error";
 
 /**
- * Value Object для РНОКПП (раніше ІПН) фізичної особи.
+ * Value Object для РНОКПП фізичної особи.
  * В Україні складається з 10 цифр.
  */
 export class TaxNumber {
@@ -11,13 +11,13 @@ export class TaxNumber {
    * Створює об'єкт РНОКПП з валідацією.
    */
   static create(value: string): TaxNumber {
-    const cleaned = value.trim().replace(/\D/g, '');
-    
+    const cleaned = value.trim().replace(/\D/g, "");
+
     // В Україні РНОКПП має бути рівно 10 цифр
     if (cleaned.length !== 10) {
       throw new InvalidTaxNumberError(value);
     }
-    
+
     return new TaxNumber(cleaned);
   }
 

@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { Client, ClientType } from "@/frontend/entities/client/model/types";
 import { ClientListItem } from "@/frontend/entities/client/ui/ClientListItem";
 import { ClientCard } from "@/frontend/entities/client/ui/ClientCard";
+import { UpdateClientDialog } from "@/frontend/features/client/update-client/ui/UpdateClientDialog";
 import {
   Table,
   TableBody,
@@ -33,10 +34,12 @@ type FilterValue = ClientType | "all";
 /**
  * @description Адаптивний віджет списку контактів.
  * Автоматично перемикається між таблицею (десктоп) та картками (мобайл).
+ * Включає в себе функціонал редагування клієнтів через UpdateClientDialog.
  */
 export function ClientsList({ clients, onEdit, onDelete }: ClientListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<FilterValue>("all");
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   // Логіка фільтрації
   const filteredClients = useMemo(() => {
@@ -61,6 +64,11 @@ export function ClientsList({ clients, onEdit, onDelete }: ClientListProps) {
   const resetFilters = () => {
     setSearchQuery("");
     setTypeFilter("all");
+  };
+
+  const handleEdit = (client: Client) => {
+    setEditingClient(client);
+    onEdit?.(client);
   };
 
   return (
@@ -124,7 +132,7 @@ export function ClientsList({ clients, onEdit, onDelete }: ClientListProps) {
                   <ClientListItem
                     key={client.id}
                     client={client}
-                    onEdit={onEdit}
+                    onEdit={handleEdit}
                     onDelete={onDelete}
                   />
                 ))}
@@ -138,7 +146,7 @@ export function ClientsList({ clients, onEdit, onDelete }: ClientListProps) {
               <ClientCard
                 key={client.id}
                 client={client}
-                onEdit={onEdit}
+                onEdit={handleEdit}
                 onDelete={onDelete}
               />
             ))}
@@ -153,6 +161,20 @@ export function ClientsList({ clients, onEdit, onDelete }: ClientListProps) {
             </Button>
           )}
         </div>
+      )}
+
+      {/* Діалог редагування */}
+      {editingClient && (
+        <UpdateClientDialog
+          key={editingClient.id}
+          open={!!editingClient}
+          onOpenChange={(open) => !open && setEditingClient(null)}
+          clientId={editingClient.id}
+          workspaceId={editingClient.workspaceId}
+          onSuccess={() => {
+            // Тут можна додати логіку після успішного оновлення
+          }}
+        />
       )}
     </div>
   );

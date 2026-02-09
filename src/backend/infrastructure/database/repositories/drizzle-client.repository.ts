@@ -26,6 +26,7 @@ import { ClientType } from "@/backend/domain/value-objects/client-type.enum";
 import { CompanyContactRole } from "@/backend/domain/value-objects/company-contact-role.enum";
 import { IClientRepository } from "@/backend/application/interfaces/repositories/client.repository.interface";
 import { FindAllClientsOptions } from "@/backend/application/dtos/clients/find-clients-query.dto";
+import { EntityNotFoundError } from "@/backend/domain/errors/invalid-data.error";
 import { ClientMapper } from "../mappers/client.mapper";
 import { IndividualMapper } from "../mappers/individual.mapper";
 import { CompanyMapper } from "../mappers/company.mapper";
@@ -77,6 +78,73 @@ export class DrizzleClientRepository implements IClientRepository {
     if (!row) return null;
 
     return CompanyMapper.toDomain(row);
+  }
+
+  /**
+   * Атомарне оновлення клієнта та його деталей через транзакцію.
+   */
+  async updateFullClient(
+    client: Client,
+    details: Individual | Company,
+  ): Promise<void> {
+    const clientData = ClientMapper.toPersistence(client);
+    clientData.updatedAt = new Date();
+
+    await db.transaction(async (tx) => {
+      // 1. Оновлюємо базовий контакт
+      const [updatedClient] = await tx
+        .update(clients)
+        .set({
+          email: clientData.email,
+          phone: clientData.phone,
+          address: clientData.address,
+          note: clientData.note,
+          updatedAt: clientData.updatedAt,
+        })
+        .where(eq(clients.id, client.id))
+        .returning();
+
+      if (!updatedClient) {
+        throw new EntityNotFoundError("Клієнт", client.id);
+      }
+
+      // 2. Оновлюємо деталі залежно від типу
+      if (details instanceof Individual) {
+        const indData = IndividualMapper.toPersistence(details);
+
+        const [updatedInd] = await tx
+          .update(individuals)
+          .set({
+            firstName: indData.firstName,
+            lastName: indData.lastName,
+            middleName: indData.middleName,
+            dateOfBirth: indData.dateOfBirth,
+            taxNumber: indData.taxNumber,
+            isFop: indData.isFop,
+            passportDetails: indData.passportDetails,
+          })
+          .where(eq(individuals.id, details.id))
+          .returning();
+
+        if (!updatedInd) {
+          throw new EntityNotFoundError("Профіль фізичної особи", details.id);
+        }
+      } else {
+        const compData = CompanyMapper.toPersistence(details as Company);
+        const [updatedComp] = await tx
+          .update(companies)
+          .set({
+            name: compData.name,
+            taxId: compData.taxId,
+          })
+          .where(eq(companies.id, details.id))
+          .returning();
+
+        if (!updatedComp) {
+          throw new EntityNotFoundError("Профіль компанії", details.id);
+        }
+      }
+    });
   }
 
   /**
@@ -217,7 +285,7 @@ export class DrizzleClientRepository implements IClientRepository {
   }
 
   /**
-   * Перевірка унікальності ІПН (РНОКПП).
+   * Перевірка унікальності РНОКПП.
    */
   async existsByTaxNumber(
     workspaceId: string,

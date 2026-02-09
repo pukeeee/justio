@@ -1,4 +1,4 @@
-import { InvalidEdrpouError } from '../errors/invalid-data.error';
+import { InvalidEdrpouError } from "../errors/invalid-data.error";
 
 /**
  * Value Object для коду ЄДРПОУ юридичної особи.
@@ -11,13 +11,13 @@ export class Edrpou {
    * Створює об'єкт ЄДРПОУ з валідацією.
    */
   static create(value: string): Edrpou {
-    const cleaned = value.trim().replace(/\D/g, '');
-    
+    const cleaned = value.trim().replace(/\D/g, "");
+
     // Стандартний ЄДРПОУ - 8 цифр. 10 зустрічається вкрай рідко для специфічних структур.
-    if (cleaned.length !== 8 && cleaned.length !== 10) {
+    if (cleaned.length !== 8) {
       throw new InvalidEdrpouError(value);
     }
-    
+
     return new Edrpou(cleaned);
   }
 
