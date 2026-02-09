@@ -17,7 +17,6 @@ export const UserRoleSchema = z.enum([
   "admin",
   "manager",
   "user",
-  "guest",
 ]);
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
@@ -30,8 +29,8 @@ export type WorkspaceUserStatus = z.infer<typeof WorkspaceUserStatusSchema>;
 
 export const SubscriptionTierSchema = z.enum([
   "free",
-  "starter",
-  "pro",
+  "solo",
+  "firm",
   "enterprise",
 ]);
 export type SubscriptionTier = z.infer<typeof SubscriptionTierSchema>;
@@ -465,7 +464,7 @@ export const DealProductSchema = z.object({
   price: z.number().nonnegative(),
   discount: z.number().min(0).max(100).default(0),
   total: z.number().nonnegative(), // Computed
-  notes: z.string().max(500).optional().nullable(),
+  note: z.string().max(500).optional().nullable(),
 });
 
 export const CreateDealProductSchema = DealProductSchema.pick({
@@ -474,7 +473,7 @@ export const CreateDealProductSchema = DealProductSchema.pick({
   quantity: true,
   price: true,
   discount: true,
-  notes: true,
+  note: true,
 });
 
 export type DealProduct = z.infer<typeof DealProductSchema>;

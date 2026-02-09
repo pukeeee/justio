@@ -75,8 +75,7 @@ export const USER_ACTIONS = [
  * Опція оновлення тарифу
  */
 export const UPGRADE_ACTION = {
-  label: "Оновити до Pro",
-  icon: Sparkles,
+      label: "Оновити до Firm",  icon: Sparkles,
   href: "/user/billing?upgrade=true",
 } as const;
 

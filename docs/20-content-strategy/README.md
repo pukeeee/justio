@@ -694,7 +694,7 @@ Bad:  /blog/post-123
 | **Content Lead (PT)** | 20,000 | $550 |
 | **Freelance Writers** | 10,000 | $275 |
 | **SEO Tools (Ahrefs)** | 3,500 | $100 |
-| **Design Tools (Canva Pro)** | 450 | $12 |
+| **Design Tools (Canva Firm)** | 450 | $12 |
 | **Email Marketing (Mailchimp)** | 700 | $20 |
 | **Social Media Scheduling** | 350 | $10 |
 | **Video Editing (Freelance)** | 5,000 | $140 |

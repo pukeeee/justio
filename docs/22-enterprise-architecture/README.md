@@ -152,10 +152,10 @@ npx drizzle-kit push:pg
 **Приклад Drizzle схеми:**
 
 ```typescript
-// backend/infrastructure/database/drizzle/schema/contacts.ts
+// backend/infrastructure/database/drizzle/schema/clients.ts
 import { pgTable, uuid, varchar, timestamp, jsonb } from 'drizzle-orm/pg-core';
 
-export const contacts = pgTable('contacts', {
+export const clients = pgTable('clients', {
   id: uuid('id').defaultRandom().primaryKey(),
   workspaceId: uuid('workspace_id').notNull(),
   firstName: varchar('first_name', { length: 50 }).notNull(),
@@ -185,7 +185,7 @@ src/
 ├── backend/                 # Backend логіка (Future: окремий repo)
 │   ├── domain/              # Domain Layer
 │   │   ├── entities/        # Бізнес-сутності
-│   │   │   ├── contact.entity.ts
+│   │   │   ├── client.entity.ts
 │   │   │   ├── deal.entity.ts
 │   │   │   └── workspace.entity.ts
 │   │   ├── value-objects/   # Value Objects
@@ -193,7 +193,7 @@ src/
 │   │   │   ├── phone.vo.ts
 │   │   │   └── money.vo.ts
 │   │   ├── events/          # Domain Events
-│   │   │   ├── contact-created.event.ts
+│   │   │   ├── client-created.event.ts
 │   │   │   └── deal-won.event.ts
 │   │   └── errors/          # Domain errors
 │   │       ├── domain-error.ts
@@ -201,18 +201,18 @@ src/
 │   │
 │   ├── application/         # Application Layer
 │   │   ├── use-cases/       # Business scenarios
-│   │   │   ├── contact/
-│   │   │   │   ├── create-contact.use-case.ts
-│   │   │   │   ├── update-contact.use-case.ts
-│   │   │   │   └── delete-contact.use-case.ts
+│   │   │   ├── client/
+│   │   │   │   ├── create-client.use-case.ts
+│   │   │   │   ├── update-client.use-case.ts
+│   │   │   │   └── delete-client.use-case.ts
 │   │   │   └── workspace/
 │   │   │       └── create-workspace.use-case.ts
 │   │   ├── dtos/            # Data Transfer Objects
-│   │   │   ├── create-contact.dto.ts
-│   │   │   └── update-contact.dto.ts
+│   │   │   ├── create-client.dto.ts
+│   │   │   └── update-client.dto.ts
 │   │   └── interfaces/      # Ports (абстракції)
 │   │       ├── repositories/
-│   │       │   ├── contact.repository.interface.ts
+│   │       │   ├── client.repository.interface.ts
 │   │       │   └── workspace.repository.interface.ts
 │   │       └── services/
 │   │           ├── auth.service.interface.ts
@@ -225,10 +225,10 @@ src/
 │       │   │   ├── schema/  # Database schemas
 │       │   │   └── migrations/
 │       │   ├── repositories/# Repository implementations
-│       │   │   ├── drizzle-contact.repository.ts
+│       │   │   ├── drizzle-client.repository.ts
 │       │   │   └── drizzle-workspace.repository.ts
 │       │   └── mappers/     # Domain ↔ Database mappers
-│       │       ├── contact.mapper.ts
+│       │       ├── client.mapper.ts
 │       │       └── deal.mapper.ts
 │       ├── auth/            # Auth providers
 │       │   ├── supabase-auth.adapter.ts
@@ -241,14 +241,14 @@ src/
 │
 ├── frontend/                # Frontend-specific code
 │   ├── features/            # Feature modules
-│   │   ├── contacts/
+│   │   ├── clients/
 │   │   ├── deals/
 │   │   └── workspaces/
 │   ├── widgets/             # Complex UI components
-│   │   ├── contact-form/
+│   │   ├── client-form/
 │   │   └── deal-kanban/
 │   ├── entities/            # UI entities
-│   │   └── contact-card/
+│   │   └── client-card/
 │   └── shared/              # Shared UI code
 │       ├── components/
 │       ├── hooks/
@@ -270,7 +270,7 @@ src/
 
 ##### ✅ МОЖНА:
 
-- **Entities** (Contact, Deal, Workspace)
+- **Entities** (Client, Deal, Workspace)
 - **Value Objects** (Email, Phone, Money)
 - **Domain Events** (WorkspaceCreated, DealWon)
 - **Business Rules** (validateQuota, calculateDiscount)
@@ -288,13 +288,13 @@ src/
 
 ```typescript
 // ✅ Правильно: Domain Entity
-// backend/domain/entities/contact.entity.ts
+// backend/domain/entities/client.entity.ts
 
 import { Email } from '../value-objects/email.vo';
 import { Phone } from '../value-objects/phone.vo';
 import { InvalidEmailError } from '../errors/invalid-email.error';
 
-export class Contact {
+export class Client {
   private constructor(
     public readonly id: string,
     public readonly workspaceId: string,
@@ -314,8 +314,8 @@ export class Contact {
     lastName: string;
     email: string;
     phone?: string;
-  }): Contact {
-    return new Contact(
+  }): Client {
+    return new Client(
       data.id ?? crypto.randomUUID(),
       data.workspaceId,
       data.firstName,
@@ -398,28 +398,28 @@ export class Email {
 
 ```typescript
 // ✅ Правильно: Repository Interface (Port)
-// backend/application/interfaces/repositories/contact.repository.interface.ts
+// backend/application/interfaces/repositories/client.repository.interface.ts
 
-import { Contact } from '@/backend/domain/entities/contact.entity';
+import { Client } from '@/backend/domain/entities/client.entity';
 
 export interface IContactRepository {
-  findById(id: string): Promise<Contact | null>;
-  findByWorkspaceId(workspaceId: string): Promise<Contact[]>;
-  save(contact: Contact): Promise<Contact>;
+  findById(id: string): Promise<Client | null>;
+  findByWorkspaceId(workspaceId: string): Promise<Client[]>;
+  save(client: Client): Promise<Client>;
   delete(id: string): Promise<void>;
 }
 ```
 
 ```typescript
 // ✅ Правильно: Use Case з Dependency Injection
-// backend/application/use-cases/contact/create-contact.use-case.ts
+// backend/application/use-cases/client/create-client.use-case.ts
 
 import { injectable, inject } from 'tsyringe';
-import { Contact } from '@/backend/domain/entities/contact.entity';
-import { IContactRepository } from '@/backend/application/interfaces/repositories/contact.repository.interface';
+import { Client } from '@/backend/domain/entities/client.entity';
+import { IContactRepository } from '@/backend/application/interfaces/repositories/client.repository.interface';
 import { IQuotaService } from '@/backend/application/interfaces/services/quota.service.interface';
 import { QuotaExceededError } from '@/backend/domain/errors/quota-exceeded.error';
-import { CreateContactDTO } from '@/backend/application/dtos/create-contact.dto';
+import { CreateContactDTO } from '@/backend/application/dtos/create-client.dto';
 
 @injectable()
 export class CreateContactUseCase {
@@ -430,15 +430,15 @@ export class CreateContactUseCase {
     private readonly quotaService: IQuotaService
   ) {}
 
-  async execute(dto: CreateContactDTO): Promise<Contact> {
+  async execute(dto: CreateContactDTO): Promise<Client> {
     // 1. Перевірка квот
     const canCreate = await this.quotaService.canCreateContact(dto.workspaceId);
     if (!canCreate) {
-      throw new QuotaExceededError('contacts');
+      throw new QuotaExceededError('clients');
     }
 
     // 2. Створення domain entity
-    const contact = Contact.create({
+    const client = Client.create({
       workspaceId: dto.workspaceId,
       firstName: dto.firstName,
       lastName: dto.lastName,
@@ -447,14 +447,14 @@ export class CreateContactUseCase {
     });
 
     // 3. Збереження через interface (не знаємо про implementation)
-    return await this.contactRepository.save(contact);
+    return await this.contactRepository.save(client);
   }
 }
 ```
 
 ```typescript
 // ✅ Правильно: DTO
-// backend/application/dtos/create-contact.dto.ts
+// backend/application/dtos/create-client.dto.ts
 
 export interface CreateContactDTO {
   workspaceId: string;
@@ -507,23 +507,23 @@ export const db = drizzle(queryClient, { schema });
 
 ```typescript
 // ✅ Правильно: Repository Implementation
-// backend/infrastructure/database/repositories/drizzle-contact.repository.ts
+// backend/infrastructure/database/repositories/drizzle-client.repository.ts
 
 import { injectable } from 'tsyringe';
 import { eq, and } from 'drizzle-orm';
 import { db } from '../drizzle/client';
-import { contacts } from '../drizzle/schema/contacts';
-import { Contact } from '@/backend/domain/entities/contact.entity';
-import { IContactRepository } from '@/backend/application/interfaces/repositories/contact.repository.interface';
-import { ContactMapper } from '../mappers/contact.mapper';
+import { clients } from '../drizzle/schema/clients';
+import { Client } from '@/backend/domain/entities/client.entity';
+import { IContactRepository } from '@/backend/application/interfaces/repositories/client.repository.interface';
+import { ContactMapper } from '../mappers/client.mapper';
 
 @injectable()
 export class DrizzleContactRepository implements IContactRepository {
-  async findById(id: string): Promise<Contact | null> {
+  async findById(id: string): Promise<Client | null> {
     const result = await db
       .select()
-      .from(contacts)
-      .where(eq(contacts.id, id))
+      .from(clients)
+      .where(eq(clients.id, id))
       .limit(1);
 
     if (result.length === 0) return null;
@@ -531,25 +531,25 @@ export class DrizzleContactRepository implements IContactRepository {
     return ContactMapper.toDomain(result[0]);
   }
 
-  async findByWorkspaceId(workspaceId: string): Promise<Contact[]> {
+  async findByWorkspaceId(workspaceId: string): Promise<Client[]> {
     const result = await db
       .select()
-      .from(contacts)
+      .from(clients)
       .where(
         and(
-          eq(contacts.workspaceId, workspaceId),
-          eq(contacts.deletedAt, null)
+          eq(clients.workspaceId, workspaceId),
+          eq(clients.deletedAt, null)
         )
       );
 
     return result.map(ContactMapper.toDomain);
   }
 
-  async save(contact: Contact): Promise<Contact> {
-    const data = ContactMapper.toDatabase(contact);
+  async save(client: Client): Promise<Client> {
+    const data = ContactMapper.toDatabase(client);
     
     const result = await db
-      .insert(contacts)
+      .insert(clients)
       .values(data)
       .returning();
 
@@ -558,18 +558,18 @@ export class DrizzleContactRepository implements IContactRepository {
 
   async delete(id: string): Promise<void> {
     await db
-      .update(contacts)
+      .update(clients)
       .set({ deletedAt: new Date() })
-      .where(eq(contacts.id, id));
+      .where(eq(clients.id, id));
   }
 }
 ```
 
 ```typescript
 // ✅ Правильно: Mapper
-// backend/infrastructure/database/mappers/contact.mapper.ts
+// backend/infrastructure/database/mappers/client.mapper.ts
 
-import { Contact } from '@/backend/domain/entities/contact.entity';
+import { Client } from '@/backend/domain/entities/client.entity';
 
 type DbContact = {
   id: string;
@@ -584,8 +584,8 @@ type DbContact = {
 };
 
 export class ContactMapper {
-  static toDomain(raw: DbContact): Contact {
-    return Contact.create({
+  static toDomain(raw: DbContact): Client {
+    return Client.create({
       id: raw.id,
       workspaceId: raw.workspace_id,
       firstName: raw.first_name,
@@ -595,14 +595,14 @@ export class ContactMapper {
     });
   }
 
-  static toDatabase(contact: Contact): Omit<DbContact, 'created_at' | 'updated_at' | 'deleted_at'> {
+  static toDatabase(client: Client): Omit<DbContact, 'created_at' | 'updated_at' | 'deleted_at'> {
     return {
-      id: contact.id,
-      workspace_id: contact.workspaceId,
-      first_name: contact.firstName,
-      last_name: contact.lastName,
-      email: contact.getEmail(),
-      phone: contact.getPhone() ?? null
+      id: client.id,
+      workspace_id: client.workspaceId,
+      first_name: client.firstName,
+      last_name: client.lastName,
+      email: client.getEmail(),
+      phone: client.getPhone() ?? null
     };
   }
 }
@@ -632,12 +632,12 @@ export class ContactMapper {
 
 ```typescript
 // ✅ Правильно: API Route
-// app/api/contacts/route.ts
+// app/api/clients/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { container } from '@/backend/infrastructure/di/container';
-import { CreateContactUseCase } from '@/backend/application/use-cases/contact/create-contact.use-case';
-import { CreateContactSchema } from '@/shared/validations/contact.schema';
+import { CreateContactUseCase } from '@/backend/application/use-cases/client/create-client.use-case';
+import { CreateContactSchema } from '@/shared/validations/client.schema';
 
 export async function POST(request: NextRequest) {
   try {
@@ -649,10 +649,10 @@ export async function POST(request: NextRequest) {
 
     // 3. Виклик use case (через DI container)
     const useCase = container.resolve(CreateContactUseCase);
-    const contact = await useCase.execute(dto);
+    const client = await useCase.execute(dto);
 
     // 4. Повернення результату
-    return NextResponse.json(contact, { status: 201 });
+    return NextResponse.json(client, { status: 201 });
   } catch (error) {
     // 5. Обробка помилок
     if (error instanceof QuotaExceededError) {
@@ -672,18 +672,18 @@ export async function POST(request: NextRequest) {
 
 ```typescript
 // ✅ Правильно: Server Action
-// app/actions/contact.actions.ts
+// app/actions/client.actions.ts
 
 'use server';
 
 import { container } from '@/backend/infrastructure/di/container';
-import { CreateContactUseCase } from '@/backend/application/use-cases/contact/create-contact.use-case';
+import { CreateContactUseCase } from '@/backend/application/use-cases/client/create-client.use-case';
 import { revalidatePath } from 'next/cache';
 
 export async function createContactAction(formData: FormData) {
   const useCase = container.resolve(CreateContactUseCase);
   
-  const contact = await useCase.execute({
+  const client = await useCase.execute({
     workspaceId: formData.get('workspaceId') as string,
     firstName: formData.get('firstName') as string,
     lastName: formData.get('lastName') as string,
@@ -691,9 +691,9 @@ export async function createContactAction(formData: FormData) {
     phone: formData.get('phone') as string | undefined
   });
 
-  revalidatePath('/contacts');
+  revalidatePath('/clients');
   
-  return contact;
+  return client;
 }
 ```
 
@@ -754,8 +754,8 @@ import 'reflect-metadata';
 import { container } from 'tsyringe';
 
 // Infrastructure: Repositories
-import { IContactRepository } from '@/backend/application/interfaces/repositories/contact.repository.interface';
-import { DrizzleContactRepository } from '@/backend/infrastructure/database/repositories/drizzle-contact.repository';
+import { IContactRepository } from '@/backend/application/interfaces/repositories/client.repository.interface';
+import { DrizzleContactRepository } from '@/backend/infrastructure/database/repositories/drizzle-client.repository';
 
 container.register<IContactRepository>(
   'IContactRepository',
@@ -772,7 +772,7 @@ container.register<IQuotaService>(
 );
 
 // Application: Use Cases
-import { CreateContactUseCase } from '@/backend/application/use-cases/contact/create-contact.use-case';
+import { CreateContactUseCase } from '@/backend/application/use-cases/client/create-client.use-case';
 
 container.register(CreateContactUseCase, {
   useClass: CreateContactUseCase
@@ -784,9 +784,9 @@ export { container };
 **Використання:**
 
 ```typescript
-// app/api/contacts/route.ts
+// app/api/clients/route.ts
 import { container } from '@/backend/infrastructure/di/container';
-import { CreateContactUseCase } from '@/backend/application/use-cases/contact/create-contact.use-case';
+import { CreateContactUseCase } from '@/backend/application/use-cases/client/create-client.use-case';
 
 export async function POST(request: Request) {
   const useCase = container.resolve(CreateContactUseCase);
@@ -799,7 +799,7 @@ export async function POST(request: Request) {
 ### 4.3 Testing з DI
 
 ```typescript
-// tests/unit/create-contact.use-case.spec.ts
+// tests/unit/create-client.use-case.spec.ts
 import { container } from 'tsyringe';
 
 describe('CreateContactUseCase', () => {
@@ -812,7 +812,7 @@ describe('CreateContactUseCase', () => {
     container.registerInstance('IContactRepository', mockRepository);
   });
 
-  it('should create contact', async () => {
+  it('should create client', async () => {
     const useCase = container.resolve(CreateContactUseCase);
     const result = await useCase.execute(mockDto);
     expect(result).toBeDefined();
@@ -843,27 +843,27 @@ describe('CreateContactUseCase', () => {
 **Приклад:**
 
 ```typescript
-// tests/backend/domain/entities/contact.spec.ts
+// tests/backend/domain/entities/client.spec.ts
 import { describe, it, expect } from 'vitest';
-import { Contact } from '@/backend/domain/entities/contact.entity';
+import { Client } from '@/backend/domain/entities/client.entity';
 import { InvalidEmailError } from '@/backend/domain/errors/invalid-email.error';
 
-describe('Contact Entity', () => {
-  it('should create valid contact', () => {
-    const contact = Contact.create({
+describe('Client Entity', () => {
+  it('should create valid client', () => {
+    const client = Client.create({
       workspaceId: 'ws-123',
       firstName: 'John',
       lastName: 'Doe',
       email: 'john@example.com'
     });
 
-    expect(contact.getFullName()).toBe('John Doe');
-    expect(contact.getEmail()).toBe('john@example.com');
+    expect(client.getFullName()).toBe('John Doe');
+    expect(client.getEmail()).toBe('john@example.com');
   });
 
   it('should throw error on invalid email', () => {
     expect(() => 
-      Contact.create({
+      Client.create({
         workspaceId: 'ws-123',
         firstName: 'John',
         lastName: 'Doe',
@@ -873,24 +873,24 @@ describe('Contact Entity', () => {
   });
 
   it('should update email', () => {
-    const contact = Contact.create({
+    const client = Client.create({
       workspaceId: 'ws-123',
       firstName: 'John',
       lastName: 'Doe',
       email: 'john@example.com'
     });
 
-    contact.changeEmail('newemail@example.com');
-    expect(contact.getEmail()).toBe('newemail@example.com');
+    client.changeEmail('newemail@example.com');
+    expect(client.getEmail()).toBe('newemail@example.com');
   });
 });
 ```
 
 ```typescript
-// tests/backend/application/use-cases/create-contact.spec.ts
+// tests/backend/application/use-cases/create-client.spec.ts
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { CreateContactUseCase } from '@/backend/application/use-cases/contact/create-contact.use-case';
-import { IContactRepository } from '@/backend/application/interfaces/repositories/contact.repository.interface';
+import { CreateContactUseCase } from '@/backend/application/use-cases/client/create-client.use-case';
+import { IContactRepository } from '@/backend/application/interfaces/repositories/client.repository.interface';
 import { IQuotaService } from '@/backend/application/interfaces/services/quota.service.interface';
 import { QuotaExceededError } from '@/backend/domain/errors/quota-exceeded.error';
 
@@ -916,10 +916,10 @@ describe('CreateContactUseCase', () => {
     useCase = new CreateContactUseCase(mockRepository, mockQuotaService);
   });
 
-  it('should create contact when quota allows', async () => {
+  it('should create client when quota allows', async () => {
     // Arrange
     mockQuotaService.canCreateContact.mockResolvedValue(true);
-    const mockContact = Contact.create({
+    const mockContact = Client.create({
       workspaceId: 'ws-123',
       firstName: 'John',
       lastName: 'Doe',
@@ -1006,7 +1006,7 @@ export async function teardownTestDatabase() {
 
 export async function cleanDatabase() {
   // Очистка всіх таблиць
-  await db.delete(contacts);
+  await db.delete(clients);
   await db.delete(deals);
   await db.delete(workspaces);
 }
@@ -1015,11 +1015,11 @@ export async function cleanDatabase() {
 **Приклад тесту:**
 
 ```typescript
-// tests/backend/infrastructure/repositories/drizzle-contact.repository.spec.ts
+// tests/backend/infrastructure/repositories/drizzle-client.repository.spec.ts
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { setupTestDatabase, teardownTestDatabase, cleanDatabase } from '@/tests/helpers/database';
-import { DrizzleContactRepository } from '@/backend/infrastructure/database/repositories/drizzle-contact.repository';
-import { Contact } from '@/backend/domain/entities/contact.entity';
+import { DrizzleContactRepository } from '@/backend/infrastructure/database/repositories/drizzle-client.repository';
+import { Client } from '@/backend/domain/entities/client.entity';
 
 describe('DrizzleContactRepository Integration Tests', () => {
   let repository: DrizzleContactRepository;
@@ -1039,9 +1039,9 @@ describe('DrizzleContactRepository Integration Tests', () => {
     await cleanDatabase();
   });
 
-  it('should save and retrieve contact', async () => {
+  it('should save and retrieve client', async () => {
     // Arrange
-    const contact = Contact.create({
+    const client = Client.create({
       workspaceId: 'ws-123',
       firstName: 'John',
       lastName: 'Doe',
@@ -1049,24 +1049,24 @@ describe('DrizzleContactRepository Integration Tests', () => {
     });
 
     // Act
-    await repository.save(contact);
-    const retrieved = await repository.findById(contact.id);
+    await repository.save(client);
+    const retrieved = await repository.findById(client.id);
 
     // Assert
     expect(retrieved).toBeDefined();
-    expect(retrieved!.id).toBe(contact.id);
+    expect(retrieved!.id).toBe(client.id);
     expect(retrieved!.getFullName()).toBe('John Doe');
   });
 
-  it('should find contacts by workspace', async () => {
+  it('should find clients by workspace', async () => {
     // Arrange
-    const contact1 = Contact.create({
+    const contact1 = Client.create({
       workspaceId: 'ws-123',
       firstName: 'John',
       lastName: 'Doe',
       email: 'john@example.com'
     });
-    const contact2 = Contact.create({
+    const contact2 = Client.create({
       workspaceId: 'ws-123',
       firstName: 'Jane',
       lastName: 'Smith',
@@ -1077,25 +1077,25 @@ describe('DrizzleContactRepository Integration Tests', () => {
     await repository.save(contact2);
 
     // Act
-    const contacts = await repository.findByWorkspaceId('ws-123');
+    const clients = await repository.findByWorkspaceId('ws-123');
 
     // Assert
-    expect(contacts).toHaveLength(2);
+    expect(clients).toHaveLength(2);
   });
 
-  it('should soft delete contact', async () => {
+  it('should soft delete client', async () => {
     // Arrange
-    const contact = Contact.create({
+    const client = Client.create({
       workspaceId: 'ws-123',
       firstName: 'John',
       lastName: 'Doe',
       email: 'john@example.com'
     });
-    await repository.save(contact);
+    await repository.save(client);
 
     // Act
-    await repository.delete(contact.id);
-    const retrieved = await repository.findById(contact.id);
+    await repository.delete(client.id);
+    const retrieved = await repository.findById(client.id);
 
     // Assert
     expect(retrieved).toBeNull();
@@ -1115,14 +1115,14 @@ npx playwright install
 **Приклад:**
 
 ```typescript
-// tests/e2e/contacts.spec.ts
+// tests/e2e/clients.spec.ts
 import { test, expect } from '@playwright/test';
 
-test.describe('Contact Management', () => {
-  test('should create new contact', async ({ page }) => {
-    await page.goto('/contacts');
+test.describe('Client Management', () => {
+  test('should create new client', async ({ page }) => {
+    await page.goto('/clients');
     
-    await page.click('[data-testid="create-contact-btn"]');
+    await page.click('[data-testid="create-client-btn"]');
     await page.fill('[name="firstName"]', 'John');
     await page.fill('[name="lastName"]', 'Doe');
     await page.fill('[name="email"]', 'john@example.com');
@@ -1185,7 +1185,7 @@ test.describe('Contact Management', () => {
 **Мета:** Створити core бізнес-логіку без залежностей
 
 - [ ] Створити domain entities
-  - Contact
+  - Client
   - Deal
   - Workspace
   - User (WorkspaceMember)
@@ -1304,7 +1304,7 @@ test.describe('Contact Management', () => {
 
 **Стратегія:** Strangler Fig Pattern
 
-1. **Contacts модуль (1 тиждень)**
+1. **Clients модуль (1 тиждень)**
    - [ ] Замінити прямі Supabase calls на use cases
    - [ ] Тестування
    - [ ] Deploy на staging
@@ -1331,12 +1331,12 @@ test.describe('Contact Management', () => {
 ```typescript
 // Старий код (видалити)
 const { data } = await supabase
-  .from('contacts')
+  .from('clients')
   .select('*')
   .eq('workspace_id', workspaceId);
 
 // Новий код
-const contacts = await container
+const clients = await container
   .resolve(GetContactsUseCase)
   .execute({ workspaceId });
 ```
@@ -1454,12 +1454,12 @@ class S3StorageAdapter implements IStorageService {
 ```typescript
 // ✅ Добре: всі implementations відповідають контракту
 interface IContactRepository {
-  findById(id: string): Promise<Contact | null>;
+  findById(id: string): Promise<Client | null>;
 }
 
 class DrizzleContactRepository implements IContactRepository {
-  async findById(id: string): Promise<Contact | null> {
-    // Завжди повертає Contact | null
+  async findById(id: string): Promise<Client | null> {
+    // Завжди повертає Client | null
   }
 }
 ```
@@ -1510,19 +1510,19 @@ class CreateContactUseCase {
 **Файли та директорії:**
 
 ```
-✅ contact.entity.ts          // Entity
+✅ client.entity.ts          // Entity
 ✅ email.vo.ts                 // Value Object
-✅ create-contact.use-case.ts  // Use Case
-✅ contact.repository.interface.ts  // Interface
-✅ drizzle-contact.repository.ts    // Implementation
-✅ contact.mapper.ts           // Mapper
+✅ create-client.use-case.ts  // Use Case
+✅ client.repository.interface.ts  // Interface
+✅ drizzle-client.repository.ts    // Implementation
+✅ client.mapper.ts           // Mapper
 ✅ quota-exceeded.error.ts     // Error
 ```
 
 **Класи:**
 
 ```typescript
-✅ Contact                      // Entity (PascalCase)
+✅ Client                      // Entity (PascalCase)
 ✅ Email                        // Value Object
 ✅ CreateContactUseCase         // Use Case
 ✅ IContactRepository           // Interface (I prefix)
@@ -1605,7 +1605,7 @@ export class NetworkError extends InfrastructureError { }
 **Error mapping в HTTP layer:**
 
 ```typescript
-// app/api/contacts/route.ts
+// app/api/clients/route.ts
 export async function POST(request: Request) {
   try {
     const useCase = container.resolve(CreateContactUseCase);
@@ -1670,8 +1670,8 @@ export const logger = pino({
 });
 
 // Usage
-logger.info({ userId: '123', action: 'create_contact' }, 'Contact created');
-logger.error({ err: error, contactId: '456' }, 'Failed to create contact');
+logger.info({ userId: '123', action: 'create_contact' }, 'Client created');
+logger.error({ err: error, contactId: '456' }, 'Failed to create client');
 ```
 
 **Correlation IDs:**
@@ -1861,7 +1861,7 @@ container.register('IContactRepository', MySQLContactRepository);
 class TenantAwareContactRepository implements IContactRepository {
   constructor(private tenantId: string) {}
 
-  async findById(id: string): Promise<Contact | null> {
+  async findById(id: string): Promise<Client | null> {
     const db = this.getTenantDatabase(this.tenantId);
     // Use tenant-specific database
   }
@@ -1912,7 +1912,7 @@ class TenantAwareContactRepository implements IContactRepository {
 ```typescript
 // Command side (writes)
 interface IContactCommandRepository {
-  save(contact: Contact): Promise<void>;
+  save(client: Client): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
@@ -1938,11 +1938,11 @@ interface ContactEvent {
 }
 
 // Відновлення стану через replay подій
-class Contact {
-  static fromEvents(events: ContactEvent[]): Contact {
-    const contact = new Contact();
-    events.forEach(event => contact.apply(event));
-    return contact;
+class Client {
+  static fromEvents(events: ContactEvent[]): Client {
+    const client = new Client();
+    events.forEach(event => client.apply(event));
+    return client;
   }
 
   apply(event: ContactEvent) {
@@ -2049,7 +2049,7 @@ class Contact {
 
 9. Імплементуйте Infrastructure Layer (repositories)
 10. Напишіть integration тести
-11. Почніть міграцію модулями (contacts → deals → ...)
+11. Почніть міграцію модулями (clients → deals → ...)
 12. Continuous testing та monitoring
 
 #### Long-term (тиждень 19-20):

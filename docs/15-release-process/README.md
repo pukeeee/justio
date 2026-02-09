@@ -359,7 +359,7 @@ We've just released v1.2.0 with some exciting updates:
 - Resolved calendar display issue
 - Fixed notification timing
 
-Questions? Contact support@justio.ua
+Questions? Client support@justio.ua
 
 Happy lawyering!
 Justio Team
@@ -752,9 +752,9 @@ git push
 
 | Tool | Purpose | Cost |
 |------|---------|------|
-| **Vercel** | Hosting, CD | $20/mo (Pro) |
+| **Vercel** | Hosting, CD | $20/mo (Firm) |
 | **GitHub** | Code, CI | Free (public repo) |
-| **Supabase** | Database, Auth | $25/mo (Pro) |
+| **Supabase** | Database, Auth | $25/mo (Firm) |
 | **Sentry** | Error tracking | $26/mo (Team) |
 | **StatusPage** | Status updates | $29/mo |
 | **Slack** | Communication | Free |

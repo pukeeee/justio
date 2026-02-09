@@ -1,14 +1,14 @@
-import { ContactCreatedEvent } from "@/backend/domain/events/contact.events";
+import { ClientCreatedEvent } from "@/backend/domain/events/client.events";
 // import { ActivityRepository } from "@/backend/domain/repositories/activity.repository";
 
-export const logContactCreationHandler = async (event: ContactCreatedEvent) => {
-  console.log(`[Audit] Recording activity for contact ${event.contactId}`);
+export const logClientCreationHandler = async (event: ClientCreatedEvent) => {
+  console.log(`[Audit] Recording activity for client ${event.clientId}`);
 
   // Тут логіка запису в таблицю activities
   // await activityRepo.create({
-  //   type: 'CONTACT_CREATED',
-  //   entityId: event.contactId,
+  //   type: 'Client_CREATED',
+  //   entityId: event.clientId,
   //   userId: event.createdBy,
-  //   details: `Created contact of type ${event.contactType}`
+  //   details: `Created client of type ${event.clientType}`
   // });
 };

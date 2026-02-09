@@ -173,7 +173,7 @@ Now (MVP) → Q2 2026 → Q3-Q4 2026 → 2027 → 2027+
 - [ ] OCR (scan paper documents → text)
 - [ ] Document versioning
 - [ ] Templates library (позови, договори)
-- [ ] E-signature integration (Дія.Підпис Pro)
+- [ ] E-signature integration (Дія.Підпис Firm)
 
 **3. Client Portal:**
 - [ ] Client login (view their cases, documents)

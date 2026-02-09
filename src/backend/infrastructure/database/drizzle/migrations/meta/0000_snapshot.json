@@ -1,5 +1,5 @@
 {
-  "id": "07b3302c-687f-4da7-8700-31adb8eedc9c",
+  "id": "3ae205b8-530b-433e-b151-3a2e77c8812b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -70,7 +70,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "workspaces_owner_id_users_id_fk": {
+          "name": "workspaces_owner_id_users_id_fk",
+          "tableFrom": "workspaces",
+          "tableTo": "users",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "workspaces_slug_unique": {
@@ -85,8 +99,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.contacts": {
-      "name": "contacts",
+    "public.clients": {
+      "name": "clients",
       "schema": "",
       "columns": {
         "id": {
@@ -102,9 +116,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "contact_type": {
-          "name": "contact_type",
-          "type": "contact_type",
+        "client_type": {
+          "name": "client_type",
+          "type": "client_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
@@ -127,15 +141,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "notes": {
-          "name": "notes",
+        "note": {
+          "name": "note",
           "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tags": {
-          "name": "tags",
-          "type": "text[]",
           "primaryKey": false,
           "notNull": false
         },
@@ -167,7 +175,34 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "clients_workspace_id_workspaces_id_fk": {
+          "name": "clients_workspace_id_workspaces_id_fk",
+          "tableFrom": "clients",
+          "tableTo": "workspaces",
+          "columnsFrom": [
+            "workspace_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "clients_created_by_users_id_fk": {
+          "name": "clients_created_by_users_id_fk",
+          "tableFrom": "clients",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -185,8 +220,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "contact_id": {
-          "name": "contact_id",
+        "client_id": {
+          "name": "client_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -221,6 +256,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "is_fop": {
+          "name": "is_fop",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "passport_details": {
           "name": "passport_details",
           "type": "jsonb",
@@ -230,12 +272,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "individuals_contact_id_contacts_id_fk": {
-          "name": "individuals_contact_id_contacts_id_fk",
+        "individuals_client_id_clients_id_fk": {
+          "name": "individuals_client_id_clients_id_fk",
           "tableFrom": "individuals",
-          "tableTo": "contacts",
+          "tableTo": "clients",
           "columnsFrom": [
-            "contact_id"
+            "client_id"
           ],
           "columnsTo": [
             "id"
@@ -282,10 +324,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "companies_contact_id_contacts_id_fk": {
-          "name": "companies_contact_id_contacts_id_fk",
+        "companies_contact_id_clients_id_fk": {
+          "name": "companies_contact_id_clients_id_fk",
           "tableFrom": "companies",
-          "tableTo": "contacts",
+          "tableTo": "clients",
           "columnsFrom": [
             "contact_id"
           ],
@@ -504,6 +546,14 @@
     }
   },
   "enums": {
+    "public.client_type": {
+      "name": "client_type",
+      "schema": "public",
+      "values": [
+        "individual",
+        "company"
+      ]
+    },
     "public.company_contact_role": {
       "name": "company_contact_role",
       "schema": "public",
@@ -518,14 +568,6 @@
         "lawyer",
         "manager",
         "other"
-      ]
-    },
-    "public.contact_type": {
-      "name": "contact_type",
-      "schema": "public",
-      "values": [
-        "individual",
-        "company"
       ]
     },
     "public.user_status": {
@@ -543,8 +585,7 @@
       "values": [
         "owner",
         "admin",
-        "user",
-        "guest"
+        "user"
       ]
     },
     "public.workspace_tier": {
@@ -552,8 +593,8 @@
       "schema": "public",
       "values": [
         "free",
-        "starter",
-        "pro",
+        "solo",
+        "firm",
         "enterprise"
       ]
     },

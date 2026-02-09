@@ -1,36 +1,38 @@
-import { Permission } from './permission.enum';
+import { Permission } from "./permission.enum";
 
 /**
  * Об'єкт-значення для Ролі користувача.
  * Визначає набір дозволів, які має користувач у робочому просторі.
  */
 export class Role {
-  static readonly OWNER = new Role('owner', new Set(Object.values(Permission)));
-  
-  static readonly ADMIN = new Role('admin', new Set([
-    Permission.CREATE_CONTACT,
-    Permission.UPDATE_CONTACT,
-    Permission.DELETE_CONTACT,
-    Permission.VIEW_CONTACT,
-    Permission.INVITE_USERS,
-    Permission.REMOVE_USERS,
-    // Admin не може керувати білінгом або видаляти workspace
-  ]));
+  static readonly OWNER = new Role("owner", new Set(Object.values(Permission)));
 
-  static readonly USER = new Role('user', new Set([
-    Permission.CREATE_CONTACT,
-    Permission.UPDATE_CONTACT,
-    Permission.VIEW_CONTACT,
-    // User не може видаляти контакти
-  ]));
+  static readonly ADMIN = new Role(
+    "admin",
+    new Set([
+      Permission.CREATE_CONTACT,
+      Permission.UPDATE_CONTACT,
+      Permission.DELETE_CONTACT,
+      Permission.VIEW_CONTACT,
+      Permission.INVITE_USERS,
+      Permission.REMOVE_USERS,
+      // Admin не може керувати білінгом або видаляти workspace
+    ]),
+  );
 
-  static readonly GUEST = new Role('guest', new Set([
-    Permission.VIEW_CONTACT,
-  ]));
+  static readonly USER = new Role(
+    "user",
+    new Set([
+      Permission.CREATE_CONTACT,
+      Permission.UPDATE_CONTACT,
+      Permission.VIEW_CONTACT,
+      // User не може видаляти контакти
+    ]),
+  );
 
   private constructor(
     public readonly name: string,
-    private readonly permissions: Set<Permission>
+    private readonly permissions: Set<Permission>,
   ) {}
 
   /**
@@ -38,11 +40,14 @@ export class Role {
    */
   static fromName(name: string): Role {
     switch (name) {
-      case 'owner': return Role.OWNER;
-      case 'admin': return Role.ADMIN;
-      case 'user': return Role.USER;
-      case 'guest': return Role.GUEST;
-      default: throw new Error(`Unknown role: ${name}`);
+      case "owner":
+        return Role.OWNER;
+      case "admin":
+        return Role.ADMIN;
+      case "user":
+        return Role.USER;
+      default:
+        throw new Error(`Unknown role: ${name}`);
     }
   }
 

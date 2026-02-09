@@ -24,14 +24,14 @@ export const WORKSPACE_TIER_LIMITS = {
     storage_mb: 500,
     workspaces: 2, // Ліміт на кількість воркспейсів
   },
-  starter: {
+  solo: {
     users: 5,
     contacts: 5000,
     deals: 1000,
     storage_mb: 5120, // 5 GB
     workspaces: 5,
   },
-  pro: {
+  firm: {
     users: 20,
     contacts: 50000,
     deals: 10000,

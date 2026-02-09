@@ -1,17 +1,22 @@
 /**
  * @file page.tsx (/dashboard/[slug]/clients)
- * @description Сторінка управління клієнтами та компаніями
+ * @description Сторінка управління контактами
  */
 
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { getClientsAction } from "@/frontend/features/client/get-clients/actions/get-clients.action";
+import { getUserWorkspaces } from "@/frontend/shared/lib/auth/get-user-data";
+import { ClientsList } from "@/frontend/widgets/dashboard/clients/clients-list/ui/ClientsList";
+import { notFound } from "next/navigation";
+import { CreateClientDialog } from "@/frontend/features/client/create-client/ui/CreateClientDialog";
 
 /**
  * Loading fallback
  */
 function ClientsPageSkeleton() {
   return (
-    <div className="flex min-h-[60vh] w-full items-center justify-center">
+    <div className="flex min-h-[40vh] w-full items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="text-sm text-muted-foreground">
@@ -22,38 +27,55 @@ function ClientsPageSkeleton() {
   );
 }
 
-/**
- * Сторінка клієнтів
- * 
- * TODO: Реалізувати функціонал:
- * - Список клієнтів (фізичні особи)
- * - Список компаній (юридичні особи)
- * - Фільтрація та пошук
- * - Створення нових записів
- * - Детальні картки клієнтів
- */
-export default function ClientsPage({
+async function ClientsContent({ slug }: { slug: string }) {
+  // 1. Отримуємо воркспейси користувача
+  const workspaces = await getUserWorkspaces();
+  const currentWorkspace = workspaces.find((w) => w.slug === slug);
+
+  if (!currentWorkspace) {
+    notFound();
+  }
+
+  // 2. Отримуємо контакти
+  const { clients, error } = await getClientsAction(currentWorkspace.id);
+
+  if (error) {
+    return (
+      <div className="p-8 border rounded-lg bg-destructive/10 text-destructive text-center">
+        {error}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Клієнти</h1>
+          <p className="text-muted-foreground">
+            Управління базою фізичних та юридичних осіб
+          </p>
+        </div>
+        <CreateClientDialog workspaceId={currentWorkspace.id} />
+      </div>
+
+      <ClientsList clients={clients} />
+    </div>
+  );
+}
+
+export default async function ClientsPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
+
   return (
-    <Suspense fallback={<ClientsPageSkeleton />}>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="grid gap-4">
-          <div className="rounded-xl border bg-card p-6">
-            <h2 className="text-2xl font-bold mb-2">Клієнти</h2>
-            <p className="text-muted-foreground">
-              База клієнтів (фізичні та юридичні особи)
-            </p>
-            <div className="mt-4 p-8 border rounded-lg bg-muted/50">
-              <p className="text-center text-sm text-muted-foreground">
-                Функціонал в розробці
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Suspense>
+    <div className="flex flex-1 flex-col gap-4 p-4 md:p-8 pt-0">
+      <Suspense fallback={<ClientsPageSkeleton />}>
+        <ClientsContent slug={slug} />
+      </Suspense>
+    </div>
   );
 }

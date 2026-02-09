@@ -1,23 +1,23 @@
-import { Edrpou } from '../value-objects/edrpou.vo';
-import { MissingRequiredFieldError } from '../errors/invalid-data.error';
+import { Edrpou } from "../value-objects/edrpou.vo";
+import { MissingRequiredFieldError } from "../errors/invalid-data.error";
 
 /**
  * Сутність "Компанія" (юридична особа).
  */
 export class Company {
   public readonly id: string;
-  public readonly contactId: string;
+  public readonly clientId: string;
   private _name: string;
   private _taxId: Edrpou | null;
 
   private constructor(props: {
     id: string;
-    contactId: string;
+    clientId: string;
     name: string;
     taxId: Edrpou | null;
   }) {
     this.id = props.id;
-    this.contactId = props.contactId;
+    this.clientId = props.clientId;
     this._name = props.name;
     this._taxId = props.taxId;
   }
@@ -27,17 +27,18 @@ export class Company {
    */
   public static create(props: {
     id?: string;
-    contactId: string;
+    clientId: string;
     name: string;
     taxId?: string | null;
   }): Company {
-    if (!props.name?.trim()) throw new MissingRequiredFieldError('Назва компанії');
+    if (!props.name?.trim())
+      throw new MissingRequiredFieldError("Назва компанії");
 
     const taxId = props.taxId ? Edrpou.create(props.taxId) : null;
 
     return new Company({
       id: props.id ?? crypto.randomUUID(),
-      contactId: props.contactId,
+      clientId: props.clientId,
       name: props.name.trim(),
       taxId: taxId,
     });
@@ -58,15 +59,13 @@ export class Company {
   /**
    * Оновлює дані компанії.
    */
-  public update(props: {
-    name?: string;
-    taxId?: string | null;
-  }): void {
+  public update(props: { name?: string; taxId?: string | null }): void {
     if (props.name !== undefined) {
-      if (!props.name?.trim()) throw new MissingRequiredFieldError('Назва компанії');
+      if (!props.name?.trim())
+        throw new MissingRequiredFieldError("Назва компанії");
       this._name = props.name.trim();
     }
-    
+
     if (props.taxId !== undefined) {
       this._taxId = props.taxId ? Edrpou.create(props.taxId) : null;
     }

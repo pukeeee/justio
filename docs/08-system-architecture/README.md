@@ -664,7 +664,7 @@ CREATE INDEX idx_cases_search
 | Users | Requests/sec | DB Size | Strategy |
 |-------|-------------|---------|----------|
 | 1k | 10 | 10GB | Current setup ✅ |
-| 10k | 100 | 100GB | Supabase Pro |
+| 10k | 100 | 100GB | Supabase Firm |
 | 100k | 1,000 | 1TB | Read replicas, CDN |
 | 1M | 10,000 | 10TB | Sharding, microservices |
 
