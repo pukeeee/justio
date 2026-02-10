@@ -41,6 +41,7 @@ import { GetClientsListUseCase } from "@/backend/application/use-cases/clients/g
 import { GetClientDetailsUseCase } from "@/backend/application/use-cases/clients/get-client-details.use-case";
 import { DeleteClientUseCase } from "@/backend/application/use-cases/clients/delete-client.use-case";
 import { RestoreClientUseCase } from "@/backend/application/use-cases/clients/restore-client.use-case";
+import { HardDeleteClientUseCase } from "@/backend/application/use-cases/clients/hard-delete-client.use-case";
 import { CreateWorkspaceUseCase } from "@/backend/application/use-cases/workspace/create-workspace.use-case";
 import { DeleteWorkspaceUseCase } from "@/backend/application/use-cases/workspace/delete-workspace.use-case";
 
@@ -66,6 +67,10 @@ container.register(DeleteClientUseCase, {
 
 container.register(RestoreClientUseCase, {
   useClass: RestoreClientUseCase,
+});
+
+container.register(HardDeleteClientUseCase, {
+  useClass: HardDeleteClientUseCase,
 });
 
 container.register(CreateWorkspaceUseCase, {

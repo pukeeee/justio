@@ -2,16 +2,16 @@ import { injectable, inject } from "tsyringe";
 import type { IClientRepository } from "@/backend/application/interfaces/repositories/client.repository.interface";
 
 /**
- * Use Case: М'яке видалення контакту (переміщення в кошик).
+ * Use Case: Остаточне (жорстке) видалення контакту з бази даних.
  */
 @injectable()
-export class DeleteClientUseCase {
+export class HardDeleteClientUseCase {
   constructor(
     @inject("IClientRepository")
     private readonly clientRepository: IClientRepository,
   ) {}
 
-  async execute(contactId: string): Promise<void> {
-    await this.clientRepository.softDelete(contactId);
+  async execute(clientId: string): Promise<void> {
+    await this.clientRepository.hardDelete(clientId);
   }
 }

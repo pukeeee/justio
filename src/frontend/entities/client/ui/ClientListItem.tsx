@@ -7,6 +7,7 @@ import { Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/frontend/shared/lib/utils";
 import { ClientActions } from "./ClientActions";
+import { useWorkspaceStore } from "@/frontend/shared/stores/workspace-store";
 
 interface ClientListItemProps {
   client: Client;
@@ -25,6 +26,9 @@ export function ClientListItem({
   onDelete,
   className,
 }: ClientListItemProps) {
+  const currentWorkspaceSlug = useWorkspaceStore(
+    (state) => state.currentWorkspaceSlug,
+  );
   const isIndividual = client.clientType === "individual";
 
   const displayName = isIndividual
@@ -35,13 +39,15 @@ export function ClientListItem({
     ? `${client.firstName?.[0] || ""}${client.lastName?.[0] || ""}`.toUpperCase()
     : (client.companyName?.[0] || "").toUpperCase();
 
+  // Формуємо URL: якщо ми в контексті воркспейсу, додаємо його slug
+  const clientUrl = currentWorkspaceSlug
+    ? `/dashboard/${currentWorkspaceSlug}/clients/${client.id}`
+    : `/dashboard/clients/${client.id}`;
+
   return (
     <TableRow className={cn("group transition-colors", className)}>
       <TableCell className="py-3 px-4">
-        <Link
-          href={`/dashboard/clients/${client.id}`}
-          className="flex items-center gap-3 outline-none"
-        >
+        <Link href={clientUrl} className="flex items-center gap-3 outline-none">
           <Avatar className="h-9 w-9 border">
             <AvatarFallback
               className={

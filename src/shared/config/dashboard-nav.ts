@@ -13,6 +13,7 @@ import {
   Inbox,
   Settings,
   BookOpen,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -98,6 +99,12 @@ export const DASHBOARD_SECONDARY_NAV: NavItem[] = [
     name: "Налаштування",
     href: "/settings",
     icon: Settings,
+    description: "Параметри воркспейсу",
+  },
+  {
+    name: "Кошик",
+    href: "/bin",
+    icon: Trash2,
     description: "Параметри воркспейсу",
   },
 ];
