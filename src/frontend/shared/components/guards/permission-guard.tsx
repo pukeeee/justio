@@ -256,22 +256,6 @@ export function ShowWhenAuthenticated({
   return <>{children}</>;
 }
 
-/**
- * Відображає дочірні елементи, тільки якщо користувач НЕ автентифікований (гість).
- */
-export function ShowWhenGuest({
-  children,
-  fallback = null,
-}: ShowWhenAuthenticatedProps) {
-  const isAuthenticated = useAuthenticated();
-
-  if (isAuthenticated) {
-    return <>{fallback}</>;
-  }
-
-  return <>{children}</>;
-}
-
 // ============================================================================
 // УТИЛИТА ДЛЯ ОТОБРАЖЕНИЯ РАЗНОГО КОНТЕНТА ПО РОЛИ
 // ============================================================================

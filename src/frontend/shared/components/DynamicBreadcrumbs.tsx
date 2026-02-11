@@ -35,20 +35,21 @@ export function DynamicBreadcrumbs({
 }: DynamicBreadcrumbsProps) {
   const pathname = usePathname();
 
-  // Отримуємо шлях після /dashboard/[slug]
-  // Наприклад: /dashboard/my-workspace/clients -> /clients
+  // Отримуємо базовий шлях воркспейсу
   const baseDashboardPath = `/dashboard/${workspaceSlug}`;
-  const subPath = pathname.replace(baseDashboardPath, "") || "";
 
   // Знаходимо назву модуля в конфігурації
   const allNavItems = [...DASHBOARD_NAV, ...DASHBOARD_SECONDARY_NAV];
 
-  // Шукаємо точний збіг або найбільш підходящий префікс
-  const currentNavItem = allNavItems.find(
-    (item) =>
-      item.href === subPath ||
-      (item.href !== "" && subPath.startsWith(item.href)),
-  );
+  // Шукаємо найбільш підходящий елемент навігації
+  const currentNavItem = allNavItems.find((item) => {
+    const fullHref = item.href(workspaceSlug);
+    // Точний збіг або якщо поточний pathname починається з href модуля (і це не корінь)
+    return (
+      pathname === fullHref ||
+      (fullHref !== baseDashboardPath && pathname.startsWith(fullHref))
+    );
+  });
 
   const moduleName = currentNavItem?.name || "Огляд";
 
@@ -66,11 +67,7 @@ export function DynamicBreadcrumbs({
 
         {/* Рівень модуля */}
         <BreadcrumbItem>
-          {subPath === "" || subPath === "/" ? (
-            <BreadcrumbPage>{moduleName}</BreadcrumbPage>
-          ) : (
-            <BreadcrumbPage>{moduleName}</BreadcrumbPage>
-          )}
+          <BreadcrumbPage>{moduleName}</BreadcrumbPage>
         </BreadcrumbItem>
 
         {/* Тут можна додати третій рівень для конкретних ID, якщо потрібно */}

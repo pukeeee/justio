@@ -8,7 +8,7 @@ import {
   Globe,
   Lock,
 } from "lucide-react";
-import { routes } from "@/shared/config/routes";
+import { routes } from "@/shared/routes/main-routes";
 
 export const productContent = {
   hero: {

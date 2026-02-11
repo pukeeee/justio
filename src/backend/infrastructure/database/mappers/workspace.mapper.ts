@@ -56,7 +56,11 @@ export class WorkspaceMapper {
       name: domain.name,
       slug: domain.slug.value,
       ownerId: domain.ownerId,
-      tier: domain.subscriptionTier.name as "free" | "starter" | "pro" | "enterprise",
+      tier: domain.subscriptionTier.name as
+        | "free"
+        | "solo"
+        | "firm"
+        | "enterprise",
       settings: {
         visibility_mode: domain.settings.visibilityMode,
         default_currency: domain.settings.defaultCurrency,

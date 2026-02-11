@@ -1,12 +1,9 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
 /**
- * Типи контактів: фізична або юридична особа.
+ * Типи клієнтів: фізична або юридична особа.
  */
-export const contactTypeEnum = pgEnum("contact_type", [
-  "individual",
-  "company",
-]);
+export const clientTypeEnum = pgEnum("client_type", ["individual", "company"]);
 
 /**
  * Ролі користувача в workspace.
@@ -15,7 +12,6 @@ export const workspaceRoleEnum = pgEnum("workspace_role", [
   "owner",
   "admin",
   "user",
-  "guest",
 ]);
 
 /**
@@ -41,8 +37,8 @@ export const workspaceUserStatusEnum = pgEnum("workspace_user_status", [
  */
 export const workspaceTierEnum = pgEnum("workspace_tier", [
   "free",
-  "starter",
-  "pro",
+  "solo",
+  "firm",
   "enterprise",
 ]);
 

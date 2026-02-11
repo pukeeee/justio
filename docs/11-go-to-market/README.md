@@ -259,7 +259,7 @@ justio.com.ua
 - "Безпека даних клієнтів: best practices"
 - "Дія.Підпис в роботі юриста"
 
-**Budget:** $500 (Zoom Pro, промо)
+**Budget:** $500 (Zoom Firm, промо)
 
 **Expected:** 6 paid users
 

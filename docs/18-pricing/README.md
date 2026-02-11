@@ -234,7 +234,7 @@
 - Negotiable (based on users, features)
 
 **Sales Process:**
-- Contact sales (form)
+- Client sales (form)
 - Discovery call (30 min)
 - Demo (1h)
 - Proposal + pricing
@@ -256,7 +256,7 @@
 |--------|----------|-------------|------|
 | **Advanced Analytics** | 299 грн ($8) | Team+ | Глибока аналітика, кастомні звіти, BI dashboard |
 | **Document Automation** | 499 грн ($14) | Solo+ | AI-генерація документів з шаблонів, auto-fill |
-| **Court Monitoring Pro** | 399 грн ($11) | Team+ | Розширений моніторинг судів, автооновлення, alerts |
+| **Court Monitoring Firm** | 399 грн ($11) | Team+ | Розширений моніторинг судів, автооновлення, alerts |
 | **SMS Notifications** | 199 грн + 0.50 грн/SMS | Solo+ | SMS нагадування клієнтам про засідання |
 | **Email Integration** | 299 грн ($8) | Team+ | Gmail/Outlook інтеграція, автоархівація emails |
 | **E-Signature Premium** | 399 грн ($11) | Solo+ | Необмежені Дія.Підпис підписи (базовий план: 10/міс) |
@@ -576,7 +576,7 @@ Firm $112 ← Makes Team look affordable
 │ │       │       │🔥Most│       │        │ │
 │ │  0грн │499грн │1,499  │3,999  │Custom  │ │
 │ │       │       │       │       │        │ │
-│ │[Start]│[Start]│[Start]│[Start]│[Contact]│ │
+│ │[Start]│[Start]│[Start]│[Start]│[Client]│ │
 │ └───────┴───────┴───────┴───────┴────────┘ │
 │                                             │
 │           Всі плани включають:             │
@@ -745,7 +745,7 @@ Firm $112 ← Makes Team look affordable
 - Core features + billing
 - Good value ($14)
 
-**Team Bundle:** "Team Pro"
+**Team Bundle:** "Team Firm"
 - All Solo + collaboration
 - Huge value vs buying separately
 

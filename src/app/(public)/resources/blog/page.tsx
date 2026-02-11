@@ -1,10 +1,10 @@
 "use client";
 
-import { BlogHero } from "@/frontend/widgets/blog/ui/BlogHero";
-import { BlogCategories } from "@/frontend/widgets/blog/ui/BlogCategories";
-import { BlogFeaturedPost } from "@/frontend/widgets/blog/ui/BlogFeaturedPost";
-import { BlogGrid } from "@/frontend/widgets/blog/ui/BlogGrid";
-import { BlogNewsletter } from "@/frontend/widgets/blog/ui/BlogNewsletter";
+import { BlogHero } from "@/frontend/widgets/root/blog/ui/BlogHero";
+import { BlogCategories } from "@/frontend/widgets/root/blog/ui/BlogCategories";
+import { BlogFeaturedPost } from "@/frontend/widgets/root/blog/ui/BlogFeaturedPost";
+import { BlogGrid } from "@/frontend/widgets/root/blog/ui/BlogGrid";
+import { BlogNewsletter } from "@/frontend/widgets/root/blog/ui/BlogNewsletter";
 import { blogContent } from "@/content/main/resources/blog";
 
 /**

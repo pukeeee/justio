@@ -1,7 +1,7 @@
 "use client";
 
-import { ReleasesHero } from "@/frontend/widgets/releases/ui/ReleasesHero";
-import { ReleasesTimeline } from "@/frontend/widgets/releases/ui/ReleasesTimeline";
+import { ReleasesHero } from "@/frontend/widgets/root/releases/ui/ReleasesHero";
+import { ReleasesTimeline } from "@/frontend/widgets/root/releases/ui/ReleasesTimeline";
 import { releasesContent } from "@/content/main/resources/releases";
 
 /**

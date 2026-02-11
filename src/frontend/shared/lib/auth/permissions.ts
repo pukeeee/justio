@@ -183,14 +183,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "use_integrations",
     "send_individual_emails",
   ],
-  guest: [
-    // Доступ тільки для читання
-    "view_own_contacts",
-    "view_all_companies",
-    "view_own_deals",
-    "view_assigned_tasks",
-    "view_products",
-  ],
 };
 
 // ============================================================================
@@ -254,7 +246,6 @@ export const ROLE_WEIGHTS: Record<UserRole, number> = {
   admin: 4,
   manager: 3,
   user: 2,
-  guest: 1,
 };
 
 /**
@@ -348,7 +339,6 @@ export function getRoleDisplayName(role: UserRole): string {
     admin: "Адміністратор",
     manager: "Менеджер",
     user: "Користувач",
-    guest: "Гість",
   };
   return names[role];
 }
@@ -363,7 +353,6 @@ export function getRoleDescription(role: UserRole): string {
     admin: "Керування командою та даними, крім білінгу",
     manager: "Керування клієнтами, угодами та завданнями",
     user: "Робота з власними клієнтами та угодами",
-    guest: "Перегляд даних без можливості редагування",
   };
   return descriptions[role];
 }
@@ -373,7 +362,7 @@ export function getRoleDescription(role: UserRole): string {
  * @param currentUserRole - Роль поточного користувача.
  */
 export function getAssignableRoles(currentUserRole: UserRole): UserRole[] {
-  const allRoles: UserRole[] = ["owner", "admin", "manager", "user", "guest"];
+  const allRoles: UserRole[] = ["owner", "admin", "manager", "user"];
 
   // Власник може призначати будь-які ролі
   if (currentUserRole === "owner") return allRoles;

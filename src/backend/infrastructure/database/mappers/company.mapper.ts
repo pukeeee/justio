@@ -1,17 +1,16 @@
-import { Company } from '@/backend/domain/entities/company.entity';
+import { Company } from "@/backend/domain/entities/company.entity";
+import { companies } from "../drizzle/schema";
 
-type DbCompany = {
-  id: string;
-  contactId: string;
-  name: string;
-  taxId: string | null;
-};
+/**
+ * Тип для рядка з таблиці companies.
+ */
+export type DbCompany = typeof companies.$inferSelect;
 
 export class CompanyMapper {
   static toDomain(raw: DbCompany): Company {
     return Company.create({
       id: raw.id,
-      contactId: raw.contactId,
+      clientId: raw.clientId,
       name: raw.name,
       taxId: raw.taxId,
     });
@@ -20,7 +19,7 @@ export class CompanyMapper {
   static toPersistence(company: Company) {
     return {
       id: company.id,
-      contactId: company.contactId,
+      clientId: company.clientId,
       name: company.name,
       taxId: company.taxId,
     };

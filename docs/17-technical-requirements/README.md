@@ -81,8 +81,8 @@
 **Infrastructure:**
 | Service | Purpose | Tier |
 |---------|---------|------|
-| **Vercel** | Hosting, CDN, Functions | Pro ($20/mo) |
-| **Supabase** | Database, Auth, Storage | Pro ($25/mo) |
+| **Vercel** | Hosting, CDN, Functions | Firm ($20/mo) |
+| **Supabase** | Database, Auth, Storage | Firm ($25/mo) |
 | **AWS S3** | File storage (backup) | Pay-as-you-go |
 | **Cloudflare** | DNS, DDoS protection | Free |
 
@@ -192,12 +192,12 @@ Total (10k users):
 - CDN: Global edge caching (Vercel Edge Network)
 
 **Database Scaling:**
-- Supabase Pro: Up to 100k users (sufficient for Phase 1-2)
+- Supabase Firm: Up to 100k users (sufficient for Phase 1-2)
 - Connection pooling (Supavisor)
 - Read replicas (if needed in Phase 3+)
 
 **File Storage:**
-- Supabase Storage: 100GB (Pro)
+- Supabase Storage: 100GB (Firm)
 - AWS S3: Unlimited (fallback/backup)
 - CDN caching for frequently accessed files
 
@@ -234,7 +234,7 @@ Total (10k users):
 
 **Database Backups:**
 - Frequency: Daily automatic (Supabase)
-- Retention: 7 days (Pro plan)
+- Retention: 7 days (Firm plan)
 - Manual backups: Before major migrations
 
 **File Storage Backups:**
@@ -576,7 +576,7 @@ Device × OS × Browser
 Priority P0:
 - iPhone 14, iOS 17, Safari
 - Samsung S22, Android 13, Chrome
-- MacBook Pro, macOS, Chrome
+- MacBook Firm, macOS, Chrome
 - Windows 11, Chrome
 
 Priority P1:

@@ -1,12 +1,12 @@
 "use client";
 
-import { SecurityHero } from "@/frontend/widgets/security/ui/SecurityHero";
-import { SecurityTrust } from "@/frontend/widgets/security/ui/SecurityTrust";
-import { SecurityFeatures } from "@/frontend/widgets/security/ui/SecurityFeatures";
-import { SecurityCertifications } from "@/frontend/widgets/security/ui/SecurityCertifications";
-import { SecurityPractices } from "@/frontend/widgets/security/ui/SecurityPractices";
-import { SecurityInfrastructure } from "@/frontend/widgets/security/ui/SecurityInfrastructure";
-import { CTAsection } from "@/frontend/widgets/cta-section/ui/CTAsection";
+import { SecurityHero } from "@/frontend/widgets/root/security/ui/SecurityHero";
+import { SecurityTrust } from "@/frontend/widgets/root/security/ui/SecurityTrust";
+import { SecurityFeatures } from "@/frontend/widgets/root/security/ui/SecurityFeatures";
+import { SecurityCertifications } from "@/frontend/widgets/root/security/ui/SecurityCertifications";
+import { SecurityPractices } from "@/frontend/widgets/root/security/ui/SecurityPractices";
+import { SecurityInfrastructure } from "@/frontend/widgets/root/security/ui/SecurityInfrastructure";
+import { CTAsection } from "@/frontend/widgets/root/cta-section/ui/CTAsection";
 import { securityContent } from "@/content/main/security";
 
 /**

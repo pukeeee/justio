@@ -1,4 +1,4 @@
-import { routes } from "@/shared/config/routes";
+import { routes } from "@/shared/routes/main-routes";
 
 // Тепер LucideIcon не імпортуються тут, оскільки ми зберігатимемо їх назви як рядки
 // import {

@@ -1,19 +1,11 @@
 import { Individual } from "@/backend/domain/entities/individual.entity";
 import { PassportDetailsProps } from "@/backend/domain/value-objects/passport-details.vo";
+import { individuals } from "../drizzle/schema";
 
 /**
  * Тип для рядка з таблиці individuals.
  */
-type DbIndividual = {
-  id: string;
-  contactId: string;
-  firstName: string;
-  lastName: string;
-  middleName: string | null;
-  dateOfBirth: string | null; // Drizzle повертає дату як рядок
-  taxNumber: string | null;
-  passportDetails: unknown; // jsonb
-};
+export type DbIndividual = typeof individuals.$inferSelect;
 
 export class IndividualMapper {
   static toDomain(raw: DbIndividual): Individual {
@@ -34,12 +26,13 @@ export class IndividualMapper {
 
     return Individual.create({
       id: raw.id,
-      contactId: raw.contactId,
+      clientId: raw.clientId,
       firstName: raw.firstName,
       lastName: raw.lastName,
       middleName: raw.middleName,
       dateOfBirth: raw.dateOfBirth ? new Date(raw.dateOfBirth) : null,
       taxNumber: raw.taxNumber,
+      isFop: raw.isFop,
       passportDetails: passportProps,
     });
   }
@@ -49,12 +42,13 @@ export class IndividualMapper {
 
     return {
       id: individual.id,
-      contactId: individual.contactId,
+      clientId: individual.clientId,
       firstName: individual.firstName,
       lastName: individual.lastName,
       middleName: individual.middleName,
       dateOfBirth: individual.dateOfBirth?.toISOString().split("T")[0] ?? null,
       taxNumber: individual.taxNumber,
+      isFop: individual.isFop,
       // Конвертуємо Value Object назад у простий об'єкт для JSONB
       passportDetails: passport
         ? {

@@ -45,11 +45,11 @@ export class ImmutableFieldUpdateError extends DomainError {
 }
 
 /**
- * Помилка для невалідного РНОКПП (ІПН).
+ * Помилка для невалідного РНОКПП.
  */
 export class InvalidTaxNumberError extends DomainError {
   constructor(value: string) {
-    super(`Невалідний РНОКПП (ІПН): ${value}. Очікується 10 цифр.`);
+    super(`Невалідний РНОКПП: ${value}. Очікується 10 цифр.`);
   }
 }
 
@@ -84,7 +84,12 @@ export class EntityNotFoundError extends DomainError {
  * Помилка: Сутність вже існує (дублікат).
  */
 export class DuplicateEntityError extends DomainError {
-  constructor(entityName: string, field: string, value: string) {
-    super(`${entityName} з ${field} "${value}" вже існує в системі`);
+  constructor(
+    public readonly entityName: string,
+    public readonly field: string,
+    public readonly value: string,
+    public readonly fieldKey?: string,
+  ) {
+    super(`${entityName} з таким ${field} вже існує`);
   }
 }

@@ -1,8 +1,8 @@
 import { lawFirmsContent } from "@/content/main/solutions/law-firms";
-import { HeroSolutions } from "@/frontend/widgets/solutions/shared/hero-solutions/ui/HeroSolutions";
-import { PainPoints } from "@/frontend/widgets/solutions/shared/pain-points/ui/PainPoints";
-import { FeaturesSolutions } from "@/frontend/widgets/solutions/shared/features-solutions/ui/FeaturesSolutions";
-import { CTAsection } from "@/frontend/widgets/cta-section/ui/CTAsection";
+import { HeroSolutions } from "@/frontend/widgets/root/solutions/shared/hero-solutions/ui/HeroSolutions";
+import { PainPoints } from "@/frontend/widgets/root/solutions/shared/pain-points/ui/PainPoints";
+import { FeaturesSolutions } from "@/frontend/widgets/root/solutions/shared/features-solutions/ui/FeaturesSolutions";
+import { CTAsection } from "@/frontend/widgets/root/cta-section/ui/CTAsection";
 
 export default function LawFirms() {
   const { hero, painPoints, features, cta } = lawFirmsContent;

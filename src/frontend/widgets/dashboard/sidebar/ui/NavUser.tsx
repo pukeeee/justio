@@ -37,7 +37,7 @@ import {
   USER_PAGES,
   UPGRADE_ACTION,
   LOGOUT_ACTION,
-} from "@/shared/config/user-pages";
+} from "@/shared/config/user-nav";
 import { signOut } from "@/frontend/features/auth/actions/auth.actions";
 import type { FormattedUserData } from "@/frontend/shared/lib/auth/get-user-data";
 

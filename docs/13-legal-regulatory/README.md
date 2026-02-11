@@ -288,7 +288,7 @@
 - How we use it
 - Who has access
 - User rights
-- Contact information (DPO)
+- Client information (DPO)
 
 **3. Cookie Policy**
 - What cookies we use
@@ -605,7 +605,7 @@
 
 ---
 
-## 13.16. Contact & Escalation
+## 13.16. Client & Escalation
 
 **Data Protection Officer (DPO):**
 - Email: dpo@justio.ua

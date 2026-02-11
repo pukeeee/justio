@@ -1,10 +1,10 @@
 "use client";
 
-import { AboutHero } from "@/frontend/widgets/about/ui/AboutHero";
-import { AboutStory } from "@/frontend/widgets/about/ui/AboutStory";
-import { AboutValues } from "@/frontend/widgets/about/ui/AboutValues";
-import { AboutTeam } from "@/frontend/widgets/about/ui/AboutTeam";
-import { CTAsection } from "@/frontend/widgets/cta-section/ui/CTAsection";
+import { AboutHero } from "@/frontend/widgets/root/about/ui/AboutHero";
+import { AboutStory } from "@/frontend/widgets/root/about/ui/AboutStory";
+import { AboutValues } from "@/frontend/widgets/root/about/ui/AboutValues";
+import { AboutTeam } from "@/frontend/widgets/root/about/ui/AboutTeam";
+import { CTAsection } from "@/frontend/widgets/root/cta-section/ui/CTAsection";
 import { aboutContent } from "@/content/main/company/about";
 
 /**

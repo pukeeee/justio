@@ -1,38 +1,44 @@
-import { TaxNumber } from '../value-objects/tax-number.vo';
-import { PassportDetails, PassportDetailsProps } from '../value-objects/passport-details.vo';
-import { MissingRequiredFieldError } from '../errors/invalid-data.error';
+import { TaxNumber } from "../value-objects/tax-number.vo";
+import {
+  PassportDetails,
+  PassportDetailsProps,
+} from "../value-objects/passport-details.vo";
+import { MissingRequiredFieldError } from "../errors/invalid-data.error";
 
 /**
  * Сутність "Фізична особа".
  */
 export class Individual {
   public readonly id: string;
-  public readonly contactId: string;
+  public readonly clientId: string;
 
   private _firstName: string;
   private _lastName: string;
   private _middleName: string | null;
   private _dateOfBirth: Date | null;
   private _taxNumber: TaxNumber | null;
+  private _isFop: boolean;
   private _passportDetails: PassportDetails | null;
 
   private constructor(props: {
     id: string;
-    contactId: string;
+    clientId: string;
     firstName: string;
     lastName: string;
     middleName: string | null;
     dateOfBirth: Date | null;
     taxNumber: TaxNumber | null;
+    isFop: boolean;
     passportDetails: PassportDetails | null;
   }) {
     this.id = props.id;
-    this.contactId = props.contactId;
+    this.clientId = props.clientId;
     this._firstName = props.firstName;
     this._lastName = props.lastName;
     this._middleName = props.middleName;
     this._dateOfBirth = props.dateOfBirth;
     this._taxNumber = props.taxNumber;
+    this._isFop = props.isFop;
     this._passportDetails = props.passportDetails;
   }
 
@@ -41,28 +47,35 @@ export class Individual {
    */
   public static create(props: {
     id?: string;
-    contactId: string;
+    clientId: string;
     firstName: string;
     lastName: string;
     middleName?: string | null;
     dateOfBirth?: Date | null;
     taxNumber?: string | null;
+    isFop?: boolean;
     passportDetails?: PassportDetailsProps | null;
   }): Individual {
-    if (!props.firstName?.trim()) throw new MissingRequiredFieldError('Ім’я');
-    if (!props.lastName?.trim()) throw new MissingRequiredFieldError('Прізвище');
+    if (!props.firstName?.trim()) throw new MissingRequiredFieldError("Ім’я");
+    if (!props.lastName?.trim())
+      throw new MissingRequiredFieldError("Прізвище");
 
-    const taxNumber = props.taxNumber ? TaxNumber.create(props.taxNumber) : null;
-    const passportDetails = props.passportDetails ? PassportDetails.create(props.passportDetails) : null;
+    const taxNumber = props.taxNumber
+      ? TaxNumber.create(props.taxNumber)
+      : null;
+    const passportDetails = props.passportDetails
+      ? PassportDetails.create(props.passportDetails)
+      : null;
 
     return new Individual({
       id: props.id ?? crypto.randomUUID(),
-      contactId: props.contactId,
+      clientId: props.clientId,
       firstName: props.firstName.trim(),
       lastName: props.lastName.trim(),
       middleName: props.middleName ?? null,
       dateOfBirth: props.dateOfBirth ?? null,
       taxNumber: taxNumber,
+      isFop: props.isFop ?? false,
       passportDetails: passportDetails,
     });
   }
@@ -87,7 +100,7 @@ export class Individual {
   get fullName(): string {
     return [this._lastName, this._firstName, this._middleName]
       .filter(Boolean)
-      .join(' ');
+      .join(" ");
   }
 
   get dateOfBirth(): Date | null {
@@ -96,6 +109,10 @@ export class Individual {
 
   get taxNumber(): string | null {
     return this._taxNumber?.value ?? null;
+  }
+
+  get isFop(): boolean {
+    return this._isFop;
   }
 
   get passportDetails(): PassportDetails | null {
@@ -113,27 +130,37 @@ export class Individual {
     middleName?: string | null;
     dateOfBirth?: Date | null;
     taxNumber?: string | null;
+    isFop?: boolean;
     passportDetails?: PassportDetailsProps | null;
   }): void {
     if (props.firstName !== undefined) {
-      if (!props.firstName?.trim()) throw new MissingRequiredFieldError('Ім’я');
+      if (!props.firstName?.trim()) throw new MissingRequiredFieldError("Ім’я");
       this._firstName = props.firstName.trim();
     }
-    
+
     if (props.lastName !== undefined) {
-      if (!props.lastName?.trim()) throw new MissingRequiredFieldError('Прізвище');
+      if (!props.lastName?.trim())
+        throw new MissingRequiredFieldError("Прізвище");
       this._lastName = props.lastName.trim();
     }
 
     if (props.middleName !== undefined) this._middleName = props.middleName;
     if (props.dateOfBirth !== undefined) this._dateOfBirth = props.dateOfBirth;
-    
+
     if (props.taxNumber !== undefined) {
-      this._taxNumber = props.taxNumber ? TaxNumber.create(props.taxNumber) : null;
+      this._taxNumber = props.taxNumber
+        ? TaxNumber.create(props.taxNumber)
+        : null;
+    }
+
+    if (props.isFop !== undefined) {
+      this._isFop = props.isFop;
     }
 
     if (props.passportDetails !== undefined) {
-      this._passportDetails = props.passportDetails ? PassportDetails.create(props.passportDetails) : null;
+      this._passportDetails = props.passportDetails
+        ? PassportDetails.create(props.passportDetails)
+        : null;
     }
   }
 }

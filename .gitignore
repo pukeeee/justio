@@ -42,6 +42,5 @@ next-env.d.ts
 
 .geminiignore
 GEMINI.md
-fundament
 
 /supabase-archive/.temp
