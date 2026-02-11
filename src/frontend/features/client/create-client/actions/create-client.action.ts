@@ -8,6 +8,7 @@ import { createClientSchema } from "@/frontend/entities/client/model/schema";
 import { CreateClient } from "@/frontend/entities/client/model/types";
 import { ClientType } from "@/backend/domain/value-objects/client-type.enum";
 import { DuplicateEntityError } from "@/backend/domain/errors/invalid-data.error";
+import { dashboardRoutes } from "@/shared/routes/dashboard-routes";
 
 /**
  * @description Допоміжна функція для конвертації значень у дату
@@ -24,6 +25,7 @@ const toDate = (val: string | Date | null | undefined): Date | null => {
  */
 export async function createClientAction(
   data: CreateClient,
+  workspaceSlug: string,
 ): Promise<{ 
   success: boolean; 
   error: string | null;
@@ -119,7 +121,7 @@ export async function createClientAction(
     }
 
     // 5. Оновлення кешу сторінок
-    revalidatePath(`/dashboard/${validatedData.workspaceId}/clients`);
+    revalidatePath(dashboardRoutes.clients(workspaceSlug));
 
     return { success: true, error: null };
   } catch (error) {

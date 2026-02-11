@@ -8,14 +8,14 @@ import { ClientActions } from "./ClientActions";
 interface ClientCardProps {
   client: Client;
   onEdit?: (client: Client) => void;
-  onDelete?: (client: Client) => void;
+  deleteAction?: React.ReactNode;
 }
 
 /**
  * @description Компонент картки контакту для мобільного вигляду та списків.
  * Адаптований під різні типи контактів (фіз. особа / компанія).
  */
-export function ClientCard({ client, onEdit, onDelete }: ClientCardProps) {
+export function ClientCard({ client, onEdit, deleteAction }: ClientCardProps) {
   const isIndividual = client.clientType === "individual";
 
   // Отримуємо відображуване ім'я
@@ -65,7 +65,7 @@ export function ClientCard({ client, onEdit, onDelete }: ClientCardProps) {
           <ClientActions
             client={client}
             onEdit={onEdit}
-            onDelete={onDelete}
+            deleteAction={deleteAction}
             icon="horizontal"
             triggerClassName="h-8 w-8"
           />

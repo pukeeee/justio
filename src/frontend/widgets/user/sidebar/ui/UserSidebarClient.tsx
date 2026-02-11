@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { USER_PAGES } from "@/shared/config/user-pages";
+import { USER_PAGES } from "@/shared/config/user-nav";
 import { cn } from "@/frontend/shared/lib/utils";
 import { Button } from "@/frontend/shared/components/ui/button";
 

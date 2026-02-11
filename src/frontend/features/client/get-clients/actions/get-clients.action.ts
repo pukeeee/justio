@@ -27,15 +27,13 @@ export async function getClientsAction(
     // Мапінг даних з бекенд DTO на фронтенд сутності
     const mappedClients: Client[] = result.items.map(
       (item: ClientListItemDTO) => {
-        // Явне приведення типу замість any, оскільки значення enum збігаються з нашими стрінговими літералами
         const type = item.clientType as ClientType;
 
         const base = {
           id: item.id,
           workspaceId: workspaceId,
-          clientType: type,
-          email: item.email,
-          phone: item.phone,
+          email: item.email || null,
+          phone: item.phone || null,
           address: null,
           note: null,
           createdAt: new Date(item.createdAt),
@@ -43,21 +41,20 @@ export async function getClientsAction(
         };
 
         if (type === "individual") {
-          const nameParts = item.displayName.split(" ");
           return {
             ...base,
             clientType: "individual",
-            firstName: nameParts[1] || "",
-            lastName: nameParts[0] || "",
+            firstName: item.firstName || "",
+            lastName: item.lastName || "",
             isFop: item.isFop ?? false,
-            taxNumber: item.taxNumber,
+            taxNumber: item.taxNumber || null,
           } satisfies Client;
         } else {
           return {
             ...base,
             clientType: "company",
-            companyName: item.displayName,
-            taxId: item.taxId,
+            companyName: item.companyName || item.displayName,
+            taxId: item.taxId || null,
           } satisfies Client;
         }
       },

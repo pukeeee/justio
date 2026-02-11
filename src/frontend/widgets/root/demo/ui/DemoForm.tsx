@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/frontend/shared/components/ui/select";
-import { routes } from "@/shared/config/routes";
+import { routes } from "@/shared/routes/main-routes";
 
 interface DemoFormProps {
   content: {

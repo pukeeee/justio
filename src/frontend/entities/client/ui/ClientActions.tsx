@@ -15,7 +15,9 @@ import {
 interface ClientActionsProps {
   client: Client;
   onEdit?: (client: Client) => void;
+  /** @deprecated Використовуйте deleteAction слот */
   onDelete?: (client: Client) => void;
+  deleteAction?: React.ReactNode;
   triggerClassName?: string;
   icon?: "vertical" | "horizontal";
 }
@@ -28,6 +30,7 @@ export function ClientActions({
   client,
   onEdit,
   onDelete,
+  deleteAction,
   triggerClassName,
   icon = "vertical",
 }: ClientActionsProps) {
@@ -53,14 +56,21 @@ export function ClientActions({
           <Pencil className="mr-2 h-4 w-4" />
           Редагувати
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => onDelete?.(client)}
-          className="text-destructive focus:text-destructive cursor-pointer"
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Видалити
-        </DropdownMenuItem>
+        
+        {deleteAction ? (
+          deleteAction
+        ) : onDelete ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => onDelete?.(client)}
+              className="text-destructive focus:text-destructive cursor-pointer"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Видалити
+            </DropdownMenuItem>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

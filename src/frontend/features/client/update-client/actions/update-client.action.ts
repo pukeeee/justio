@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { container } from "@/backend/infrastructure/di/container";
 import { UpdateClientUseCase } from "@/backend/application/use-cases/clients/update-client.use-case";
 import { IAuthService } from "@/backend/application/interfaces/services/auth.service.interface";
-import { IWorkspaceRepository } from "@/backend/application/interfaces/repositories/workspace.repository.interface";
 import { updateClientSchema } from "@/frontend/entities/client/model/schema";
 import { UpdateClient } from "@/frontend/entities/client/model/types";
 import { DuplicateEntityError } from "@/backend/domain/errors/invalid-data.error";
+import { dashboardRoutes } from "@/shared/routes/dashboard-routes";
 
 /**
  * @description Допоміжна функція для конвертації значень у дату
@@ -23,6 +23,7 @@ const toDate = (val: string | Date | null | undefined): Date | null => {
  */
 export async function updateClientAction(
   data: UpdateClient,
+  workspaceSlug: string,
 ): Promise<{ 
   success: boolean; 
   error: string | null;
@@ -32,9 +33,6 @@ export async function updateClientAction(
     // 1. Отримуємо залежності з контейнера
     const updateClientUseCase = container.resolve(UpdateClientUseCase);
     const authService = container.resolve<IAuthService>("IAuthService");
-    const workspaceRepository = container.resolve<IWorkspaceRepository>(
-      "IWorkspaceRepository",
-    );
 
     // 2. Безпека: перевірка автентифікації
     const user = await authService.getCurrentUser();
@@ -114,14 +112,7 @@ export async function updateClientAction(
     }
 
     // 5. Оновлення кешу сторінок
-    const workspace = await workspaceRepository.findById(
-      validatedData.workspaceId,
-    );
-    if (workspace) {
-      revalidatePath(`/dashboard/${workspace.slug}/clients`);
-    } else {
-      revalidatePath(`/dashboard/${validatedData.workspaceId}/clients`);
-    }
+    revalidatePath(dashboardRoutes.clients(workspaceSlug));
 
     return { success: true, error: null };
   } catch (error) {

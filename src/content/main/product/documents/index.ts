@@ -6,7 +6,7 @@ import {
   FileCheck,
   Sparkles,
 } from "lucide-react";
-import { routes } from "@/shared/config/routes";
+import { routes } from "@/shared/routes/main-routes";
 
 export const documentsContent = {
   hero: {
@@ -86,7 +86,8 @@ export const documentsContent = {
   },
   cta: {
     title: "Візьміть під контроль свої документи",
-    description: "Дізнайтеся, як Justio CRM може організувати документи вашої практики.",
+    description:
+      "Дізнайтеся, як Justio CRM може організувати документи вашої практики.",
     button: {
       text: "Замовити демо",
       href: routes.demo,

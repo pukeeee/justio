@@ -4,6 +4,7 @@ import { createClientAction } from "@/frontend/features/client/create-client/act
 import { CreateClient } from "@/frontend/entities/client/model/types";
 import { ClientForm } from "@/frontend/features/client/shared/ui/ClientForm";
 import { toast } from "sonner";
+import { useWorkspaceStore } from "@/frontend/shared/stores/workspace-store";
 
 interface CreateClientFormProps {
   workspaceId: string;
@@ -16,12 +17,16 @@ export function CreateClientForm({
   onSuccess,
   className,
 }: CreateClientFormProps) {
+  const currentWorkspaceSlug = useWorkspaceStore(
+    (state) => state.currentWorkspaceSlug,
+  );
+
   const handleSubmit = async (data: CreateClient) => {
-    const result = await createClientAction(data);
+    const result = await createClientAction(data, currentWorkspaceSlug || "");
 
     if (result.success) {
       toast.success("Клієнта успішно створено");
-      // Ми не викликаємо onSuccess тут, бо ClientForm зробить це, якщо результат успішний
+      onSuccess?.();
     }
     
     return result;
@@ -32,6 +37,7 @@ export function CreateClientForm({
       workspaceId={workspaceId}
       mode="create"
       onSubmit={handleSubmit}
+      onSuccess={onSuccess}
       className={className}
     />
   );

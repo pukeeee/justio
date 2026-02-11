@@ -14,6 +14,8 @@ import { UpdateClient } from "@/frontend/entities/client/model/types";
 import { getClientDetailsAction } from "../actions/get-client-details.action";
 import { updateClientAction } from "../actions/update-client.action";
 import { Loader2 } from "lucide-react";
+import { CreateClient } from "@/frontend/entities/client/model/types";
+import { useWorkspaceStore } from "@/frontend/shared/stores/workspace-store";
 
 interface UpdateClientDialogProps {
   clientId: string | null | undefined;
@@ -30,8 +32,13 @@ export function UpdateClientDialog({
   onOpenChange,
   onSuccess,
 }: UpdateClientDialogProps) {
-  const [defaultValues, setDefaultValues] = useState<Partial<UpdateClient> | undefined>(undefined);
+  const [defaultValues, setDefaultValues] = useState<
+    Partial<UpdateClient> | undefined
+  >(undefined);
   const [isLoading, setIsLoading] = useState(false);
+  const currentWorkspaceSlug = useWorkspaceStore(
+    (state) => state.currentWorkspaceSlug,
+  );
 
   // Завантаження даних при відкритті
   useEffect(() => {
@@ -62,7 +69,7 @@ export function UpdateClientDialog({
     }
   }, [open, clientId, onOpenChange]);
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: CreateClient) => {
     // data приходить як CreateClient, але ми знаємо що це update, тому додаємо ID
     // ClientForm повертає CreateClient, тому нам треба додати ID
     if (!clientId) {
@@ -74,25 +81,28 @@ export function UpdateClientDialog({
       id: clientId,
     };
 
-    const result = await updateClientAction(updateData);
+    const result = await updateClientAction(
+      updateData,
+      currentWorkspaceSlug || "",
+    );
 
     if (result.success) {
       toast.success("Клієнта успішно оновлено");
     }
-    
+
     return result;
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] h-[90vh] sm:h-[80vh] flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-150 h-[90vh] sm:h-[80vh] flex flex-col gap-0 p-0 overflow-hidden">
         <DialogHeader className="p-6 pb-2 shrink-0">
           <DialogTitle>Редагування клієнта</DialogTitle>
           <DialogDescription>
             Змініть дані клієнта. Тип клієнта змінити неможливо.
           </DialogDescription>
         </DialogHeader>
-        
+
         {isLoading ? (
           <div className="flex flex-1 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />

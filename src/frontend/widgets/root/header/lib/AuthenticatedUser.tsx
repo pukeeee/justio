@@ -16,7 +16,7 @@ import {
   AvatarImage,
 } from "@/frontend/shared/components/ui/avatar";
 import { Button } from "@/frontend/shared/components/ui/button";
-import { USER_PAGES } from "@/shared/config/user-pages";
+import { USER_PAGES } from "@/shared/config/user-nav";
 import { signOut } from "@/frontend/features/auth/actions/auth.actions";
 import { LogOut } from "lucide-react";
 import type { FormattedUserData } from "@/frontend/shared/lib/auth/get-user-data";
@@ -59,7 +59,7 @@ export function AuthenticatedUser({
         if (err instanceof Error && err.message.includes("NEXT_REDIRECT")) {
           return;
         }
-        
+
         console.error("Помилка виходу:", err);
         setError("Не вдалося вийти. Спробуйте ще раз.");
         setTimeout(() => setError(null), 3000);

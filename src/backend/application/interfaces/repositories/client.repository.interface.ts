@@ -57,12 +57,12 @@ export interface IClientRepository {
   /**
    * М'яке видалення клієнту.
    */
-  softDelete(id: string): Promise<void>;
+  softDelete(id: string, workspaceId: string): Promise<void>;
 
   /**
    * Відновлення видаленого клієнту.
    */
-  restore(id: string): Promise<void>;
+  restore(id: string, workspaceId: string): Promise<void>;
 
   /**
    * Перевірити, чи існує фізична особа з таким РНОКПП у воркспейсі.
@@ -103,7 +103,7 @@ export interface IClientRepository {
   /**
    * Повне видалення з бази даних.
    */
-  hardDelete(id: string): Promise<void>;
+  hardDelete(id: string, workspaceId: string): Promise<void>;
 
   /**
    * Додати контактну особу до компанії.

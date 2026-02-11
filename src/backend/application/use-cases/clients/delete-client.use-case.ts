@@ -11,7 +11,7 @@ export class DeleteClientUseCase {
     private readonly clientRepository: IClientRepository,
   ) {}
 
-  async execute(contactId: string): Promise<void> {
-    await this.clientRepository.softDelete(contactId);
+  async execute(clientId: string, workspaceId: string): Promise<void> {
+    await this.clientRepository.softDelete(clientId, workspaceId);
   }
 }

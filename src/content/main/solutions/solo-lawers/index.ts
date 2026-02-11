@@ -1,5 +1,5 @@
 import { Clock, CreditCard, Smartphone, Calendar } from "lucide-react";
-import { routes } from "@/shared/config/routes";
+import { routes } from "@/shared/routes/main-routes";
 
 export const soloLawyersContent = {
   hero: {

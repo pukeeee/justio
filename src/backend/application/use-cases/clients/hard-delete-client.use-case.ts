@@ -11,7 +11,7 @@ export class HardDeleteClientUseCase {
     private readonly clientRepository: IClientRepository,
   ) {}
 
-  async execute(clientId: string): Promise<void> {
-    await this.clientRepository.hardDelete(clientId);
+  async execute(clientId: string, workspaceId: string): Promise<void> {
+    await this.clientRepository.hardDelete(clientId, workspaceId);
   }
 }

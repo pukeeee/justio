@@ -3,23 +3,31 @@
 import { container } from "@/backend/infrastructure/di/container";
 import { DeleteClientUseCase } from "@/backend/application/use-cases/clients/delete-client.use-case";
 import { revalidatePath } from "next/cache";
+import { dashboardRoutes } from "@/shared/routes/dashboard-routes";
+import { getUserWorkspaces } from "@/frontend/shared/lib/auth/get-user-data";
 
 /**
  * Server Action для м'якого видалення клієнта.
  * @param clientId ID клієнта
- * @param workspaceId ID воркспейсу для ревалідації
+ * @param workspaceSlug Slug воркспейсу для ревалідації та безпеки
  */
 export async function deleteClientAction(
   clientId: string,
-  workspaceId: string,
+  workspaceSlug: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const deleteClientUseCase = container.resolve(DeleteClientUseCase);
+    const workspaces = await getUserWorkspaces();
+    const workspace = workspaces.find((w) => w.slug === workspaceSlug);
 
-    await deleteClientUseCase.execute(clientId);
+    if (!workspace) {
+      return { success: false, error: "Доступ до воркспейсу заборонено" };
+    }
+
+    const deleteClientUseCase = container.resolve(DeleteClientUseCase);
+    await deleteClientUseCase.execute(clientId, workspace.id);
 
     // Ревалідуємо список клієнтів у конкретному воркспейсі
-    revalidatePath(`/dashboard/${workspaceId}/clients`);
+    revalidatePath(dashboardRoutes.clients(workspaceSlug));
 
     return { success: true };
   } catch (error: unknown) {

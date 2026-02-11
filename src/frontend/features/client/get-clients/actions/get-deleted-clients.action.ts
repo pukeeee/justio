@@ -2,9 +2,9 @@
 
 import { container } from "@/backend/infrastructure/di/container";
 import { GetClientsListUseCase } from "@/backend/application/use-cases/clients/get-clients-list.use-case";
-import { getUserWorkspaces } from "@/frontend/shared/lib/auth/get-user-data";
-import { Client, ClientType } from "@/frontend/entities/client/model/types";
+import { Client } from "@/frontend/entities/client/model/types";
 import { ClientListItemDTO } from "@/backend/application/dtos/clients/client-list-item.dto";
+import { clientSchema } from "@/frontend/entities/client/model/schema";
 
 /**
  * Server Action для отримання списку видалених клієнтів.
@@ -21,40 +21,32 @@ export async function getDeletedClientsAction(
       limit: 100, // Для кошика поки беремо без пагінації перші 100
     });
 
-    const mappedClients: Client[] = result.items.map(
-      (item: ClientListItemDTO) => {
-        const type = item.clientType as ClientType;
+    const clients: Client[] = [];
+    const errors: string[] = [];
 
-        const base = {
-          id: item.id,
-          workspaceId: workspaceId,
-          email: item.email || "",
-          phone: item.phone || "",
-          createdAt: item.createdAt,
-        };
+    result.items.forEach((item: ClientListItemDTO) => {
+      // Підготовка даних для Zod-схеми
+      const rawData = {
+        ...item,
+        workspaceId,
+        // Переконуємося, що типи відповідають схемі (Zod Discrimination Union)
+        clientType: item.clientType === "company" ? "company" : "individual",
+      };
 
-        if (type === "individual") {
-          const names = item.displayName.split(" ");
-          return {
-            ...base,
-            clientType: "individual",
-            firstName: names[1] || "",
-            lastName: names[0] || "",
-            isFop: item.isFop || false,
-            taxNumber: item.taxNumber || "",
-          } satisfies Client;
-        }
+      const validation = clientSchema.safeParse(rawData);
 
-        return {
-          ...base,
-          clientType: "company",
-          companyName: item.displayName,
-          taxId: item.taxId || "",
-        } satisfies Client;
-      },
-    );
+      if (validation.success) {
+        clients.push(validation.data as Client);
+      } else {
+        console.error(`Validation error for client ${item.id}:`, validation.error.format());
+        errors.push(`Клієнт ${item.id} має некоректні дані`);
+      }
+    });
 
-    return { clients: mappedClients, error: null };
+    return { 
+      clients, 
+      error: errors.length > 0 ? "Деякі дані в кошику застаріли або пошкоджені" : null 
+    };
   } catch (error: unknown) {
     console.error("Get deleted clients action error:", error);
     return {

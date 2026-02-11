@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/frontend/shared/components/ui/button";
 import Link from "next/link";
 import { ProductMockup } from "@/frontend/shared/components/ProductMockup";
-import { routes } from "@/shared/config/routes";
+import { routes } from "@/shared/routes/main-routes";
 
 // Інтерфейс для пропсів HeroSection
 interface HeroSectionProps {

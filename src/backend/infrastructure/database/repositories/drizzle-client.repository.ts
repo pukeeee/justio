@@ -238,6 +238,9 @@ export class DrizzleClientRepository implements IClientRepository {
         row.clientType === ClientType.INDIVIDUAL
           ? `${row.lastName} ${row.firstName}`.trim()
           : row.companyName || "Без назви",
+      firstName: row.firstName,
+      lastName: row.lastName,
+      companyName: row.companyName,
       email: row.email,
       phone: row.phone,
       isFop: row.isFop ?? false,
@@ -393,28 +396,30 @@ export class DrizzleClientRepository implements IClientRepository {
   /**
    * М'яке видалення.
    */
-  async softDelete(id: string): Promise<void> {
+  async softDelete(id: string, workspaceId: string): Promise<void> {
     await db
       .update(clients)
       .set({ deletedAt: new Date(), updatedAt: new Date() })
-      .where(eq(clients.id, id));
+      .where(and(eq(clients.id, id), eq(clients.workspaceId, workspaceId)));
   }
 
   /**
    * Відновлення.
    */
-  async restore(id: string): Promise<void> {
+  async restore(id: string, workspaceId: string): Promise<void> {
     await db
       .update(clients)
       .set({ deletedAt: null, updatedAt: new Date() })
-      .where(eq(clients.id, id));
+      .where(and(eq(clients.id, id), eq(clients.workspaceId, workspaceId)));
   }
 
   /**
    * Повне видалення.
    */
-  async hardDelete(id: string): Promise<void> {
-    await db.delete(clients).where(eq(clients.id, id));
+  async hardDelete(id: string, workspaceId: string): Promise<void> {
+    await db
+      .delete(clients)
+      .where(and(eq(clients.id, id), eq(clients.workspaceId, workspaceId)));
   }
 
   /**

@@ -20,11 +20,11 @@ import {
   SidebarMenuItem,
 } from "@/frontend/shared/components/ui/sidebar";
 import {
-  getWorkspaceUrl,
   type NavItem,
   DASHBOARD_NAV,
   DASHBOARD_SECONDARY_NAV,
 } from "@/shared/config/dashboard-nav";
+import { dashboardRoutes } from "@/shared/routes/dashboard-routes";
 
 /**
  * Типи груп навігації
@@ -61,12 +61,14 @@ export function NavGroup({ type, label }: NavGroupProps) {
   const isActive = (item: NavItem): boolean => {
     if (!workspaceSlug) return false;
 
-    const itemPath = getWorkspaceUrl(workspaceSlug, item.href);
+    const itemPath = item.href(workspaceSlug);
 
-    if (item.href === "") {
-      return pathname === `/dashboard/${workspaceSlug}`;
+    // Кореневий маршрут дашборду перевіряємо на точний збіг
+    if (itemPath === dashboardRoutes.root(workspaceSlug)) {
+      return pathname === itemPath;
     }
 
+    // Інші маршрути перевіряємо за префіксом
     return pathname.startsWith(itemPath);
   };
 
@@ -76,12 +78,12 @@ export function NavGroup({ type, label }: NavGroupProps) {
     <SidebarGroup>
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
       <SidebarMenu>
-        {items.map((item) => {
-          const href = getWorkspaceUrl(workspaceSlug, item.href);
+        {items.map((item, index) => {
+          const href = item.href(workspaceSlug);
           const active = isActive(item);
 
           return (
-            <SidebarMenuItem key={item.href || "home"}>
+            <SidebarMenuItem key={`${href}-${index}`}>
               <SidebarMenuButton asChild isActive={active} tooltip={item.name}>
                 <Link href={href}>
                   <item.icon className="h-4 w-4" />

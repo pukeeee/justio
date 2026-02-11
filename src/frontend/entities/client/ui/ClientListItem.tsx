@@ -12,7 +12,7 @@ import { useWorkspaceStore } from "@/frontend/shared/stores/workspace-store";
 interface ClientListItemProps {
   client: Client;
   onEdit?: (client: Client) => void;
-  onDelete?: (client: Client) => void;
+  deleteAction?: React.ReactNode;
   className?: string;
 }
 
@@ -23,7 +23,7 @@ interface ClientListItemProps {
 export function ClientListItem({
   client,
   onEdit,
-  onDelete,
+  deleteAction,
   className,
 }: ClientListItemProps) {
   const currentWorkspaceSlug = useWorkspaceStore(
@@ -129,7 +129,7 @@ export function ClientListItem({
         <ClientActions
           client={client}
           onEdit={onEdit}
-          onDelete={onDelete}
+          deleteAction={deleteAction}
           triggerClassName="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
         />
       </TableCell>

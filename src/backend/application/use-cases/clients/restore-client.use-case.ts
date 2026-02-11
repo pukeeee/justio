@@ -11,7 +11,7 @@ export class RestoreClientUseCase {
     private readonly clientRepository: IClientRepository,
   ) {}
 
-  async execute(contactId: string): Promise<void> {
-    await this.clientRepository.restore(contactId);
+  async execute(clientId: string, workspaceId: string): Promise<void> {
+    await this.clientRepository.restore(clientId, workspaceId);
   }
 }
