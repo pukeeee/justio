@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { container } from "@/backend/infrastructure/di/container";
 import { CreateWorkspaceUseCase } from "@/backend/application/use-cases/workspace/create-workspace.use-case";
 import { IAuthService } from "@/backend/application/interfaces/services/auth.service.interface";
-import { CreateWorkspaceSchema } from "@/frontend/entities/workspace/model/validation";
+import { CreateWorkspaceSchema } from "@/frontend/entities/workspace/model/schema";
 import type { Workspace } from "@/frontend/entities/workspace/model/type";
 
 type FormState = {

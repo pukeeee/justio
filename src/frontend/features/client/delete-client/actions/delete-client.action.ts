@@ -1,43 +1,23 @@
 "use server";
 
-import { container } from "@/backend/infrastructure/di/container";
-import { DeleteClientUseCase } from "@/backend/application/use-cases/clients/delete-client.use-case";
 import { revalidatePath } from "next/cache";
+import { clientController } from "@/backend/api/controllers";
 import { dashboardRoutes } from "@/shared/routes/dashboard-routes";
-import { getUserWorkspaces } from "@/frontend/shared/lib/auth/get-user-data";
+import type { ApiResponse } from "@/backend/api/contracts/base.contracts";
 
 /**
  * Server Action для м'якого видалення клієнта.
- * @param clientId ID клієнта
- * @param workspaceSlug Slug воркспейсу для ревалідації та безпеки
  */
 export async function deleteClientAction(
   clientId: string,
+  workspaceId: string,
   workspaceSlug: string,
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const workspaces = await getUserWorkspaces();
-    const workspace = workspaces.find((w) => w.slug === workspaceSlug);
+): Promise<ApiResponse<void>> {
+  const result = await clientController.delete({ id: clientId, workspaceId });
 
-    if (!workspace) {
-      return { success: false, error: "Доступ до воркспейсу заборонено" };
-    }
-
-    const deleteClientUseCase = container.resolve(DeleteClientUseCase);
-    await deleteClientUseCase.execute(clientId, workspace.id);
-
-    // Ревалідуємо список клієнтів у конкретному воркспейсі
+  if (result.success) {
     revalidatePath(dashboardRoutes.clients(workspaceSlug));
-
-    return { success: true };
-  } catch (error: unknown) {
-    console.error("Delete client action error:", error);
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Помилка при видаленні клієнта",
-    };
   }
+
+  return result;
 }
