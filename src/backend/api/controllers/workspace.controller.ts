@@ -3,15 +3,20 @@ import { container } from "@/backend/infrastructure/di/container";
 import { CreateWorkspaceUseCase } from "@/backend/application/use-cases/workspace/create-workspace.use-case";
 import { GetMyWorkspacesUseCase } from "@/backend/application/use-cases/workspace/get-my-workspaces.use-case";
 import { DeleteWorkspaceUseCase } from "@/backend/application/use-cases/workspace/delete-workspace.use-case";
+import { HardDeleteWorkspaceUseCase } from "@/backend/application/use-cases/workspace/hard-delete-workspace.use-case";
 import { WorkspaceMapper } from "../mappers/workspace.mapper";
 import type { ApiResponse } from "../contracts/base.contracts";
+import {
+  CreateWorkspaceRequestSchema,
+  HardDeleteWorkspaceRequestSchema,
+} from "../contracts/workspace.contracts";
 import type {
   CreateWorkspaceRequest,
   CreateWorkspaceResponse,
   GetWorkspacesResponse,
   DeleteWorkspaceRequest,
+  HardDeleteWorkspaceRequest,
 } from "../contracts/workspace.contracts";
-import { CreateWorkspaceRequestSchema } from "../contracts/workspace.contracts";
 
 /**
  * Контролер для роботи з робочими просторами (Workspace).
@@ -20,6 +25,7 @@ export class WorkspaceController extends BaseController {
   private createWorkspaceUseCase: CreateWorkspaceUseCase;
   private getMyWorkspacesUseCase: GetMyWorkspacesUseCase;
   private deleteWorkspaceUseCase: DeleteWorkspaceUseCase;
+  private hardDeleteWorkspaceUseCase: HardDeleteWorkspaceUseCase;
   private mapper: WorkspaceMapper;
 
   constructor() {
@@ -27,6 +33,9 @@ export class WorkspaceController extends BaseController {
     this.createWorkspaceUseCase = container.resolve(CreateWorkspaceUseCase);
     this.getMyWorkspacesUseCase = container.resolve(GetMyWorkspacesUseCase);
     this.deleteWorkspaceUseCase = container.resolve(DeleteWorkspaceUseCase);
+    this.hardDeleteWorkspaceUseCase = container.resolve(
+      HardDeleteWorkspaceUseCase,
+    );
     this.mapper = new WorkspaceMapper();
   }
 
@@ -70,7 +79,7 @@ export class WorkspaceController extends BaseController {
   }
 
   /**
-   * Видалення воркспейсу.
+   * Видалення воркспейсу (м'яке).
    */
   async delete(request: DeleteWorkspaceRequest): Promise<ApiResponse<void>> {
     return this.execute(async () => {
@@ -78,6 +87,27 @@ export class WorkspaceController extends BaseController {
 
       await this.deleteWorkspaceUseCase.execute({
         workspaceId: request.id,
+        userId: user.id,
+      });
+    });
+  }
+
+  /**
+   * Повне видалення воркспейсу (hard delete).
+   */
+  async hardDelete(
+    request: HardDeleteWorkspaceRequest,
+  ): Promise<ApiResponse<void>> {
+    return this.execute(async () => {
+      // 1. Валідація
+      const validatedRequest = HardDeleteWorkspaceRequestSchema.parse(request);
+
+      // 2. Автентифікація
+      const user = await this.getCurrentUserOrThrow();
+
+      // 3. Виклик Use Case
+      await this.hardDeleteWorkspaceUseCase.execute({
+        workspaceId: validatedRequest.id,
         userId: user.id,
       });
     });

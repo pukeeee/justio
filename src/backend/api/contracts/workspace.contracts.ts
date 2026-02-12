@@ -64,8 +64,29 @@ export interface GetWorkspacesResponse {
 // --- Delete Workspace ---
 
 /**
- * Запит на видалення воркспейсу
+ * Запит на видалення воркспейсу (м'яке або повне)
  */
-export interface DeleteWorkspaceRequest {
-  id: string;
-}
+export const DeleteWorkspaceRequestSchema = z.object({
+  id: z.uuid("Некоректний ID воркспейсу"),
+});
+
+/**
+ * Тип запиту на видалення воркспейсу
+ */
+export type DeleteWorkspaceRequest = z.infer<
+  typeof DeleteWorkspaceRequestSchema
+>;
+
+/**
+ * Схема запиту на повне видалення воркспейсу
+ */
+export const HardDeleteWorkspaceRequestSchema = z.object({
+  id: z.uuid("Некоректний ID воркспейсу"),
+});
+
+/**
+ * Тип запиту на повне видалення воркспейсу
+ */
+export type HardDeleteWorkspaceRequest = z.infer<
+  typeof HardDeleteWorkspaceRequestSchema
+>;
