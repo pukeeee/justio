@@ -1,0 +1,90 @@
+import { BaseController } from "./base.controller";
+import { container } from "@/backend/infrastructure/di/container";
+import { CreateWorkspaceUseCase } from "@/backend/application/use-cases/workspace/create-workspace.use-case";
+import { GetMyWorkspacesUseCase } from "@/backend/application/use-cases/workspace/get-my-workspaces.use-case";
+import { DeleteWorkspaceUseCase } from "@/backend/application/use-cases/workspace/delete-workspace.use-case";
+import { WorkspaceMapper } from "../mappers/workspace.mapper";
+import type { ApiResponse } from "../contracts/base.contracts";
+import type {
+  CreateWorkspaceRequest,
+  CreateWorkspaceResponse,
+  GetWorkspacesResponse,
+  DeleteWorkspaceRequest,
+} from "../contracts/workspace.contracts";
+import { CreateWorkspaceRequestSchema } from "../contracts/workspace.contracts";
+
+/**
+ * Контролер для роботи з робочими просторами (Workspace).
+ */
+export class WorkspaceController extends BaseController {
+  private createWorkspaceUseCase: CreateWorkspaceUseCase;
+  private getMyWorkspacesUseCase: GetMyWorkspacesUseCase;
+  private deleteWorkspaceUseCase: DeleteWorkspaceUseCase;
+  private mapper: WorkspaceMapper;
+
+  constructor() {
+    super();
+    this.createWorkspaceUseCase = container.resolve(CreateWorkspaceUseCase);
+    this.getMyWorkspacesUseCase = container.resolve(GetMyWorkspacesUseCase);
+    this.deleteWorkspaceUseCase = container.resolve(DeleteWorkspaceUseCase);
+    this.mapper = new WorkspaceMapper();
+  }
+
+  /**
+   * Створення нового воркспейсу.
+   */
+  async create(
+    request: CreateWorkspaceRequest,
+  ): Promise<ApiResponse<CreateWorkspaceResponse>> {
+    return this.execute(async () => {
+      // 1. Валідація
+      const validatedRequest = CreateWorkspaceRequestSchema.parse(request);
+
+      // 2. Автентифікація
+      const user = await this.getCurrentUserOrThrow();
+
+      // 3. Виклик Use Case
+      const workspace = await this.createWorkspaceUseCase.execute({
+        name: validatedRequest.name,
+        userId: user.id,
+      });
+
+      // 4. Маппінг
+      return this.mapper.toCreateResponse(workspace);
+    });
+  }
+
+  /**
+   * Отримання списку воркспейсів поточного користувача.
+   */
+  async getMyWorkspaces(): Promise<ApiResponse<GetWorkspacesResponse>> {
+    return this.execute(async () => {
+      const user = await this.getCurrentUserOrThrow();
+
+      const workspaces = await this.getMyWorkspacesUseCase.execute(user.id);
+
+      return {
+        items: this.mapper.toListResponse(workspaces),
+      };
+    });
+  }
+
+  /**
+   * Видалення воркспейсу.
+   */
+  async delete(request: DeleteWorkspaceRequest): Promise<ApiResponse<void>> {
+    return this.execute(async () => {
+      const user = await this.getCurrentUserOrThrow();
+
+      await this.deleteWorkspaceUseCase.execute({
+        workspaceId: request.id,
+        userId: user.id,
+      });
+    });
+  }
+}
+
+/**
+ * Singleton instance.
+ */
+export const workspaceController = new WorkspaceController();

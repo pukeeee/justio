@@ -1,71 +1,24 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { container } from "@/backend/infrastructure/di/container";
-import { DeleteWorkspaceUseCase } from "@/backend/application/use-cases/workspace/delete-workspace.use-case";
-import { IAuthService } from "@/backend/application/interfaces/services/auth.service.interface";
+import { workspaceController } from "@/backend/api/controllers";
+import type { DeleteWorkspaceRequest } from "@/backend/api/contracts/workspace.contracts";
+import type { ApiResponse } from "@/backend/api/contracts/base.contracts";
+import { userRoutes } from "@/shared/routes/user-routes";
+import { dashboardRoutes } from "@/shared/routes/dashboard-routes";
 
 /**
- * @description Визначає структуру об'єкта, що повертається Server Action для відображення стану операції у формі.
- */
-export type FormState = {
-  isSuccess: boolean;
-  isError: boolean;
-  message: string;
-};
-
-/**
- * Server Action для безпечного видалення воркспейсу через Clean Architecture.
+ * Server Action для видалення воркспейсу.
  */
 export async function deleteWorkspaceAction(
-  workspaceId: string,
-  _prevState: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  if (!workspaceId) {
-    return {
-      isSuccess: false,
-      isError: true,
-      message: "Помилка: ID воркспейсу не вказано.",
-    };
+  request: DeleteWorkspaceRequest,
+): Promise<ApiResponse<void>> {
+  const result = await workspaceController.delete(request);
+
+  if (result.success) {
+    revalidatePath(userRoutes.workspace);
+    revalidatePath(dashboardRoutes.root(""), "layout");
   }
 
-  try {
-    // 1. Отримуємо залежності
-    const deleteWorkspaceUseCase = container.resolve(DeleteWorkspaceUseCase);
-    const authService = container.resolve<IAuthService>("IAuthService");
-
-    // 2. Автентифікація
-    const user = await authService.getCurrentUser();
-    if (!user) {
-      return {
-        isSuccess: false,
-        isError: true,
-        message: "Користувач не автентифікований",
-      };
-    }
-
-    // 3. Виклик бізнес-логіки
-    await deleteWorkspaceUseCase.execute({
-      workspaceId,
-      userId: user.id,
-    });
-
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Сталася несподівана помилка.";
-    return {
-      isSuccess: false,
-      isError: true,
-      message: errorMessage,
-    };
-  }
-
-  // 4. Очищення кешу
-  revalidatePath("/user/workspace");
-  revalidatePath("/dashboard", "layout");
-
-  // 5. Перенаправлення
-  redirect("/user/workspace");
+  return result;
 }
