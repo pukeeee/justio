@@ -18,6 +18,7 @@ import { cn } from "@/frontend/shared/lib/utils";
 interface HardDeleteClientButtonProps
   extends Omit<React.ComponentProps<typeof Button>, "onClick"> {
   clientId: string;
+  workspaceId: string;
   workspaceSlug: string;
   clientName: string;
   onDelete?: () => void;
@@ -30,6 +31,7 @@ interface HardDeleteClientButtonProps
  */
 export function HardDeleteClientButton({
   clientId,
+  workspaceId,
   workspaceSlug,
   clientName,
   onDelete,
@@ -48,11 +50,11 @@ export function HardDeleteClientButton({
       setIsOpen(false);
 
       try {
-        const result = await hardDeleteClientAction(clientId, workspaceSlug);
+        const result = await hardDeleteClientAction(clientId, workspaceId, workspaceSlug);
         if (result.success) {
           toast.success(`Клієнта "${clientName}" видалено назавжди`);
         } else {
-          toast.error(result.error || "Не вдалося видалити клієнта");
+          toast.error(result.error?.message || "Не вдалося видалити клієнта");
         }
       } catch {
         toast.error("Сталася непередбачувана помилка");

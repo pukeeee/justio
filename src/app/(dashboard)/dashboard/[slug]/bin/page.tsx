@@ -34,12 +34,12 @@ async function BinContent({ slug }: { slug: string }) {
   }
 
   // 2. Отримуємо видалені клієнти
-  const { clients, error } = await getDeletedClientsAction(currentWorkspace.id);
+  const response = await getDeletedClientsAction(currentWorkspace.id);
 
-  if (error) {
+  if (!response.success || response.error) {
     return (
       <div className="p-8 border rounded-lg bg-destructive/10 text-destructive text-center">
-        {error}
+        {response.error?.message || "Не вдалося завантажити видалених клієнтів"}
       </div>
     );
   }
@@ -59,7 +59,7 @@ async function BinContent({ slug }: { slug: string }) {
       </div>
 
       <DeletedClientsList
-        initialClients={clients}
+        initialClients={response.data?.items || []}
         workspaceId={currentWorkspace.id}
       />
     </div>

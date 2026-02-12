@@ -10,15 +10,50 @@ export const ClientTypeEnum = z.enum(["individual", "company"]);
 export type ClientType = z.infer<typeof ClientTypeEnum>;
 
 /**
- * Схема паспортних даних
- * Використовується для валідації вкладеного об'єкта паспортних даних
+ * Схема паспортних даних з умовною валідацією
  */
-export const PassportDetailsSchema = z.object({
-  series: z.string().optional().or(z.literal("")).nullable(),
-  number: z.string().min(1, "Номер паспорта обов'язковий").or(z.literal("")),
-  issuedBy: z.string().optional().or(z.literal("")).nullable(),
-  issuedDate: z.string().optional().or(z.literal("")).nullable(), // ISO string from frontend form
-});
+export const PassportDetailsSchema = z
+  .object({
+    series: z.string().nullable().optional().or(z.literal("")),
+    number: z.string().nullable().optional().or(z.literal("")),
+    issuedBy: z.string().nullable().optional().or(z.literal("")),
+    issuedDate: z
+      .union([z.string(), z.date()])
+      .nullable()
+      .optional()
+      .or(z.literal("")), // ISO string or Date from frontend form
+  })
+  .superRefine((data, ctx) => {
+    const hasAnyValue =
+      (data.series && data.series.length > 0) ||
+      (data.number && data.number.length > 0) ||
+      (data.issuedBy && data.issuedBy.length > 0) ||
+      (data.issuedDate && data.issuedDate !== "");
+
+    if (hasAnyValue) {
+      if (!data.number || data.number.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Номер паспорта обов'язковий",
+          path: ["number"],
+        });
+      }
+      if (!data.issuedBy || data.issuedBy.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Поле 'Ким виданий' обов'язкове",
+          path: ["issuedBy"],
+        });
+      }
+      if (!data.issuedDate || data.issuedDate === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Дата видачі обов'язкова",
+          path: ["issuedDate"],
+        });
+      }
+    }
+  });
 
 export type PassportDetailsRequest = z.infer<typeof PassportDetailsSchema>;
 
@@ -30,6 +65,7 @@ export type PassportDetailsRequest = z.infer<typeof PassportDetailsSchema>;
 const ClientBaseFields = {
   workspaceId: z.uuid("Некоректний ID воркспейсу"),
   email: z
+    .string()
     .email("Некоректний формат email")
     .nullable()
     .optional()
@@ -45,8 +81,8 @@ const ClientBaseFields = {
       return digits.length === 10 || digits.length === 12;
     }, "Введіть повний номер телефону (+380 XX XXX XX XX)")
     .or(z.literal("")),
-  address: z.string().nullable().optional(),
-  note: z.string().nullable().optional(),
+  address: z.string().nullable().optional().or(z.literal("")),
+  note: z.string().nullable().optional().or(z.literal("")),
 };
 
 // --- Create Client Request ---
@@ -59,8 +95,8 @@ const CreateIndividualSchema = z.object({
   clientType: z.literal("individual"),
   firstName: z.string().min(1, "Ім'я обов'язкове"),
   lastName: z.string().min(1, "Прізвище обов'язкове"),
-  middleName: z.string().nullable().optional(),
-  dateOfBirth: z.union([z.date(), z.string()]).nullable().optional(),
+  middleName: z.string().nullable().optional().or(z.literal("")),
+  dateOfBirth: z.union([z.date(), z.string()]).nullable().optional().or(z.literal("")),
   isFop: z.boolean().default(false),
   taxNumber: z
     .string()
@@ -84,8 +120,7 @@ const CreateCompanySchema = z.object({
   companyName: z.string().min(1, "Назва компанії обов'язкова"),
   taxId: z
     .string()
-    .min(8, "ЄДРПОУ має містити 8 або 12 цифр")
-    .max(12)
+    .length(8, "ЄДРПОУ має містити 8 цифр")
     .regex(/^\d+$/, "Тільки цифри")
     .nullable()
     .optional()
@@ -165,8 +200,12 @@ export type GetClientsRequest = z.infer<typeof GetClientsRequestSchema>;
  */
 export interface ClientListItem {
   id: string;
+  workspaceId: string;
   clientType: ClientType;
   displayName: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  companyName?: string | null;
   email: string | null;
   phone: string | null;
   taxNumber?: string | null;
@@ -198,42 +237,52 @@ export type GetClientDetailsRequest = z.infer<
 >;
 
 /**
- * Повна детальна інформація про клієнта
+ * Базова структура деталей клієнта
  */
-export interface ClientDetailsResponse {
+interface ClientDetailsBase {
   id: string;
   workspaceId: string;
-  clientType: ClientType;
   email: string | null;
   phone: string | null;
   address: string | null;
   note: string | null;
   createdAt: string;
   updatedAt: string;
-
-  /** Деталі фізичної особи (тільки якщо clientType === 'individual') */
-  individual?: {
-    firstName: string;
-    lastName: string;
-    middleName: string | null;
-    fullName: string;
-    dateOfBirth: string | null;
-    taxNumber: string | null;
-    isFop: boolean;
-    passportDetails: {
-      series: string | null;
-      number: string;
-      issuedBy: string;
-      issuedDate: string;
-    } | null;
-  };
-
-  /** Деталі компанії (тільки якщо clientType === 'company') */
-  company?: {
-    name: string;
-    taxId: string | null;
-  };
 }
+
+/**
+ * Деталі фізичної особи
+ */
+export interface IndividualDetailsResponse extends ClientDetailsBase {
+  clientType: "individual";
+  firstName: string;
+  lastName: string;
+  middleName?: string | null;
+  fullName?: string;
+  dateOfBirth?: string | null;
+  taxNumber?: string | null;
+  isFop?: boolean;
+  passportDetails?: {
+    series?: string | null;
+    number: string;
+    issuedBy?: string | null;
+    issuedDate?: string | null;
+  } | null;
+}
+
+/**
+ * Деталі компанії
+ */
+export interface CompanyDetailsResponse extends ClientDetailsBase {
+  clientType: "company";
+  companyName: string;
+  taxId?: string | null;
+}
+
+/**
+ * Повна детальна інформація про клієнта
+ */
+export type ClientDetailsResponse = IndividualDetailsResponse | CompanyDetailsResponse;
 
 // --- Delete/Restore ---
 

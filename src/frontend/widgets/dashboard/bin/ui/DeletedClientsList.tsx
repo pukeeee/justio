@@ -25,6 +25,7 @@ interface DeletedClientsListProps {
 
 export function DeletedClientsList({
   initialClients,
+  workspaceId,
 }: DeletedClientsListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const currentWorkspaceSlug = useWorkspaceStore(
@@ -63,7 +64,7 @@ export function DeletedClientsList({
               filteredClients.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell className="px-4 font-medium">
-                    {getClientDisplayName(client)}
+                    {client.displayName}
                   </TableCell>
                   <TableCell className="px-4 text-muted-foreground">
                     {client.clientType === "individual"
@@ -73,16 +74,18 @@ export function DeletedClientsList({
                   <TableCell className="px-4">{client.email || "—"}</TableCell>
                   <TableCell className="px-4 text-right space-x-2">
                     <RestoreClientButton
-                      clientId={client.id!}
+                      clientId={client.id}
+                      workspaceId={workspaceId}
                       workspaceSlug={currentWorkspaceSlug || ""}
-                      clientName={getClientDisplayName(client)}
-                      onRestore={() => removeOptimistic(client.id!)}
+                      clientName={client.displayName}
+                      onRestore={() => removeOptimistic(client.id)}
                     />
                     <HardDeleteClientButton
-                      clientId={client.id!}
+                      clientId={client.id}
+                      workspaceId={workspaceId}
                       workspaceSlug={currentWorkspaceSlug || ""}
-                      clientName={getClientDisplayName(client)}
-                      onDelete={() => removeOptimistic(client.id!)}
+                      clientName={client.displayName}
+                      onDelete={() => removeOptimistic(client.id)}
                     />
                   </TableCell>
                 </TableRow>

@@ -10,12 +10,12 @@ import {
   DialogDescription,
 } from "@/frontend/shared/components/ui/dialog";
 import { ClientForm } from "@/frontend/features/client/shared/ui/ClientForm";
-import { UpdateClient } from "@/frontend/entities/client/model/types";
+import { UpdateClient, CreateClient } from "@/frontend/entities/client/model/types";
 import { getClientDetailsAction } from "../actions/get-client-details.action";
 import { updateClientAction } from "../actions/update-client.action";
 import { Loader2 } from "lucide-react";
-import { CreateClient } from "@/frontend/entities/client/model/types";
 import { useWorkspaceStore } from "@/frontend/shared/stores/workspace-store";
+import { ErrorCode } from "@/backend/api/contracts/base.contracts";
 
 interface UpdateClientDialogProps {
   clientId: string | null | undefined;
@@ -46,11 +46,11 @@ export function UpdateClientDialog({
       const fetchData = async () => {
         setIsLoading(true);
         try {
-          const result = await getClientDetailsAction(clientId);
+          const result = await getClientDetailsAction({ id: clientId, workspaceId });
           if (result.success && result.data) {
             setDefaultValues(result.data);
           } else {
-            toast.error(result.error || "Не вдалося завантажити дані клієнта");
+            toast.error(result.error?.message || "Не вдалося завантажити дані клієнта");
             onOpenChange(false);
           }
         } catch (error) {
@@ -67,19 +67,23 @@ export function UpdateClientDialog({
       // Очищення даних при закритті
       setDefaultValues(undefined);
     }
-  }, [open, clientId, onOpenChange]);
+  }, [open, clientId, workspaceId, onOpenChange]);
 
   const handleSubmit = async (data: CreateClient) => {
-    // data приходить як CreateClient, але ми знаємо що це update, тому додаємо ID
-    // ClientForm повертає CreateClient, тому нам треба додати ID
     if (!clientId) {
-      return { success: false, error: "ID клієнта відсутній" };
+      return { 
+        success: false, 
+        error: { 
+          message: "ID клієнта відсутній",
+          code: ErrorCode.VALIDATION_ERROR 
+        } 
+      };
     }
 
     const updateData: UpdateClient = {
       ...data,
       id: clientId,
-    };
+    } as UpdateClient;
 
     const result = await updateClientAction(
       updateData,

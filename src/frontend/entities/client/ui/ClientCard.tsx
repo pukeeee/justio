@@ -14,19 +14,13 @@ interface ClientCardProps {
 /**
  * @description Компонент картки контакту для мобільного вигляду та списків.
  * Адаптований під різні типи контактів (фіз. особа / компанія).
+ * Використовує готові дані displayName з бекенда.
  */
 export function ClientCard({ client, onEdit, deleteAction }: ClientCardProps) {
   const isIndividual = client.clientType === "individual";
 
-  // Отримуємо відображуване ім'я
-  const displayName = isIndividual
-    ? `${client.firstName} ${client.lastName}`
-    : client.companyName;
-
-  // Формуємо ініціали для аватара
-  const initials = isIndividual
-    ? `${client.firstName[0]}${client.lastName[0]}`.toUpperCase()
-    : client.companyName.substring(0, 2).toUpperCase();
+  // Формуємо ініціали для аватара з готового імені
+  const initials = (client.displayName?.[0] || "К").toUpperCase();
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
@@ -47,7 +41,7 @@ export function ClientCard({ client, onEdit, deleteAction }: ClientCardProps) {
 
             <div className="space-y-1">
               <h3 className="font-semibold leading-none text-foreground">
-                {displayName}
+                {client.displayName}
               </h3>
               <div className="flex items-center gap-2">
                 <Badge

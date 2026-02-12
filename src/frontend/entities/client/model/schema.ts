@@ -1,18 +1,56 @@
 import { z } from "zod";
 
-/** @description Схема паспортних даних */
-export const passportDetailsSchema = z.object({
-  series: z.string().optional().or(z.literal("")),
-  number: z.string().min(1, "Номер паспорта обов'язковий").or(z.literal("")),
-  issuedBy: z.string().optional().or(z.literal("")),
-  issuedDate: z.string().optional().or(z.literal("")),
-});
+/** @description Схема паспортних даних з умовною валідацією */
+export const passportDetailsSchema = z
+  .object({
+    series: z.string().nullable().optional().or(z.literal("")),
+    number: z.string().nullable().optional().or(z.literal("")),
+    issuedBy: z.string().nullable().optional().or(z.literal("")),
+    issuedDate: z
+      .union([z.string(), z.date()])
+      .nullable()
+      .optional()
+      .or(z.literal("")),
+  })
+  .superRefine((data, ctx) => {
+    const hasSeries = !!(data.series && data.series.length > 0);
+    const hasNumber = !!(data.number && data.number.length > 0);
+    const hasIssuedBy = !!(data.issuedBy && data.issuedBy.length > 0);
+    const hasIssuedDate = !!(data.issuedDate && data.issuedDate !== "");
+
+    const isAnyFieldFilled = hasSeries || hasNumber || hasIssuedBy || hasIssuedDate;
+
+    if (isAnyFieldFilled) {
+      if (!hasNumber) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Номер паспорта обов'язковий",
+          path: ["number"],
+        });
+      }
+      if (!hasIssuedBy) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Поле 'Ким виданий' обов'язкове",
+          path: ["issuedBy"],
+        });
+      }
+      if (!hasIssuedDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Дата видачі обов'язкова",
+          path: ["issuedDate"],
+        });
+      }
+    }
+  });
 
 /** @description Спільні поля для обох типів контактів */
 const clientBaseSchema = z.object({
   id: z.uuid().optional(),
   workspaceId: z.uuid(),
   email: z
+    .string()
     .email("Некоректний формат email")
     .nullable()
     .optional()
@@ -28,8 +66,8 @@ const clientBaseSchema = z.object({
       return digits.length === 10 || digits.length === 12;
     }, "Введіть повний номер телефону (+380 XX XXX XX XX)")
     .or(z.literal("")),
-  address: z.string().nullable().optional(),
-  note: z.string().nullable().optional(),
+  address: z.string().nullable().optional().or(z.literal("")),
+  note: z.string().nullable().optional().or(z.literal("")),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
@@ -39,8 +77,8 @@ const individualSchema = clientBaseSchema.extend({
   clientType: z.literal("individual"),
   firstName: z.string().min(1, "Ім'я обов'язкове"),
   lastName: z.string().min(1, "Прізвище обов'язкове"),
-  middleName: z.string().nullable().optional(),
-  dateOfBirth: z.union([z.date(), z.string()]).nullable().optional(),
+  middleName: z.string().nullable().optional().or(z.literal("")),
+  dateOfBirth: z.union([z.date(), z.string()]).nullable().optional().or(z.literal("")),
   isFop: z.boolean(),
   taxNumber: z
     .string()
@@ -58,8 +96,7 @@ const companySchema = clientBaseSchema.extend({
   companyName: z.string().min(1, "Назва компанії обов'язкова"),
   taxId: z
     .string()
-    .min(8, "ЄДРПОУ має містити 8 або 12 цифр")
-    .max(12)
+    .length(8, "ЄДРПОУ має містити 8 цифр")
     .regex(/^\d+$/, "Тільки цифри")
     .nullable()
     .optional()
@@ -84,8 +121,8 @@ export const createClientSchema = z.discriminatedUnion("clientType", [
     clientType: z.literal("individual"),
     firstName: z.string().min(1, "Ім'я обов'язкове"),
     lastName: z.string().min(1, "Прізвище обов'язкове"),
-    middleName: z.string().nullable().optional(),
-    dateOfBirth: z.union([z.date(), z.string()]).nullable().optional(),
+    middleName: z.string().nullable().optional().or(z.literal("")),
+    dateOfBirth: z.union([z.date(), z.string()]).nullable().optional().or(z.literal("")),
     isFop: z.boolean(),
     taxNumber: z
       .string()

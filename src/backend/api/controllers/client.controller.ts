@@ -93,11 +93,11 @@ export class ClientController extends BaseController {
       const useCaseDto = this.mapper.toCreateDto(validatedRequest, user.id);
 
       // 5. Виклик use case
-      const { client, details } =
+      const { client } =
         await this.createClientUseCase.execute(useCaseDto);
 
       // 6. Маппінг domain → API response
-      return this.mapper.toCreateResponse(client, details);
+      return this.mapper.toCreateResponse(client);
     });
   }
 
@@ -121,10 +121,9 @@ export class ClientController extends BaseController {
       );
 
       const useCaseDto = this.mapper.toUpdateDto(validatedRequest);
-      const { client, details } =
-        await this.updateClientUseCase.execute(useCaseDto);
+      const { client } = await this.updateClientUseCase.execute(useCaseDto);
 
-      return this.mapper.toUpdateResponse(client, details);
+      return this.mapper.toUpdateResponse(client);
     });
   }
 
@@ -159,7 +158,11 @@ export class ClientController extends BaseController {
       );
 
       // Маппінг у API response
-      return this.mapper.toListResponse(result);
+      return this.mapper.toListResponse(
+        result,
+        validatedRequest.limit,
+        validatedRequest.offset,
+      );
     });
   }
 
@@ -182,7 +185,9 @@ export class ClientController extends BaseController {
         validatedRequest.workspaceId,
       );
 
-      const result = await this.getClientDetailsUseCase.execute(validatedRequest.id);
+      const result = await this.getClientDetailsUseCase.execute(
+        validatedRequest.id,
+      );
       return this.mapper.toDetailsResponse(result);
     });
   }
@@ -204,7 +209,10 @@ export class ClientController extends BaseController {
         validatedRequest.workspaceId,
       );
 
-      await this.deleteClientUseCase.execute(validatedRequest.id, validatedRequest.workspaceId);
+      await this.deleteClientUseCase.execute(
+        validatedRequest.id,
+        validatedRequest.workspaceId,
+      );
     });
   }
 
@@ -225,7 +233,10 @@ export class ClientController extends BaseController {
         validatedRequest.workspaceId,
       );
 
-      await this.restoreClientUseCase.execute(validatedRequest.id, validatedRequest.workspaceId);
+      await this.restoreClientUseCase.execute(
+        validatedRequest.id,
+        validatedRequest.workspaceId,
+      );
     });
   }
 
@@ -248,7 +259,10 @@ export class ClientController extends BaseController {
         validatedRequest.workspaceId,
       );
 
-      await this.hardDeleteClientUseCase.execute(validatedRequest.id, validatedRequest.workspaceId);
+      await this.hardDeleteClientUseCase.execute(
+        validatedRequest.id,
+        validatedRequest.workspaceId,
+      );
     });
   }
 }

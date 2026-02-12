@@ -19,6 +19,7 @@ interface ClientListItemProps {
 /**
  * @description Рядок таблиці для відображення контакту на десктопі.
  * Використовує стандартні компоненти Table для консистентності.
+ * Використовує готові дані displayName з бекенда.
  */
 export function ClientListItem({
   client,
@@ -31,13 +32,8 @@ export function ClientListItem({
   );
   const isIndividual = client.clientType === "individual";
 
-  const displayName = isIndividual
-    ? `${client.firstName} ${client.lastName}`
-    : client.companyName;
-
-  const initials = isIndividual
-    ? `${client.firstName?.[0] || ""}${client.lastName?.[0] || ""}`.toUpperCase()
-    : (client.companyName?.[0] || "").toUpperCase();
+  // Використовуємо готові ініціали з displayName
+  const initials = (client.displayName?.[0] || "К").toUpperCase();
 
   // Формуємо URL: якщо ми в контексті воркспейсу, додаємо його slug
   const clientUrl = currentWorkspaceSlug
@@ -61,7 +57,7 @@ export function ClientListItem({
           </Avatar>
           <div className="flex flex-col">
             <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
-              {displayName}
+              {client.displayName}
             </span>
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
               {isIndividual

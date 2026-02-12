@@ -18,16 +18,16 @@ export interface PermissionMetadata {
 
 /**
  * Decorator для вказання необхідних прав доступу на методі контролера
- * 
+ *
  * @param permissions - Масив необхідних прав
  * @param requireAll - Чи потрібні всі права (true) або хоча б одне (false). Default: true.
- * 
+ *
  * @example
  * @RequirePermissions([Permission.CREATE_CONTACT])
  * async create(request: CreateClientRequest) {
  *   // Метод виконається тільки якщо є права
  * }
- * 
+ *
  * @example
  * @RequirePermissions([Permission.UPDATE_ANY_CONTACT, Permission.UPDATE_OWN_CONTACT], false)
  * async update(request: UpdateClientRequest) {
@@ -36,18 +36,14 @@ export interface PermissionMetadata {
  */
 export function RequirePermissions(
   permissions: Permission[],
-  requireAll = true
+  requireAll = true,
 ): MethodDecorator {
   return (target, propertyKey, descriptor: PropertyDescriptor) => {
     const metadata: PermissionMetadata = { permissions, requireAll };
-    
+
     // Зберігаємо metadata на методі
-    Reflect.defineMetadata(
-      PERMISSION_METADATA_KEY,
-      metadata,
-      descriptor.value
-    );
-    
+    Reflect.defineMetadata(PERMISSION_METADATA_KEY, metadata, descriptor.value);
+
     return descriptor;
   };
 }
@@ -55,6 +51,8 @@ export function RequirePermissions(
 /**
  * Допоміжна функція для отримання metadata з методу
  */
-export function getPermissionMetadata(method: Function): PermissionMetadata | undefined {
+export function getPermissionMetadata(
+  method: (...args: never[]) => unknown,
+): PermissionMetadata | undefined {
   return Reflect.getMetadata(PERMISSION_METADATA_KEY, method);
 }
