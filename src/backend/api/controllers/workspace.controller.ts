@@ -17,6 +17,8 @@ import type {
   DeleteWorkspaceRequest,
   HardDeleteWorkspaceRequest,
 } from "../contracts/workspace.contracts";
+import { Permission } from "@/backend/domain/value-objects/permission.enum";
+import { RequirePermissions } from "../middleware/permission.guard";
 
 /**
  * Контролер для роботи з робочими просторами (Workspace).
@@ -81,9 +83,13 @@ export class WorkspaceController extends BaseController {
   /**
    * Видалення воркспейсу (м'яке).
    */
+  @RequirePermissions([Permission.DELETE_WORKSPACE])
   async delete(request: DeleteWorkspaceRequest): Promise<ApiResponse<void>> {
     return this.execute(async () => {
       const user = await this.getCurrentUserOrThrow();
+
+      // Перевірка прав доступу
+      await this.checkMethodPermissions(this.delete, user.id, request.id);
 
       await this.deleteWorkspaceUseCase.execute({
         workspaceId: request.id,
@@ -95,6 +101,7 @@ export class WorkspaceController extends BaseController {
   /**
    * Повне видалення воркспейсу (hard delete).
    */
+  @RequirePermissions([Permission.DELETE_WORKSPACE])
   async hardDelete(
     request: HardDeleteWorkspaceRequest,
   ): Promise<ApiResponse<void>> {
@@ -105,7 +112,14 @@ export class WorkspaceController extends BaseController {
       // 2. Автентифікація
       const user = await this.getCurrentUserOrThrow();
 
-      // 3. Виклик Use Case
+      // 3. Перевірка прав доступу
+      await this.checkMethodPermissions(
+        this.hardDelete,
+        user.id,
+        validatedRequest.id,
+      );
+
+      // 4. Виклик Use Case
       await this.hardDeleteWorkspaceUseCase.execute({
         workspaceId: validatedRequest.id,
         userId: user.id,

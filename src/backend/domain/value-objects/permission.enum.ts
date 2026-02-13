@@ -7,6 +7,7 @@ export enum Permission {
 
   // --- Workspace ---
   MANAGE_WORKSPACE = 'manage_workspace',
+  DELETE_WORKSPACE = 'delete_workspace',
   INVITE_USERS = 'invite_users',
   REMOVE_USERS = 'remove_users',
 
