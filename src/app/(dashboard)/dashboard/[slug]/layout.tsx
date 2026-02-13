@@ -4,7 +4,7 @@
  */
 
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import {
   SidebarInset,
   SidebarProvider,
@@ -45,8 +45,14 @@ export default async function DashboardLayout({
     redirect("/");
   }
 
-  // Знаходимо поточний воркспейс для хлібних крихт
+  // Знаходимо поточний воркспейс.
+  // Це критично для безпеки: якщо воркспейс не знайдено серед доступних користувачу,
+  // значить він або не існує, або користувач не має до нього доступу.
   const currentWorkspace = workspaces.find((w) => w.slug === slug);
+
+  if (!currentWorkspace) {
+    notFound();
+  }
 
   return (
     <SidebarProvider>
@@ -61,7 +67,7 @@ export default async function DashboardLayout({
               className="mr-2 data-[orientation=vertical]:h-8"
             />
             <DynamicBreadcrumbs
-              workspaceName={currentWorkspace?.name || "Воркспейс"}
+              workspaceName={currentWorkspace.name}
               workspaceSlug={slug}
             />
           </div>

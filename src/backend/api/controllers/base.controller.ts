@@ -3,6 +3,7 @@ import { IAuthService } from "@/backend/application/interfaces/services/auth.ser
 import { IAuthorizationService } from "@/backend/application/interfaces/services/authorization.service.interface";
 import { Permission } from "@/backend/domain/value-objects/permission.enum";
 import { ApiResponse, ApiError, ErrorCode } from "../contracts/base.contracts";
+import { AuthenticatedUser } from "@/backend/application/dtos/auth/auth-result.dto";
 import {
   ForbiddenError,
   UnauthorizedError,
@@ -17,7 +18,13 @@ import {
   PERMISSION_METADATA_KEY,
 } from "../middleware/permission.guard";
 import "reflect-metadata";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
+
+/**
+ * Тип для методів контролера, що використовується для перевірки метаданих.
+ * Використовуємо 'object', оскільки для Reflect.getMetadata нам потрібне лише посилання на об'єкт функції.
+ */
+type ControllerMethod = object;
 
 /**
  * Базовий контролер з методами авторизації та обробки помилок
@@ -39,11 +46,72 @@ export abstract class BaseController {
   }
 
   /**
+   * Універсальний метод для виконання дій контролера зі схемою валідації.
+   */
+  protected async action<TSchema extends z.ZodType, TResult>(
+    method: ControllerMethod,
+    request: unknown,
+    schema: TSchema,
+    handler: (data: z.infer<TSchema>, user: AuthenticatedUser) => Promise<TResult>,
+  ): Promise<ApiResponse<TResult>>;
+
+  /**
+   * Універсальний метод для виконання дій контролера без схеми валідації.
+   */
+  protected async action<TRequest, TResult>(
+    method: ControllerMethod,
+    request: TRequest,
+    schema: null,
+    handler: (data: TRequest, user: AuthenticatedUser) => Promise<TResult>,
+  ): Promise<ApiResponse<TResult>>;
+
+  /**
+   * Реалізація універсального методу action.
+   */
+  protected async action<TResult>(
+    method: ControllerMethod,
+    request: unknown,
+    schema: z.ZodType | null,
+    handler: (data: unknown, user: AuthenticatedUser) => Promise<TResult>,
+  ): Promise<ApiResponse<TResult>> {
+    return this.execute(async () => {
+      // 1. Валідація (якщо схема надана)
+      const validatedData = schema ? schema.parse(request) : request;
+
+      // 2. Автентифікація
+      const user = await this.getCurrentUserOrThrow();
+
+      // 3. Автоматична перевірка прав
+      // Шукаємо workspaceId або id (якщо це операція над самим воркспейсом)
+      let workspaceId: string | undefined;
+      if (validatedData && typeof validatedData === "object" && validatedData !== null) {
+        const data = validatedData as Record<string, unknown>;
+        if (typeof data.workspaceId === "string") {
+          workspaceId = data.workspaceId;
+        } else if (typeof data.id === "string") {
+          workspaceId = data.id;
+        }
+      }
+
+      // checkMethodPermissions сама перевірить, чи є декоратор @RequirePermissions на методі
+      if (workspaceId) {
+        await this.checkMethodPermissions(method, user.id, workspaceId);
+      }
+
+      // 4. Виконання бізнес-логіки
+      // Ми використовуємо приведення до функціонального типу для виклику в реалізації, 
+      // оскільки перевантаження гарантують правильність типів для користувача.
+      const typedHandler = handler as (d: unknown, u: AuthenticatedUser) => Promise<TResult>;
+      return await typedHandler(validatedData, user);
+    });
+  }
+
+  /**
    * Отримує поточного користувача або кидає помилку
    *
    * @throws UnauthorizedError якщо користувач не автентифікований
    */
-  protected async getCurrentUserOrThrow() {
+  protected async getCurrentUserOrThrow(): Promise<AuthenticatedUser> {
     const user = await this.authService.getCurrentUser();
     if (!user) {
       throw new UnauthorizedError("Користувач не автентифікований");
@@ -59,7 +127,7 @@ export abstract class BaseController {
    * @param workspaceId - ID воркспейсу
    */
   protected async checkMethodPermissions(
-    method: (...args: never[]) => unknown,
+    method: ControllerMethod,
     userId: string,
     workspaceId: string,
   ): Promise<void> {

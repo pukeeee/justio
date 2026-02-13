@@ -87,6 +87,7 @@ export class ClientMapper {
   toUpdateDto(request: UpdateClientRequest): UpdateClientDTO {
     const dto: UpdateClientDTO = {
       id: request.id,
+      workspaceId: request.workspaceId,
       email: this.normalize(request.email),
       phone: this.normalize(request.phone),
       address: this.normalize(request.address),

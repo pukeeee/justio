@@ -5,6 +5,7 @@ import { PassportDetailsProps } from "@/backend/domain/value-objects/passport-de
  */
 export interface UpdateClientDTO {
   id: string; // Обов'язково для ідентифікації
+  workspaceId: string; // Обов'язково для безпеки
 
   // Спільні поля (всі опціональні для часткового оновлення)
   email?: string | null;

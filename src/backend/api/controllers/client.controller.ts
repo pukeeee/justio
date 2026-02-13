@@ -37,13 +37,10 @@ import { RequirePermissions } from "../middleware/permission.guard";
 /**
  * Контролер для роботи з клієнтами
  *
- * Відповідальність:
- * 1. Перевірка авторизації
- * 2. Перевірка прав доступу
- * 3. Маппінг request → use case DTO
- * 4. Виклик use case
- * 5. Маппінг domain → response
- * 6. Обробка помилок
+ * Використовує BaseController.action для автоматизації:
+ * - Валідації (Zod)
+ * - Автентифікації
+ * - Перевірки прав (на основі workspaceId у запиті)
  */
 export class ClientController extends BaseController {
   private createClientUseCase: CreateClientUseCase;
@@ -57,7 +54,6 @@ export class ClientController extends BaseController {
 
   constructor() {
     super();
-    // Резолвимо use cases з DI container
     this.createClientUseCase = container.resolve(CreateClientUseCase);
     this.updateClientUseCase = container.resolve(UpdateClientUseCase);
     this.getClientsListUseCase = container.resolve(GetClientsListUseCase);
@@ -75,28 +71,9 @@ export class ClientController extends BaseController {
   async create(
     request: CreateClientRequest,
   ): Promise<ApiResponse<CreateClientResponse>> {
-    return this.execute(async () => {
-      // 1. Рантайм-валідація вхідних даних
-      const validatedRequest = CreateClientRequestSchema.parse(request);
-
-      // 2. Перевірка автентифікації
-      const user = await this.getCurrentUserOrThrow();
-
-      // 3. Перевірка прав доступу
-      await this.checkMethodPermissions(
-        this.create,
-        user.id,
-        validatedRequest.workspaceId,
-      );
-
-      // 4. Маппінг API request → Use Case DTO
-      const useCaseDto = this.mapper.toCreateDto(validatedRequest, user.id);
-
-      // 5. Виклик use case
-      const { client } =
-        await this.createClientUseCase.execute(useCaseDto);
-
-      // 6. Маппінг domain → API response
+    return this.action(this.create, request, CreateClientRequestSchema, async (data, user) => {
+      const useCaseDto = this.mapper.toCreateDto(data, user.id);
+      const { client } = await this.createClientUseCase.execute(useCaseDto);
       return this.mapper.toCreateResponse(client);
     });
   }
@@ -108,61 +85,28 @@ export class ClientController extends BaseController {
   async update(
     request: UpdateClientRequest,
   ): Promise<ApiResponse<UpdateClientResponse>> {
-    return this.execute(async () => {
-      // 1. Рантайм-валідація
-      const validatedRequest = UpdateClientRequestSchema.parse(request);
-
-      const user = await this.getCurrentUserOrThrow();
-
-      await this.checkMethodPermissions(
-        this.update,
-        user.id,
-        validatedRequest.workspaceId,
-      );
-
-      const useCaseDto = this.mapper.toUpdateDto(validatedRequest);
+    return this.action(this.update, request, UpdateClientRequestSchema, async (data) => {
+      const useCaseDto = this.mapper.toUpdateDto(data);
       const { client } = await this.updateClientUseCase.execute(useCaseDto);
-
       return this.mapper.toUpdateResponse(client);
     });
   }
 
   /**
-   * Отримання списку клієнтів з пагінацією та пошуком
+   * Отримання списку клієнтів
    */
   @RequirePermissions([Permission.VIEW_CONTACT])
   async getList(
     request: GetClientsRequest,
   ): Promise<ApiResponse<GetClientsResponse>> {
-    return this.execute(async () => {
-      // 1. Рантайм-валідація
-      const validatedRequest = GetClientsRequestSchema.parse(request);
-
-      const user = await this.getCurrentUserOrThrow();
-
-      await this.checkMethodPermissions(
-        this.getList,
-        user.id,
-        validatedRequest.workspaceId,
-      );
-
-      // Виклик use case
-      const result = await this.getClientsListUseCase.execute(
-        validatedRequest.workspaceId,
-        {
-          limit: validatedRequest.limit,
-          offset: validatedRequest.offset,
-          search: validatedRequest.search,
-          onlyDeleted: validatedRequest.onlyDeleted,
-        },
-      );
-
-      // Маппінг у API response
-      return this.mapper.toListResponse(
-        result,
-        validatedRequest.limit,
-        validatedRequest.offset,
-      );
+    return this.action(this.getList, request, GetClientsRequestSchema, async (data) => {
+      const result = await this.getClientsListUseCase.execute(data.workspaceId, {
+        limit: data.limit,
+        offset: data.offset,
+        search: data.search,
+        onlyDeleted: data.onlyDeleted,
+      });
+      return this.mapper.toListResponse(result, data.limit, data.offset);
     });
   }
 
@@ -173,101 +117,51 @@ export class ClientController extends BaseController {
   async getDetails(
     request: GetClientDetailsRequest,
   ): Promise<ApiResponse<ClientDetailsResponse>> {
-    return this.execute(async () => {
-      // 1. Рантайм-валідація
-      const validatedRequest = GetClientDetailsRequestSchema.parse(request);
-
-      const user = await this.getCurrentUserOrThrow();
-
-      await this.checkMethodPermissions(
-        this.getDetails,
-        user.id,
-        validatedRequest.workspaceId,
-      );
-
-      const result = await this.getClientDetailsUseCase.execute(
-        validatedRequest.id,
-      );
-      return this.mapper.toDetailsResponse(result);
-    });
+    return this.action(
+      this.getDetails,
+      request,
+      GetClientDetailsRequestSchema,
+      async (data) => {
+        const result = await this.getClientDetailsUseCase.execute(
+          data.id,
+          data.workspaceId,
+        );
+        return this.mapper.toDetailsResponse(result);
+      },
+    );
   }
 
   /**
-   * М'яке видалення клієнта (переміщення в кошик)
+   * М'яке видалення клієнта
    */
   @RequirePermissions([Permission.DELETE_CONTACT])
   async delete(request: DeleteClientRequest): Promise<ApiResponse<void>> {
-    return this.execute(async () => {
-      // 1. Рантайм-валідація
-      const validatedRequest = DeleteClientRequestSchema.parse(request);
-
-      const user = await this.getCurrentUserOrThrow();
-
-      await this.checkMethodPermissions(
-        this.delete,
-        user.id,
-        validatedRequest.workspaceId,
-      );
-
-      await this.deleteClientUseCase.execute(
-        validatedRequest.id,
-        validatedRequest.workspaceId,
-      );
+    return this.action(this.delete, request, DeleteClientRequestSchema, async (data) => {
+      await this.deleteClientUseCase.execute(data.id, data.workspaceId);
     });
   }
 
   /**
-   * Відновлення клієнта з кошика
+   * Відновлення клієнта
    */
   @RequirePermissions([Permission.DELETE_CONTACT])
   async restore(request: RestoreClientRequest): Promise<ApiResponse<void>> {
-    return this.execute(async () => {
-      // 1. Рантайм-валідація
-      const validatedRequest = RestoreClientRequestSchema.parse(request);
-
-      const user = await this.getCurrentUserOrThrow();
-
-      await this.checkMethodPermissions(
-        this.restore,
-        user.id,
-        validatedRequest.workspaceId,
-      );
-
-      await this.restoreClientUseCase.execute(
-        validatedRequest.id,
-        validatedRequest.workspaceId,
-      );
+    return this.action(this.restore, request, RestoreClientRequestSchema, async (data) => {
+      await this.restoreClientUseCase.execute(data.id, data.workspaceId);
     });
   }
 
   /**
-   * Остаточне видалення клієнта з бази даних
+   * Остаточне видалення клієнта
    */
   @RequirePermissions([Permission.DELETE_CONTACT])
   async hardDelete(
     request: HardDeleteClientRequest,
   ): Promise<ApiResponse<void>> {
-    return this.execute(async () => {
-      // 1. Рантайм-валідація
-      const validatedRequest = HardDeleteClientRequestSchema.parse(request);
-
-      const user = await this.getCurrentUserOrThrow();
-
-      await this.checkMethodPermissions(
-        this.hardDelete,
-        user.id,
-        validatedRequest.workspaceId,
-      );
-
-      await this.hardDeleteClientUseCase.execute(
-        validatedRequest.id,
-        validatedRequest.workspaceId,
-      );
+    return this.action(this.hardDelete, request, HardDeleteClientRequestSchema, async (data) => {
+      await this.hardDeleteClientUseCase.execute(data.id, data.workspaceId);
     });
   }
 }
 
-/**
- * Singleton instance контролера
- */
 export const clientController = new ClientController();

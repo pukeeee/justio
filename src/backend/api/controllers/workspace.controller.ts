@@ -8,6 +8,7 @@ import { WorkspaceMapper } from "../mappers/workspace.mapper";
 import type { ApiResponse } from "../contracts/base.contracts";
 import {
   CreateWorkspaceRequestSchema,
+  DeleteWorkspaceRequestSchema,
   HardDeleteWorkspaceRequestSchema,
 } from "../contracts/workspace.contracts";
 import type {
@@ -47,20 +48,14 @@ export class WorkspaceController extends BaseController {
   async create(
     request: CreateWorkspaceRequest,
   ): Promise<ApiResponse<CreateWorkspaceResponse>> {
-    return this.execute(async () => {
-      // 1. Валідація
-      const validatedRequest = CreateWorkspaceRequestSchema.parse(request);
-
-      // 2. Автентифікація
-      const user = await this.getCurrentUserOrThrow();
-
-      // 3. Виклик Use Case
+    // Тут права не перевіряються автоматично через action, бо немає існуючого workspaceId
+    return this.action(this.create, request, CreateWorkspaceRequestSchema, async (data, user) => {
       const workspace = await this.createWorkspaceUseCase.execute({
-        name: validatedRequest.name,
+        name: data.name,
         userId: user.id,
       });
 
-      // 4. Маппінг
+
       return this.mapper.toCreateResponse(workspace);
     });
   }
@@ -69,11 +64,9 @@ export class WorkspaceController extends BaseController {
    * Отримання списку воркспейсів поточного користувача.
    */
   async getMyWorkspaces(): Promise<ApiResponse<GetWorkspacesResponse>> {
-    return this.execute(async () => {
-      const user = await this.getCurrentUserOrThrow();
-
+    // Для отримання списку схема не потрібна
+    return this.action(this.getMyWorkspaces, {}, null, async (_, user) => {
       const workspaces = await this.getMyWorkspacesUseCase.execute(user.id);
-
       return {
         items: this.mapper.toListResponse(workspaces),
       };
@@ -85,14 +78,10 @@ export class WorkspaceController extends BaseController {
    */
   @RequirePermissions([Permission.DELETE_WORKSPACE])
   async delete(request: DeleteWorkspaceRequest): Promise<ApiResponse<void>> {
-    return this.execute(async () => {
-      const user = await this.getCurrentUserOrThrow();
-
-      // Перевірка прав доступу
-      await this.checkMethodPermissions(this.delete, user.id, request.id);
-
+    // Тут workspaceId передається як 'id' у запиті, action автоматично це підхопить
+    return this.action(this.delete, request, DeleteWorkspaceRequestSchema, async (data, user) => {
       await this.deleteWorkspaceUseCase.execute({
-        workspaceId: request.id,
+        workspaceId: data.id,
         userId: user.id,
       });
     });
@@ -105,30 +94,13 @@ export class WorkspaceController extends BaseController {
   async hardDelete(
     request: HardDeleteWorkspaceRequest,
   ): Promise<ApiResponse<void>> {
-    return this.execute(async () => {
-      // 1. Валідація
-      const validatedRequest = HardDeleteWorkspaceRequestSchema.parse(request);
-
-      // 2. Автентифікація
-      const user = await this.getCurrentUserOrThrow();
-
-      // 3. Перевірка прав доступу
-      await this.checkMethodPermissions(
-        this.hardDelete,
-        user.id,
-        validatedRequest.id,
-      );
-
-      // 4. Виклик Use Case
+    return this.action(this.hardDelete, request, HardDeleteWorkspaceRequestSchema, async (data, user) => {
       await this.hardDeleteWorkspaceUseCase.execute({
-        workspaceId: validatedRequest.id,
+        workspaceId: data.id,
         userId: user.id,
       });
     });
   }
 }
 
-/**
- * Singleton instance.
- */
 export const workspaceController = new WorkspaceController();

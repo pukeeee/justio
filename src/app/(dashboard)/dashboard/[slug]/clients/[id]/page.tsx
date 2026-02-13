@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
 interface ClientPageProps {
@@ -24,7 +23,8 @@ export default async function ClientPage({ params }: ClientPageProps) {
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">Деталі клієнта</h1>
         <p className="text-muted-foreground">
-          Перегляд інформації про клієнта у воркспейсі <span className="font-mono text-foreground">{slug}</span>
+          Перегляд інформації про клієнта у воркспейсі{" "}
+          <span className="font-mono text-foreground">{slug}</span>
         </p>
       </div>
 
@@ -36,12 +36,14 @@ export default async function ClientPage({ params }: ClientPageProps) {
             <p className="font-mono break-all">{id}</p>
           </div>
         </div>
-        
+
         {/* Тут буде основний контент кабінету клієнта */}
         <div className="md:col-span-2 lg:col-span-2 rounded-xl border border-dashed flex items-center justify-center p-12">
           <div className="text-center">
             <p className="text-muted-foreground mb-2">Сторінка в розробці</p>
-            <p className="text-xs text-muted-foreground/60">Тут буде історія справ, документи та фінанси клієнта</p>
+            <p className="text-xs text-muted-foreground/60">
+              Тут буде історія справ, документи та фінанси клієнта
+            </p>
           </div>
         </div>
       </div>
