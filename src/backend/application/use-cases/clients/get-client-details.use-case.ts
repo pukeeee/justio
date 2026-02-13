@@ -17,10 +17,17 @@ export class GetClientDetailsUseCase {
   /**
    * Завантажує базового клієнта та його специфічний профіль.
    */
-  async execute(contactId: string): Promise<ClientDetailsDTO> {
+  async execute(
+    contactId: string,
+    workspaceId: string,
+  ): Promise<ClientDetailsDTO> {
     // 1. Отримуємо базового клієнта
     const client = await this.clientRepository.findById(contactId);
-    if (!client) throw new EntityNotFoundError("Клієнт", contactId);
+
+    // Перевіряємо наявність та належність до воркспейсу
+    if (!client || client.workspaceId !== workspaceId) {
+      throw new EntityNotFoundError("Клієнт", contactId);
+    }
 
     let individual = null;
     let company = null;

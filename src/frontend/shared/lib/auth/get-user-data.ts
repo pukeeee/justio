@@ -1,16 +1,18 @@
 /**
  * @file get-user-data.ts
- * @description Серверні утиліти для отримання даних користувача з форматуванням
+ * @description Серверні утиліти для отримання даних користувача (Wrapper над API Layer)
+ *
+ * ВАЖЛИВО: Цей файл є тимчасовим "містком" для забезпечення зворотньої сумісності
+ * під час рефакторингу. Всі методи всередині використовують професійні Server Actions.
  */
 
 import { cache } from "react";
-import { container } from "@/backend/infrastructure/di/container";
-import { IAuthService } from "@/backend/application/interfaces/services/auth.service.interface";
-import { IWorkspaceRepository } from "@/backend/application/interfaces/repositories/workspace.repository.interface";
+import { getUserAction } from "@/frontend/features/auth/actions/get-user.action";
+import { getWorkspacesAction } from "@/frontend/features/workspace/actions/get-workspaces.action";
 import type { Workspace } from "@/frontend/entities/workspace/model/type";
 
 /**
- * Тип для форматованих даних користувача
+ * Тип для форматованих даних користувача (View Model)
  */
 export type FormattedUserData = {
   id: string;
@@ -21,109 +23,78 @@ export type FormattedUserData = {
 };
 
 /**
- * Отримує воркспейси користувача з кешуванням для Server Components
- * 
- * ВАЖЛИВО: Завдяки cache(), якщо ця функція викликається в декількох 
- * Server Components під час одного запиту, реальний запит до БД 
- * буде виконано лише ОДИН РАЗ.
+ * Отримує воркспейси користувача з кешуванням для Server Components.
+ * Тепер використовує системний WorkspaceController через Server Action.
  */
 export const getUserWorkspaces = cache(async (): Promise<Workspace[]> => {
   try {
-    const authService = container.resolve<IAuthService>("IAuthService");
-    const currentUser = await authService.getCurrentUser();
+    const result = await getWorkspacesAction();
 
-    if (!currentUser) return [];
+    if (!result.success || !result.data) {
+      return [];
+    }
 
-    const workspaceRepo = container.resolve<IWorkspaceRepository>(
-      "IWorkspaceRepository",
-    );
-    const workspaces = await workspaceRepo.findAllByUserId(currentUser.id);
-
-    // Мапимо до спрощеного формату для фронтенду
-    return workspaces.map((w) => ({
+    // Мапимо до формату, який очікує існуючий фронтенд
+    return result.data.items.map((w) => ({
       id: w.id,
       name: w.name,
-      slug: w.slug.value,
+      slug: w.slug,
     }));
   } catch (error) {
-    console.error("[getUserWorkspaces] Помилка:", error);
+    console.error("[getUserWorkspaces] Помилка рефакторингу:", error);
     return [];
   }
 });
 
 /**
- * Отримує та форматує дані користувача для UI компонентів
-...
-
-/**
- * Генерує ініціали з email або імені
- */
-function generateInitials(email: string, fullName?: string): string {
-  if (fullName) {
-    const parts = fullName.trim().split(" ");
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return fullName.substring(0, 2).toUpperCase();
-  }
-
-  // Якщо немає імені - беремо з email
-  const emailPart = email.split("@")[0];
-  return emailPart.substring(0, 2).toUpperCase();
-}
-
-/**
- * Отримує та форматує дані користувача для UI компонентів
- * 
- * ВИКОРИСТАННЯ:
- * - В Server Components для передачі даних Client Components
- * - Форматує дані в зручний для відображення вигляд
- * - Генерує ініціали для аватара
- * 
- * @returns FormattedUserData | null
+ * Отримує та форматує дані користувача для UI компонентів.
+ * Тепер використовує AuthController через Server Action.
  */
 export const getFormattedUserData = cache(
   async (): Promise<FormattedUserData | null> => {
     try {
-      const authService = container.resolve<IAuthService>("IAuthService");
-      const user = await authService.getCurrentUser();
+      const result = await getUserAction();
 
-      if (!user) return null;
+      if (!result.success || !result.data) {
+        return null;
+      }
 
-      const fullName = user.fullName || user.email.split("@")[0] || "Користувач";
-      const avatarUrl = user.avatarUrl || "";
+      const { id, name, email, avatar, initials } = result.data;
 
       return {
-        id: user.id,
-        name: fullName,
-        email: user.email,
-        avatar: avatarUrl,
-        initials: generateInitials(user.email, user.fullName || undefined),
+        id,
+        name,
+        email,
+        avatar,
+        initials,
       };
     } catch (error) {
-      console.error("[getFormattedUserData] Критична помилка:", error);
+      console.error("[getFormattedUserData] Помилка рефакторингу:", error);
       return null;
     }
   },
 );
 
 /**
- * Отримує доменний об'єкт User
+ * Отримує статус авторизації (кешовано)
  */
-export const getCachedUser = cache(async () => {
+export const isAuthenticated = cache(async (): Promise<boolean> => {
   try {
-    const authService = container.resolve<IAuthService>("IAuthService");
-    return await authService.getCurrentUser();
+    const result = await getUserAction();
+    return result.success && !!result.data;
   } catch (error) {
-    console.error("[getCachedUser] Критична помилка:", error);
-    return null;
+    return false;
   }
 });
 
 /**
- * Перевіряє, чи авторизований користувач
+ * Отримує дані користувача (застарілий метод, краще використовувати getFormattedUserData)
  */
-export const isAuthenticated = cache(async (): Promise<boolean> => {
-  const user = await getCachedUser();
-  return !!user;
+export const getCachedUser = cache(async () => {
+  try {
+    const result = await getUserAction();
+    return result.data || null;
+  } catch (error) {
+    return null;
+  }
 });

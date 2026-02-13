@@ -11,6 +11,7 @@ import { cn } from "@/frontend/shared/lib/utils";
 interface DeleteClientButtonProps
   extends Omit<React.ComponentProps<typeof Button>, "onClick"> {
   clientId: string;
+  workspaceId: string;
   workspaceSlug: string;
   clientName: string;
   onDelete?: () => void;
@@ -23,6 +24,7 @@ interface DeleteClientButtonProps
  */
 export function DeleteClientButton({
   clientId,
+  workspaceId,
   workspaceSlug,
   clientName,
   onDelete,
@@ -43,7 +45,7 @@ export function DeleteClientButton({
       onDelete?.();
 
       try {
-        const result = await deleteClientAction(clientId, workspaceSlug);
+        const result = await deleteClientAction(clientId, workspaceId, workspaceSlug);
 
         if (result.success) {
           toast(`Клієнта "${clientName}" переміщено в кошик`, {
@@ -52,20 +54,21 @@ export function DeleteClientButton({
               onClick: async () => {
                 const restoreResult = await restoreClientAction(
                   clientId,
+                  workspaceId,
                   workspaceSlug,
                 );
                 if (restoreResult.success) {
                   toast.success(`Клієнта "${clientName}" відновлено`);
                 } else {
                   toast.error(
-                    restoreResult.error || "Не вдалося відновити клієнта",
+                    restoreResult.error?.message || "Не вдалося відновити клієнта",
                   );
                 }
               },
             },
           });
         } else {
-          toast.error(result.error || "Не вдалося видалити клієнта");
+          toast.error(result.error?.message || "Не вдалося видалити клієнта");
         }
       } catch {
         toast.error("Сталася непередбачувана помилка");

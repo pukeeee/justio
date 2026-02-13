@@ -192,6 +192,7 @@ export class DrizzleClientRepository implements IClientRepository {
     const query = db
       .select({
         id: clients.id,
+        workspaceId: clients.workspaceId,
         clientType: clients.clientType,
         email: clients.email,
         phone: clients.phone,
@@ -233,6 +234,7 @@ export class DrizzleClientRepository implements IClientRepository {
 
     return result.map((row) => ({
       id: row.id,
+      workspaceId: row.workspaceId,
       clientType: row.clientType as ClientType,
       displayName:
         row.clientType === ClientType.INDIVIDUAL

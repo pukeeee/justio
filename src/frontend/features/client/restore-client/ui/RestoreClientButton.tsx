@@ -10,6 +10,7 @@ import { cn } from "@/frontend/shared/lib/utils";
 interface RestoreClientButtonProps
   extends Omit<React.ComponentProps<typeof Button>, "onClick"> {
   clientId: string;
+  workspaceId: string;
   workspaceSlug: string;
   clientName: string;
   onRestore?: () => void;
@@ -22,6 +23,7 @@ interface RestoreClientButtonProps
  */
 export function RestoreClientButton({
   clientId,
+  workspaceId,
   workspaceSlug,
   clientName,
   onRestore,
@@ -41,12 +43,12 @@ export function RestoreClientButton({
       onRestore?.();
 
       try {
-        const result = await restoreClientAction(clientId, workspaceSlug);
+        const result = await restoreClientAction(clientId, workspaceId, workspaceSlug);
 
         if (result.success) {
           toast.success(`Клієнта "${clientName}" відновлено`);
         } else {
-          toast.error(result.error || "Не вдалося відновити клієнта");
+          toast.error(result.error?.message || "Не вдалося відновити клієнта");
         }
       } catch {
         toast.error("Сталася непередбачувана помилка");

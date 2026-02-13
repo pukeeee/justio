@@ -1,23 +1,27 @@
 /**
  * @file CreateWorkspaceForm.tsx
- * @description Форма створення воркспейсу з перевіркою квот
+ * @description Форма створення воркспейсу з використанням react-hook-form та API Layer
  */
 
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
-import { useFormStatus } from "react-dom";
-import { createWorkspaceAction } from "@/frontend/features/workspace/actions/create-workspace.action";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/frontend/shared/components/ui/button";
 import { Input } from "@/frontend/shared/components/ui/input";
 import { Label } from "@/frontend/shared/components/ui/label";
-import { Loader2, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/frontend/shared/components/ui/alert";
+
+import { createWorkspaceAction } from "@/frontend/features/workspace/actions/create-workspace.action";
+import { CreateWorkspaceRequestSchema, type CreateWorkspaceRequest } from "@/backend/api/contracts/workspace.contracts";
 import {
   useWorkspaceStore,
   useCanCreateWorkspace,
 } from "@/frontend/shared/stores/workspace-store";
-import { Alert, AlertDescription } from "@/frontend/shared/components/ui/alert";
 
 // ============================================================================
 // ТИПИ
@@ -29,122 +33,72 @@ type CreateWorkspaceFormProps = {
 };
 
 // ============================================================================
-// SUBMIT BUTTON COMPONENT
-// ============================================================================
-
-/**
- * Кнопка submit з індикатором завантаження
- *
- * ВАЖЛИВО:
- * - Використовує useFormStatus() з react-dom
- * - Автоматично disabled під час pending
- * - Показує spinner
- */
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button type="submit" disabled={pending} className="w-full">
-      {pending ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Створення...
-        </>
-      ) : (
-        "Створити воркспейс"
-      )}
-    </Button>
-  );
-}
-
-// ============================================================================
 // ОСНОВНИЙ КОМПОНЕНТ
 // ============================================================================
 
-/**
- * Форма створення воркспейсу з валідацією та обробкою помилок
- *
- * ФУНКЦІОНАЛ:
- * 1. Client-side валідація (2-100 символів)
- * 2. Перевірка квоти перед відображенням форми
- * 3. Server Action для створення
- * 4. Автоматичне додавання в store
- * 5. Toast нотифікації
- */
 export function CreateWorkspaceForm({
   onSuccessAction,
 }: CreateWorkspaceFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
   // ===== ПЕРЕВІРКА КВОТИ =====
-
-  /**
-   * Перевіряємо чи може користувач створити ще один воркспейс
-   * Враховує тарифний план
-   */
   const canCreate = useCanCreateWorkspace();
-
-  /**
-   * Функція для додавання воркспейсу в store
-   */
   const addWorkspace = useWorkspaceStore((state) => state.addWorkspace);
 
-  // ===== FORM STATE =====
-
-  const [state, formAction] = useActionState(createWorkspaceAction, {
-    workspace: null,
-    error: null,
+  // ===== FORM SETUP =====
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm<CreateWorkspaceRequest>({
+    resolver: zodResolver(CreateWorkspaceRequestSchema),
+    defaultValues: {
+      name: "",
+    },
   });
 
-  // ===== REFS ДЛЯ ЗАПОБІГАННЯ ДУБЛЮВАННЮ =====
+  // ===== ОБРОБКА SUBMIT =====
+  const onSubmit = async (data: CreateWorkspaceRequest) => {
+    setIsSubmitting(true);
+    setServerError(null);
 
-  /**
-   * Ref для відстеження чи вже показали toast для поточного стану
-   * Запобігає подвійним нотифікаціям при ре-рендерах
-   */
-  const previousStateRef = useRef(state);
+    try {
+      const result = await createWorkspaceAction(data);
 
-  // ===== ОБРОБКА РЕЗУЛЬТАТУ =====
+      if (result.success && result.data) {
+        // Додаємо в store для миттєвого оновлення UI
+        addWorkspace({
+          id: result.data.id,
+          name: result.data.name,
+          slug: result.data.slug,
+        });
 
-  /**
-   * Effect для обробки результату Server Action
-   *
-   * ОПТИМІЗАЦІЯ:
-   * - Виконується тільки при зміні state
-   * - Перевіряємо чи це новий стан (не дублюємо toast)
-   * - Cleanup на unmount
-   */
-  useEffect(() => {
-    // Перевіряємо чи стан змінився
-    const stateChanged = previousStateRef.current !== state;
-
-    if (!stateChanged) return;
-
-    // Оновлюємо ref
-    previousStateRef.current = state;
-
-    // ОБРОБКА ПОМИЛКИ
-    if (state.error) {
-      toast.error(state.error);
+        toast.success(`Воркспейс "${result.data.name}" створено!`);
+        onSuccessAction();
+      } else if (result.error) {
+        // Обробка помилок валідації від бекенду
+        if (result.error.validationErrors) {
+          Object.entries(result.error.validationErrors).forEach(([field, message]) => {
+            setError(field as any, { message });
+          });
+        } else {
+          setServerError(result.error.message);
+          toast.error(result.error.message);
+        }
+      }
+    } catch (error) {
+      console.error("Create workspace error:", error);
+      setServerError("Несподівана помилка при створенні воркспейсу");
+      toast.error("Несподівана помилка");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // ОБРОБКА УСПІХУ
-    if (state.workspace) {
-      // Додаємо в store
-      addWorkspace(state.workspace);
-
-      // Показуємо успішне повідомлення
-      toast.success(`Воркспейс "${state.workspace.name}" створено!`);
-
-      // Викликаємо callback (закриє модалку)
-      onSuccessAction();
-    }
-  }, [state, onSuccessAction, addWorkspace]);
+  };
 
   // ===== РЕНДЕР =====
 
-  /**
-   * СТАН 1: Досягнуто ліміт
-   * Показуємо попередження замість форми
-   */
   if (!canCreate) {
     return (
       <Alert variant="destructive">
@@ -158,37 +112,40 @@ export function CreateWorkspaceForm({
     );
   }
 
-  /**
-   * СТАН 2: Форма створення
-   */
   return (
-    <form action={formAction} className="space-y-4">
-      {/* Поле вводу назви */}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name">Назва воркспейсу</Label>
         <Input
           id="name"
-          name="name"
           placeholder="Моя компанія"
-          required
-          minLength={2}
-          maxLength={100}
+          {...register("name")}
           autoComplete="off"
           autoFocus
-          className="w-full"
+          className={errors.name ? "border-destructive" : ""}
         />
+        {errors.name && (
+          <p className="text-xs text-destructive">{errors.name.message}</p>
+        )}
         <p className="text-xs text-muted-foreground">Від 2 до 100 символів</p>
       </div>
 
-      {/* Відображення помилки від server */}
-      {state.error && (
+      {serverError && (
         <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-          {state.error}
+          {serverError}
         </div>
       )}
 
-      {/* Кнопка submit */}
-      <SubmitButton />
+      <Button type="submit" disabled={isSubmitting} className="w-full">
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Створення...
+          </>
+        ) : (
+          "Створити воркспейс"
+        )}
+      </Button>
     </form>
   );
 }

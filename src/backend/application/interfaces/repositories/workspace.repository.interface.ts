@@ -17,6 +17,11 @@ export interface IWorkspaceRepository {
   findBySlug(slug: string): Promise<Workspace | null>;
 
   /**
+   * Знаходить робочий простір за ID (включаючи м'яко видалені).
+   */
+  findByIdIncludeDeleted(workspaceId: string): Promise<Workspace | null>;
+
+  /**
    * Зберігає (створює або оновлює) робочий простір.
    */
   save(workspace: Workspace): Promise<void>;

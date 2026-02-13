@@ -35,23 +35,12 @@ export function MainHeaderClient() {
   const formattedUser: FormattedUserData | null = useMemo(() => {
     if (!user) return null;
 
-    const name = user.fullName || user.email.split("@")[0] || "Користувач";
-    const initials = (
-      user.fullName
-        ? user.fullName
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .substring(0, 2)
-        : user.email.substring(0, 2)
-    ).toUpperCase();
-
     return {
       id: user.id,
-      name,
+      name: user.name,
       email: user.email,
-      avatar: user.avatarUrl || "",
-      initials,
+      avatar: user.avatar,
+      initials: user.initials,
     };
   }, [user]);
 

@@ -36,6 +36,16 @@ export class DrizzleWorkspaceRepository implements IWorkspaceRepository {
     return row ? WorkspaceMapper.toDomain(row) : null;
   }
 
+  async findByIdIncludeDeleted(workspaceId: string): Promise<Workspace | null> {
+    const [row] = await db
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId))
+      .limit(1);
+    
+    return row ? WorkspaceMapper.toDomain(row) : null;
+  }
+
   async findBySlug(slug: string): Promise<Workspace | null> {
     const [row] = await db
       .select()

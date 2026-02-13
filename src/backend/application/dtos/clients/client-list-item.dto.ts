@@ -6,6 +6,7 @@ import { ClientType } from "@/backend/domain/value-objects/client-type.enum";
  */
 export interface ClientListItemDTO {
   id: string;
+  workspaceId: string;
   clientType: ClientType;
   displayName: string; // Залишаємо для зворотної сумісності, якщо десь використовується
   firstName?: string | null;

@@ -1,20 +1,34 @@
-import { z } from "zod";
-import { clientSchema, createClientSchema, updateClientSchema } from "./schema";
+import type { 
+  ClientListItem, 
+  CreateClientRequest, 
+  UpdateClientRequest,
+  ClientDetailsResponse,
+  ClientType as ApiClientType
+} from "@/backend/api/contracts/client.contracts";
 
 /**
- * Тип повного контакту, отриманий зі схеми
+ * Тип клієнта для списків та загального відображення.
+ * Відповідає контракту ClientListItem з бекенда.
  */
-export type Client = z.infer<typeof clientSchema>;
+export type Client = ClientListItem;
 
 /**
- * Тип для створення нового контакту
+ * Тип повної інформації про клієнта.
+ * Використовується на сторінках деталей.
  */
-export type CreateClient = z.infer<typeof createClientSchema>;
+export type ClientDetails = ClientDetailsResponse;
 
 /**
- * Тип для оновлення контакту
+ * Тип для створення нового контакту.
+ * Базується на API контракті CreateClientRequest.
  */
-export type UpdateClient = z.infer<typeof updateClientSchema>;
+export type CreateClient = CreateClientRequest;
+
+/**
+ * Тип для оновлення контакту.
+ * Базується на API контракті UpdateClientRequest.
+ */
+export type UpdateClient = UpdateClientRequest;
 
 /**
  * Допоміжні типи для конкретних видів контактів
@@ -23,6 +37,7 @@ export type IndividualContact = Extract<Client, { clientType: "individual" }>;
 export type CompanyContact = Extract<Client, { clientType: "company" }>;
 
 /**
- * Типи для вибору (select/radio) у UI
+ * Типи для вибору (select/radio) у UI.
+ * Беремо з API контракту для консистентності.
  */
-export type ClientType = Client["clientType"];
+export type ClientType = ApiClientType;

@@ -129,11 +129,12 @@ export function ClientsList({ clients, onEdit, onDelete }: ClientListProps) {
                     onEdit={handleEdit}
                     deleteAction={
                       <DeleteClientMenuItem
-                        clientId={client.id!}
+                        clientId={client.id}
+                        workspaceId={client.workspaceId}
                         workspaceSlug={currentWorkspaceSlug || ""}
-                        clientName={getClientDisplayName(client)}
+                        clientName={client.displayName}
                         onDelete={() => {
-                          removeOptimistic(client.id!);
+                          removeOptimistic(client.id);
                           onDelete?.(client);
                         }}
                       />
@@ -153,11 +154,12 @@ export function ClientsList({ clients, onEdit, onDelete }: ClientListProps) {
                 onEdit={handleEdit}
                 deleteAction={
                   <DeleteClientMenuItem
-                    clientId={client.id!}
+                    clientId={client.id}
+                    workspaceId={client.workspaceId}
                     workspaceSlug={currentWorkspaceSlug || ""}
-                    clientName={getClientDisplayName(client)}
+                    clientName={client.displayName}
                     onDelete={() => {
-                      removeOptimistic(client.id!);
+                      removeOptimistic(client.id);
                       onDelete?.(client);
                     }}
                   />

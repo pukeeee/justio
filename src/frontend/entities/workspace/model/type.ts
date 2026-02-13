@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { 
-  WorkspaceSchema, 
+import {
+  WorkspaceSchema,
   CreateWorkspaceSchema,
-  WorkspaceSettingsSchema 
-} from "./validation";
+  WorkspaceSettingsSchema,
+} from "./schema";
 
 /**
  * Основний тип воркспейсу (DTO для списків та навігації).

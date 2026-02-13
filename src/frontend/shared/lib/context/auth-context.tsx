@@ -20,13 +20,14 @@ import { getSession } from "@/frontend/features/auth/actions/auth.actions";
 
 /**
  * Інтерфейс користувача для фронтенд-контексту.
- * Повністю відповідає нашому доменному AuthenticatedUser.
+ * Повністю відповідає нашому API UserResponse.
  */
 export interface AuthUser {
   id: string;
   email: string;
-  fullName?: string;
-  avatarUrl?: string;
+  name: string;
+  avatar: string;
+  initials: string;
 }
 
 interface AuthContextType {

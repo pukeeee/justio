@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { container } from "@/backend/infrastructure/di/container";
 import { IWorkspaceRepository } from "@/backend/application/interfaces/repositories/workspace.repository.interface";
 import { DeleteWorkspaceButton } from "@/frontend/features/workspace/ui/DeleteWorkspaceButton";
+import { HardDeleteWorkspaceButton } from "@/frontend/features/workspace/ui/HardDeleteWorkspaceButton";
 
 export default async function SettingsPage({
   params,
@@ -45,8 +46,13 @@ export default async function SettingsPage({
                 Видалення воркспейсу призведе до втрати всіх пов`язаних даних.
                 Цю дію можна буде скасувати лише через адміністратора.
               </p>
-
-              <DeleteWorkspaceButton workspaceId={workspace.id} />
+              <div className="flex flex-wrap gap-4">
+                <DeleteWorkspaceButton workspaceId={workspace.id} />
+                <HardDeleteWorkspaceButton
+                  workspaceId={workspace.id}
+                  workspaceName={workspace.name}
+                />
+              </div>
             </div>
           </div>
         </div>

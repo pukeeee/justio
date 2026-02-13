@@ -40,6 +40,8 @@ import { toast } from "sonner";
 import { formatPhoneNumber } from "../../create-client/lib/formatPhoneNumber";
 import { cleanPhoneNumber } from "../../create-client/lib/cleanPhoneNumber";
 
+import { ApiResponse } from "@/backend/api/contracts/base.contracts";
+
 // Визначаємо підтипи на основі CreateClient
 type CreateIndividual = Extract<CreateClient, { clientType: "individual" }>;
 type CreateCompany = Extract<CreateClient, { clientType: "company" }>;
@@ -47,11 +49,7 @@ type CreateCompany = Extract<CreateClient, { clientType: "company" }>;
 interface ClientFormProps {
   workspaceId: string;
   onSuccess?: () => void;
-  onSubmit: (data: CreateClient) => Promise<{
-    success: boolean;
-    error: string | null;
-    validationErrors?: Record<string, string>;
-  }>;
+  onSubmit: (data: CreateClient) => Promise<ApiResponse<unknown>>;
   defaultValues?: Partial<CreateClient>;
   mode: "create" | "edit";
   className?: string;
@@ -86,7 +84,7 @@ export function ClientForm({
     }
 
     const individual = defaultValues as Partial<CreateIndividual> | undefined;
-    
+
     return {
       ...base,
       clientType: "individual",
@@ -103,13 +101,14 @@ export function ClientForm({
         issuedDate: individual?.passportDetails?.issuedDate ?? "",
       },
     } as CreateIndividual;
-    // Використовуємо JSON.stringify для глибокого порівняння defaultValues, 
+    // Використовуємо JSON.stringify для глибокого порівняння defaultValues,
     // щоб уникнути перерахунку при зміні посилання на об'єкт з тими самими даними
   }, [workspaceId, defaultValues]);
 
   const form = useForm<CreateClient>({
     resolver: zodResolver(createClientSchema),
     defaultValues: initialValues,
+    mode: "onChange",
   });
 
   const {
@@ -189,20 +188,22 @@ export function ClientForm({
       }
 
       const result = await onSubmit(cleanData);
-      
+
       if (result.success) {
         onSuccess?.();
-      } else if (result.validationErrors) {
+      } else if (result.error?.validationErrors) {
         // Встановлюємо помилки для кожного поля
-        Object.entries(result.validationErrors).forEach(([field, message]) => {
-          setError(field as Path<CreateClient>, {
-            type: "manual",
-            message: message,
-          });
-        });
+        Object.entries(result.error.validationErrors).forEach(
+          ([field, message]) => {
+            setError(field as Path<CreateClient>, {
+              type: "manual",
+              message: message,
+            });
+          },
+        );
         toast.error("Перевірте вказані дані");
       } else {
-        toast.error(result.error || "Сталася помилка");
+        toast.error(result.error?.message || "Сталася помилка");
       }
     } catch (error) {
       console.error("Form submission error:", error);
@@ -247,7 +248,7 @@ export function ClientForm({
 
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field>
+              <Field data-invalid={!!errors.email}>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <FieldContent>
                   <Input
@@ -260,7 +261,7 @@ export function ClientForm({
                 </FieldContent>
               </Field>
 
-              <Field>
+              <Field data-invalid={!!errors.phone}>
                 <FieldLabel htmlFor="phone">Телефон</FieldLabel>
                 <FieldContent>
                   <Controller
@@ -285,7 +286,7 @@ export function ClientForm({
               </Field>
             </div>
 
-            <Field>
+            <Field data-invalid={!!errors.address}>
               <FieldLabel htmlFor="address">Адреса</FieldLabel>
               <FieldContent>
                 <Input
@@ -298,7 +299,7 @@ export function ClientForm({
             </Field>
 
             {clientType === "individual" ? (
-              <div className="space-y-4 animate-in fade-in duration-300">
+              <div className="flex flex-col gap-4 animate-in fade-in duration-300">
                 {(() => {
                   const reg =
                     register as unknown as UseFormRegister<CreateIndividual>;
@@ -308,7 +309,7 @@ export function ClientForm({
                   return (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Field>
+                        <Field data-invalid={!!errs.lastName}>
                           <FieldLabel htmlFor="lastName">
                             Прізвище <span className="text-destructive">*</span>
                           </FieldLabel>
@@ -322,7 +323,7 @@ export function ClientForm({
                           </FieldContent>
                         </Field>
 
-                        <Field>
+                        <Field data-invalid={!!errs.firstName}>
                           <FieldLabel htmlFor="firstName">
                             Ім`я <span className="text-destructive">*</span>
                           </FieldLabel>
@@ -338,7 +339,7 @@ export function ClientForm({
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Field>
+                        <Field data-invalid={!!errs.middleName}>
                           <FieldLabel htmlFor="middleName">
                             По батькові
                           </FieldLabel>
@@ -352,7 +353,7 @@ export function ClientForm({
                           </FieldContent>
                         </Field>
 
-                        <Field>
+                        <Field data-invalid={!!errs.taxNumber}>
                           <FieldLabel htmlFor="taxNumber">РНОКПП</FieldLabel>
                           <FieldContent>
                             <Input
@@ -398,7 +399,9 @@ export function ClientForm({
                           </AccordionTrigger>
                           <AccordionContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                              <Field>
+                              <Field
+                                data-invalid={!!errs.passportDetails?.series}
+                              >
                                 <FieldLabel htmlFor="passportSeries">
                                   Серія
                                 </FieldLabel>
@@ -413,7 +416,9 @@ export function ClientForm({
                                   />
                                 </FieldContent>
                               </Field>
-                              <Field>
+                              <Field
+                                data-invalid={!!errs.passportDetails?.number}
+                              >
                                 <FieldLabel htmlFor="passportNumber">
                                   Номер
                                 </FieldLabel>
@@ -428,7 +433,9 @@ export function ClientForm({
                                   />
                                 </FieldContent>
                               </Field>
-                              <Field>
+                              <Field
+                                data-invalid={!!errs.passportDetails?.issuedBy}
+                              >
                                 <FieldLabel htmlFor="issuedBy">
                                   Ким виданий
                                 </FieldLabel>
@@ -443,7 +450,11 @@ export function ClientForm({
                                   />
                                 </FieldContent>
                               </Field>
-                              <Field>
+                              <Field
+                                data-invalid={
+                                  !!errs.passportDetails?.issuedDate
+                                }
+                              >
                                 <FieldLabel htmlFor="issuedDate">
                                   Дата видачі
                                 </FieldLabel>
@@ -475,7 +486,7 @@ export function ClientForm({
                 })()}
               </div>
             ) : (
-              <div className="space-y-4 animate-in fade-in duration-300">
+              <div className="flex flex-col gap-4 animate-in fade-in duration-300">
                 {(() => {
                   const reg =
                     register as unknown as UseFormRegister<CreateCompany>;
@@ -483,7 +494,7 @@ export function ClientForm({
 
                   return (
                     <>
-                      <Field>
+                      <Field data-invalid={!!errs.companyName}>
                         <FieldLabel htmlFor="companyName">
                           Назва компанії{" "}
                           <span className="text-destructive">*</span>
@@ -498,7 +509,7 @@ export function ClientForm({
                         </FieldContent>
                       </Field>
 
-                      <Field>
+                      <Field data-invalid={!!errs.taxId}>
                         <FieldLabel htmlFor="taxId">ЄДРПОУ</FieldLabel>
                         <FieldContent>
                           <Input
@@ -525,7 +536,7 @@ export function ClientForm({
               </div>
             )}
 
-            <Field>
+            <Field data-invalid={!!errors.note}>
               <FieldLabel htmlFor="note">Примітки</FieldLabel>
               <FieldContent>
                 <Textarea

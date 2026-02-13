@@ -37,15 +37,22 @@ async function ClientsContent({ slug }: { slug: string }) {
   }
 
   // 2. Отримуємо контакти
-  const { clients, error } = await getClientsAction(currentWorkspace.id);
+  const response = await getClientsAction({
+    workspaceId: currentWorkspace.id,
+    limit: 100,
+    offset: 0,
+    onlyDeleted: false,
+  });
 
-  if (error) {
+  if (!response.success || response.error) {
     return (
       <div className="p-8 border rounded-lg bg-destructive/10 text-destructive text-center">
-        {error}
+        {response.error?.message || "Не вдалося завантажити список клієнтів"}
       </div>
     );
   }
+
+  const clients = response.data?.items ?? [];
 
   return (
     <div className="space-y-6">

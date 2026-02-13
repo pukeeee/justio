@@ -11,6 +11,7 @@ import { DropdownMenuSeparator } from "@/frontend/shared/components/ui/dropdown-
 
 interface DeleteClientMenuItemProps {
   clientId: string;
+  workspaceId: string;
   workspaceSlug: string;
   clientName: string;
   onDelete?: () => void;
@@ -24,6 +25,7 @@ interface DeleteClientMenuItemProps {
  */
 export function DeleteClientMenuItem({
   clientId,
+  workspaceId,
   workspaceSlug,
   clientName,
   onDelete,
@@ -41,7 +43,7 @@ export function DeleteClientMenuItem({
       onDelete?.();
 
       try {
-        const result = await deleteClientAction(clientId, workspaceSlug);
+        const result = await deleteClientAction(clientId, workspaceId, workspaceSlug);
 
         if (result.success) {
           toast(`Клієнта "${clientName}" переміщено в кошик`, {
@@ -50,20 +52,21 @@ export function DeleteClientMenuItem({
               onClick: async () => {
                 const restoreResult = await restoreClientAction(
                   clientId,
+                  workspaceId,
                   workspaceSlug,
                 );
                 if (restoreResult.success) {
                   toast.success(`Клієнта "${clientName}" відновлено`);
                 } else {
                   toast.error(
-                    restoreResult.error || "Не вдалося відновити клієнта",
+                    restoreResult.error?.message || "Не вдалося відновити клієнта",
                   );
                 }
               },
             },
           });
         } else {
-          toast.error(result.error || "Не вдалося видалити клієнта");
+          toast.error(result.error?.message || "Не вдалося видалити клієнта");
         }
       } catch {
         toast.error("Сталася непередбачувана помилка");

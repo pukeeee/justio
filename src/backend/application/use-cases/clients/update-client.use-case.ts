@@ -25,7 +25,11 @@ export class UpdateClientUseCase {
   ): Promise<{ client: Client; details: Individual | Company }> {
     // 1. Пошук існуючого клієнта
     const client = await this.clientRepository.findById(dto.id);
-    if (!client) throw new EntityNotFoundError("Клієнт", dto.id);
+
+    // Перевірка наявності та належності до воркспейсу
+    if (!client || client.workspaceId !== dto.workspaceId) {
+      throw new EntityNotFoundError("Клієнт", dto.id);
+    }
 
     const entityName = client.clientType === ClientType.INDIVIDUAL ? "Фізична особа" : "Компанія";
 
